@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frizerski Studio Najs – Nataša Markuta, Škofja Loka</title>
+  <meta name="description" content="Frizerski studio Najs by Nataša Markuta v Škofji Loki. Striženje, barvanje, pramena, rituali in več. Naročite se danes!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bez:    #EAD7C1;
+      --bez2:   #f5ebe0;
+      --navy:   #17394B;
+      --roza:   #CE4B7B;
+      --coral:  #CE7E6F;
+      --warm:   #c9a98a;
+      --text:   #2e2e2e;
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --sans:   'Jost', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bez);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ─── SCROLL REVEAL ────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.85s cubic-bezier(.22,1,.36,1), transform 0.85s cubic-bezier(.22,1,.36,1);
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      * { animation: none !important; transition: none !important; }
+    }
+
+    /* ─── NAVBAR ───────────────────────────────────────── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 5%;
+      background: rgba(234,215,193,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(23,57,75,0.08);
+      transition: box-shadow 0.3s;
+    }
+    header.scrolled { box-shadow: 0 2px 24px rgba(23,57,75,0.10); }
+
+    .nav-logo img { height: 52px; width: auto; }
+
+    nav { display: flex; align-items: center; gap: 2rem; }
+
+    nav a {
+      font-family: var(--sans); font-size: 0.82rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--navy); text-decoration: none;
+      position: relative; padding-bottom: 2px;
+    }
+    nav a::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 0; height: 1px; background: var(--coral);
+      transition: width 0.35s ease;
+    }
+    nav a:hover::after { width: 100%; }
+
+    .btn-nav {
+      font-family: var(--sans); font-size: 0.82rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #fff; background: var(--coral);
+      border: none; padding: 0.55rem 1.4rem; border-radius: 30px;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .btn-nav:hover {
+      background: var(--roza);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(206,75,123,0.25);
+    }
+
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .nav-toggle span { display: block; width: 24px; height: 2px; background: var(--navy); border-radius: 2px; transition: 0.3s; }
+
+    /* ─── HERO ─────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      padding: 6rem 5% 4rem;
+      text-align: center;
+    }
+
+    /* breathing gradient */
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, #f5ebe0 0%, #EAD7C1 55%, #dfc3a9 100%);
+      animation: breathe 8s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    /* watermark parallax */
+    .watermark {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--serif); font-size: clamp(200px, 35vw, 420px);
+      font-weight: 300; color: rgba(23,57,75,0.04);
+      user-select: none; pointer-events: none; white-space: nowrap;
+      will-change: transform;
+    }
+
+    /* sparkles */
+    .sparkles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .sparkle {
+      position: absolute;
+      color: var(--coral); font-size: clamp(10px, 1.5vw, 18px);
+      opacity: 0;
+      animation: sparkle-float var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
+    }
+    @keyframes sparkle-float {
+      0%   { opacity: 0; transform: translateY(0) scale(0.8); }
+      30%  { opacity: 0.7; }
+      70%  { opacity: 0.5; }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.1); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      animation: heroFadeIn 1.4s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes heroFadeIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .hero-eyebrow {
+      font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--coral); margin-bottom: 0.8rem;
+    }
+    .hero-title {
+      font-family: var(--serif); font-size: clamp(3.5rem, 10vw, 8rem);
+      font-weight: 300; color: var(--navy); line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .hero-subtitle {
+      font-family: var(--serif); font-size: clamp(1rem, 2.5vw, 1.5rem);
+      font-style: italic; color: var(--coral); margin-bottom: 1.6rem;
+    }
+    .hero-desc {
+      font-size: 0.95rem; color: var(--navy); opacity: 0.75;
+      max-width: 420px; margin: 0 auto 2.5rem; line-height: 1.7;
+    }
+
+    .btn-main {
+      display: inline-block; font-family: var(--sans);
+      font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: #fff; background: var(--navy);
+      padding: 0.9rem 2.5rem; border-radius: 40px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+      animation: pulse-btn 3s ease-in-out 2s infinite;
+    }
+    .btn-main:hover {
+      background: var(--roza);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(206,75,123,0.30);
+      animation: none;
+    }
+    @keyframes pulse-btn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(23,57,75,0); }
+      50% { box-shadow: 0 0 0 8px rgba(23,57,75,0.08); }
+    }
+
+    /* ─── SECTION WRAPPER ──────────────────────────────── */
+    section { padding: 5rem 5%; }
+    .section-title {
+      font-family: var(--serif); font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 300; color: var(--navy); margin-bottom: 0.4rem;
+    }
+    .section-sub {
+      font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--coral); margin-bottom: 3rem;
+    }
+    .section-divider {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 3.5rem;
+    }
+    .section-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(23,57,75,0.15);
+    }
+    .ornament { color: var(--coral); font-size: 1.1rem; }
+
+    /* ─── STORITVE / CENIK ─────────────────────────────── */
+    #cenik { background: var(--bez2); }
+
+    .cenik-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .cenik-category {
+      background: #fff; border-radius: 18px;
+      padding: 1.8rem 1.6rem;
+      box-shadow: 0 2px 16px rgba(23,57,75,0.07);
+    }
+    .cenik-category-title {
+      font-family: var(--serif); font-size: 1.25rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 1.1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(206,126,111,0.25);
+    }
+
+    .price-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 0.42rem 0;
+      border-bottom: 1px dotted rgba(23,57,75,0.08);
+      gap: 0.5rem;
+    }
+    .price-row:last-child { border-bottom: none; }
+    .price-name { font-size: 0.88rem; color: var(--navy); flex: 1; line-height: 1.45; }
+    .price-note { font-size: 0.74rem; color: var(--coral); display: block; font-style: italic; }
+    .price-val {
+      font-family: var(--serif); font-size: 1rem; font-weight: 600;
+      color: var(--navy); white-space: nowrap;
+    }
+
+    /* ─── GALERIJA ─────────────────────────────────────── */
+    #galerija { background: var(--bez); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+    .gallery-item {
+      aspect-ratio: 4/5; border-radius: 16px; overflow: hidden;
+      background: rgba(23,57,75,0.06);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; cursor: pointer;
+      transition: transform 0.45s ease, box-shadow 0.45s ease;
+    }
+    .gallery-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 16px 36px rgba(23,57,75,0.14);
+    }
+    .gallery-placeholder {
+      text-align: center; color: rgba(23,57,75,0.35);
+    }
+    .gallery-placeholder .gp-icon { font-size: 2.5rem; display: block; margin-bottom: 0.4rem; }
+    .gallery-placeholder span { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* ─── O NAS ────────────────────────────────────────── */
+    #onas {
+      background: var(--navy);
+      color: #fff;
+    }
+    #onas .section-title { color: #fff; }
+    #onas .section-sub { color: var(--coral); }
+    .onas-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    }
+    .onas-text p {
+      font-size: 0.97rem; line-height: 1.85; opacity: 0.85; margin-bottom: 1rem;
+    }
+    .onas-img {
+      aspect-ratio: 3/4; border-radius: 20px;
+      background: rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .onas-img span { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.4; }
+
+    /* ─── NAROČANJE ────────────────────────────────────── */
+    #narocanje {
+      background: var(--bez2); text-align: center;
+    }
+    .narocanje-inner {
+      max-width: 540px; margin: 0 auto;
+    }
+    .narocanje-inner p {
+      font-size: 0.97rem; opacity: 0.75; line-height: 1.8; margin-bottom: 2rem;
+    }
+
+    /* ─── KONTAKT ──────────────────────────────────────── */
+    #kontakt { background: var(--bez); }
+    .kontakt-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+    }
+    .kontakt-info { display: flex; flex-direction: column; gap: 1.4rem; }
+    .kontakt-item { display: flex; gap: 1rem; align-items: flex-start; }
+    .kontakt-icon { font-size: 1.3rem; color: var(--coral); margin-top: 2px; }
+    .kontakt-label {
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--coral); margin-bottom: 0.2rem;
+    }
+    .kontakt-val { font-size: 0.95rem; color: var(--navy); line-height: 1.55; }
+    .kontakt-val a { color: var(--navy); text-decoration: none; }
+    .kontakt-val a:hover { color: var(--coral); }
+
+    .map-wrap {
+      border-radius: 18px; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(23,57,75,0.10);
+      aspect-ratio: 4/3;
+    }
+    .map-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    /* ─── FOOTER ───────────────────────────────────────── */
+    footer {
+      background: var(--navy); color: rgba(255,255,255,0.75);
+      padding: 3rem 5% 2rem;
+    }
+    .footer-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 1.6rem;
+    }
+    .footer-logo img { height: 54px; filter: brightness(0) invert(1); opacity: 0.85; }
+    .footer-links {
+      display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+    }
+    .footer-links a {
+      font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.6); text-decoration: none;
+      transition: color 0.25s;
+    }
+    .footer-links a:hover { color: var(--coral); }
+    .footer-copy {
+      font-size: 0.75rem; opacity: 0.4; text-align: center;
+    }
+    .footer-stamp {
+      font-family: var(--serif); font-size: 0.85rem; font-style: italic;
+      color: var(--coral); opacity: 0.8; letter-spacing: 0.04em;
+    }
+
+    /* ─── SEAL decoration ──────────────────────────────── */
+    .seal {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 90px; height: 90px; border-radius: 50%;
+      border: 2px solid var(--coral); color: var(--coral);
+      font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+      text-align: center; line-height: 1.3;
+      position: absolute; right: 5%; top: 1.5rem;
+      animation: rotate-seal 18s linear infinite;
+    }
+    @keyframes rotate-seal {
+      to { transform: rotate(360deg); }
+    }
+    .seal-inner { animation: rotate-seal 18s linear infinite reverse; font-size: 0.58rem; text-align: center; padding: 0 6px; }
+
+    /* ─── MOBILE ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { display: none; flex-direction: column; position: fixed; inset: 0; top: 68px;
+            background: rgba(234,215,193,0.97); backdrop-filter: blur(16px);
+            align-items: center; justify-content: center; gap: 2rem; z-index: 99; }
+      nav.open { display: flex; }
+      nav a { font-size: 1.2rem; }
+      .nav-toggle { display: flex; }
+      .btn-nav { margin-top: 0.5rem; }
+
+      .onas-inner { grid-template-columns: 1fr; }
+      .onas-img { display: none; }
+      .kontakt-grid { grid-template-columns: 1fr; }
+      .seal { display: none; }
+      .cenik-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════ -->
+<header id="site-header">
+  <a href="#" class="nav-logo">
+    <!-- Inline SVG logo recreation from brand assets -->
+    <svg height="52" viewBox="0 0 260 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Frizerski Studio Najs">
+      <!-- "FRIZERSKI STUDIO" small caps -->
+      <text x="6" y="22" font-family="'Jost', sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F" text-anchor="start">FRIZERSKI</text>
+      <text x="6" y="35" font-family="'Jost', sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F" text-anchor="start">STUDIO</text>
+      <!-- Comb line -->
+      <line x1="70" y1="28" x2="142" y2="28" stroke="#17394B" stroke-width="1.5"/>
+      <!-- Comb teeth -->
+      <g stroke="#17394B" stroke-width="1.2">
+        <line x1="144" y1="18" x2="144" y2="30"/><line x1="148" y1="17" x2="148" y2="30"/>
+        <line x1="152" y1="17" x2="152" y2="30"/><line x1="156" y1="17" x2="156" y2="30"/>
+        <line x1="160" y1="17" x2="160" y2="30"/><line x1="164" y1="17" x2="164" y2="30"/>
+        <line x1="168" y1="18" x2="168" y2="30"/><line x1="172" y1="19" x2="172" y2="30"/>
+      </g>
+      <!-- NAJS big text -->
+      <text x="6" y="75" font-family="'Cormorant Garamond', Georgia, serif" font-size="54" font-weight="300" fill="#17394B">NAJS</text>
+      <!-- "by Nataša Markuta" script -->
+      <text x="48" y="89" font-family="'Cormorant Garamond', Georgia, serif" font-size="13" font-style="italic" fill="#CE4B7B">by Nataša Markuta</text>
+    </svg>
+  </a>
+
+  <nav id="main-nav">
+    <a href="#cenik">Cenik</a>
+    <a href="#galerija">Galerija</a>
+    <a href="#onas">O nas</a>
+    <a href="#kontakt">Kontakt</a>
+    <a href="#narocanje" class="btn-nav">Naroči se</a>
+  </nav>
+
+  <button class="nav-toggle" id="nav-toggle" aria-label="Odpri meni">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- ═══ HERO ══════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="watermark" id="watermark">NS</div>
+
+  <!-- floating sparkles -->
+  <div class="sparkles" id="sparkles-container"></div>
+
+  <!-- rotating seal -->
+  <div class="seal">
+    <span class="seal-inner">Have a nice<br/>hair day ✦</span>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">✦ &nbsp; Frizerski studio &nbsp; ✦</p>
+    <h1 class="hero-title">NAJS</h1>
+    <p class="hero-subtitle">by Nataša Markuta</p>
+    <p class="hero-desc">Vaš zaupanja vredni frizerski studio v Škofji Loki. Striženje, barvanje, pramena in nega las – z ljubeznijo in strokovnostjo.</p>
+    <a href="#narocanje" class="btn-main">Naroči se ✦</a>
+  </div>
+</section>
+
+<!-- ═══ CENIK ══════════════════════════════════════════════ -->
+<section id="cenik">
+  <div class="reveal section-divider">
+    <span class="ornament">✦</span>
+  </div>
+  <div class="reveal" style="text-align:center; margin-bottom: 3rem;">
+    <p class="section-sub">Naše storitve</p>
+    <h2 class="section-title">Cenik</h2>
+    <p style="font-size:0.85rem; opacity:0.6; margin-top:0.5rem;">Cene so v EUR. Cenik velja od 18. septembra 2023.</p>
+  </div>
+
+  <div class="cenik-grid">
+
+    <!-- MOŠKO STRIŽENJE -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Moško striženje</h3>
+      <div class="price-row">
+        <span class="price-name">Moško striženje<span class="price-note">Ne vključuje umivanja</span></span>
+        <span class="price-val">12,50 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Moško striženje<span class="price-note">Z Actyva šamponom Velian Complex</span></span>
+        <span class="price-val">16,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Moško striženje z mašinico</span>
+        <span class="price-val">5,00 €</span>
+      </div>
+    </div>
+
+    <!-- ŽENSKO STRIŽENJE -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Žensko striženje</h3>
+      <div class="price-row">
+        <span class="price-name">Kratek las<span class="price-note">Ne vključuje umivanja</span></span>
+        <span class="price-val">11,20 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Kratek las<span class="price-note">Z Actyva šamponom Velian Complex</span></span>
+        <span class="price-val">29,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Srednje dolg las<span class="price-note">Z Actyva šamponom Velian Complex</span></span>
+        <span class="price-val">31,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Dolg las<span class="price-note">Z Actyva šamponom Velian Complex</span></span>
+        <span class="price-val">35,00 €</span>
+      </div>
+    </div>
+
+    <!-- OTROŠKO STRIŽENJE -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Otroško striženje</h3>
+      <div class="price-row">
+        <span class="price-name">Baby striženje</span>
+        <span class="price-val">3,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Otroško striženje<span class="price-note">Do 6 let</span></span>
+        <span class="price-val">6,60 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Fantovsko striženje<span class="price-note">6–14 let</span></span>
+        <span class="price-val">9,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Dekliško striženje<span class="price-note">Ne vključuje umivanja</span></span>
+        <span class="price-val">10,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Dekliško striženje<span class="price-note">Z Actyva šamponom Velian Complex</span></span>
+        <span class="price-val">17,50 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Kitke otroci</span>
+        <span class="price-val">3,00 €</span>
+      </div>
+    </div>
+
+    <!-- RITUALI -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Rituali &amp; nega</h3>
+      <div class="price-row">
+        <span class="price-name">Čistilni ritual Advanced<span class="price-note">Očisti, pomiri in osveži lasišče</span></span>
+        <span class="price-val">13,20 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Hidratantni ritual Antiage<span class="price-note">Vlaženje in pomirjanje suhega lasišča</span></span>
+        <span class="price-val">13,20 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Personalizirani<span class="price-note">Različne kombinacije terapij na lasišču</span></span>
+        <span class="price-val">13,20 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Ritual proti izpadanju in boljšo rast<span class="price-note">Ritual proti izpadanju Advanced</span></span>
+        <span class="price-val">13,20 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Ritual obnova Advanced<span class="price-note">Serum Nova fibra, BCC Komplet 1 doza</span></span>
+        <span class="price-val">6,50 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Ritual obnova Extra<span class="price-note">Disciplina Serum, Hialuron &amp; Gloss 1 doza</span></span>
+        <span class="price-val">15,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Ritual vlaženje skodranih las</span>
+        <span class="price-val">15,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Laminacija las<span class="price-note">Obloži, nahrani, navlaži, poudari sijoj</span></span>
+        <span class="price-val">15,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Rekonstrukcija las po svetlenju<span class="price-note">Stabilizira pH, zgradi in obnovi vezi v lasu</span></span>
+        <span class="price-val">9,90 €</span>
+      </div>
+    </div>
+
+    <!-- OBLIKOVANJE LAS -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Oblikovanje las</h3>
+      <div class="price-row">
+        <span class="price-name">Poročna in večerne pričeske<span class="price-note">Vključuje testno in glavno pričesko</span></span>
+        <span class="price-val">66,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Spenjanje pričeske<span class="price-note">Enostavno spenjanje</span></span>
+        <span class="price-val">22,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Spenjanje maturantske pričeske</span>
+        <span class="price-val">33,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Trajna + striženje – kratek las<span class="price-note">Kodranje brez amoniaka</span></span>
+        <span class="price-val">43,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Trajna + striženje – srednje dolg las<span class="price-note">Kodranje brez amoniaka</span></span>
+        <span class="price-val">53,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Trajna + striženje – dolg las<span class="price-note">Kodranje brez amoniaka</span></span>
+        <span class="price-val">64,70 €</span>
+      </div>
+    </div>
+
+    <!-- PRAMENA -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Pramena</h3>
+      <div class="price-row">
+        <span class="price-name">Balayage – srednje dolg las<span class="price-note">S keratinom in kamilico + toniranje</span></span>
+        <span class="price-val">66,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Balayage – dolg las<span class="price-note">S keratinom in kamilico + toniranje</span></span>
+        <span class="price-val">77,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">S folijo – pol glave / kratki<span class="price-note">Svetlenje z Keratinom in kamilico</span></span>
+        <span class="price-val">49,30 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">S folijo – komplet srednje dolg las</span>
+        <span class="price-val">59,30 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">S folijo – komplet dolg las</span>
+        <span class="price-val">70,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Na kapo<span class="price-note">S keratinom in kamilico + toniranje</span></span>
+        <span class="price-val">24,10 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Posvetlitev narastka</span>
+        <span class="price-val">30,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Tonalizacija</span>
+        <span class="price-val">14,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Restore</span>
+        <span class="price-val">3,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Pramen</span>
+        <span class="price-val">1,00 €</span>
+      </div>
+    </div>
+
+    <!-- BARVANJE -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Barvanje</h3>
+      <div class="price-row">
+        <span class="price-name">Preliv – kratek las<span class="price-note">Ton na ton brez amoniaka</span></span>
+        <span class="price-val">15,50 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Preliv – srednje dolg las</span>
+        <span class="price-val">22,40 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Preliv – dolg las</span>
+        <span class="price-val">27,60 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvanje – narastek / kratek las<span class="price-note">S kokosovim oljem in Velian complex</span></span>
+        <span class="price-val">29,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvanje – srednje dolg las</span>
+        <span class="price-val">32,50 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvanje – dolg las</span>
+        <span class="price-val">41,50 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Nanos barve<span class="price-note">Lastna barva</span></span>
+        <span class="price-val">9,30 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvanje moški<span class="price-note">Serija naravnega videza brez amoniaka</span></span>
+        <span class="price-val">19,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Yo cond nega<span class="price-note">Nega za osvežitev barve</span></span>
+        <span class="price-val">3,90 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvna nega Yo – kratek las<span class="price-note">Velian complex in jogurt 10 ml</span></span>
+        <span class="price-val">8,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvna nega Yo – srednje dolg las<span class="price-note">15 ml</span></span>
+        <span class="price-val">10,90 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Barvna nega Yo – dolg las<span class="price-note">30 ml</span></span>
+        <span class="price-val">15,30 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Dodatek</span>
+        <span class="price-val">5,00 €</span>
+      </div>
+    </div>
+
+    <!-- FEN -->
+    <div class="cenik-category reveal">
+      <h3 class="cenik-category-title">Fen &amp; oblikovanje</h3>
+      <div class="price-row">
+        <span class="price-name">Fen – kratek las</span>
+        <span class="price-val">18,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Fen – srednje dolg las</span>
+        <span class="price-val">20,80 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Fen – dolg las</span>
+        <span class="price-val">24,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Likalnik</span>
+        <span class="price-val">5,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Figaro</span>
+        <span class="price-val">10,00 €</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">Kitke odrasli</span>
+        <span class="price-val">5,00 €</span>
+      </div>
+    </div>
+
+    <!-- SEMI-PERMANENTNA BARVA ACTYVA COLORO -->
+    <div class="cenik-category reveal" style="grid-column: 1 / -1; background: linear-gradient(135deg, #fff 0%, #fdf6ef 100%);">
+      <h3 class="cenik-category-title" style="color: var(--roza);">✦ Semi-permanentna barva Actyva Coloro &nbsp;– NOVO v salonu</h3>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 2rem;">
+        <div>
+          <div class="price-row">
+            <span class="price-name">Barva svetlobe – kratek las<span class="price-note">Kokosovo olje + organske zdravilne rastline</span></span>
+            <span class="price-val">25,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva svetlobe – srednje dolg las</span>
+            <span class="price-val">31,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva svetlobe – dolg las</span>
+            <span class="price-val">46,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva in odsev – srednje dolg las<span class="price-note">Toniranje barvanih in beljenih las</span></span>
+            <span class="price-val">22,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva in odsev – dolg las</span>
+            <span class="price-val">33,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva in intenzivnost – srednje dolg las<span class="price-note">Osvežitev barve</span></span>
+            <span class="price-val">12,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva in intenzivnost – dolg las</span>
+            <span class="price-val">17,00 €</span>
+          </div>
+        </div>
+        <div>
+          <div class="price-row">
+            <span class="price-name">Infuzija svetlobe – srednje dolg las<span class="price-note">Sijaj brez spremembe barve</span></span>
+            <span class="price-val">21,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Infuzija svetlobe – dolg las</span>
+            <span class="price-val">25,50 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva in moč – srednje dolg las<span class="price-note">Negovalna barva z nego Nouva fibra</span></span>
+            <span class="price-val">30,00 €</span>
+          </div>
+          <div class="price-row">
+            <span class="price-name">Barva in moč – dolg las</span>
+            <span class="price-val">35,00 €</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cenik-grid -->
+</section>
+
+<!-- ═══ GALERIJA ═══════════════════════════════════════════ -->
+<section id="galerija">
+  <div class="reveal" style="text-align:center; margin-bottom: 3rem;">
+    <p class="section-sub">Naše delo</p>
+    <h2 class="section-title">Galerija</h2>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item reveal"><div class="gallery-placeholder"><span class="gp-icon">✂</span><span>Fotografija kmalu</span></div></div>
+    <div class="gallery-item reveal" style="transition-delay:0.05s"><div class="gallery-placeholder"><span class="gp-icon">✦</span><span>Fotografija kmalu</span></div></div>
+    <div class="gallery-item reveal" style="transition-delay:0.10s"><div class="gallery-placeholder"><span class="gp-icon">✂</span><span>Fotografija kmalu</span></div></div>
+    <div class="gallery-item reveal" style="transition-delay:0.15s"><div class="gallery-placeholder"><span class="gp-icon">✦</span><span>Fotografija kmalu</span></div></div>
+    <div class="gallery-item reveal" style="transition-delay:0.20s"><div class="gallery-placeholder"><span class="gp-icon">✂</span><span>Fotografija kmalu</span></div></div>
+    <div class="gallery-item reveal" style="transition-delay:0.25s"><div class="gallery-placeholder"><span class="gp-icon">✦</span><span>Fotografija kmalu</span></div></div>
+  </div>
+</section>
+
+<!-- ═══ O NAS ══════════════════════════════════════════════ -->
+<section id="onas">
+  <div class="reveal section-divider" style="border-color: rgba(255,255,255,0.1)">
+    <span class="ornament">✦</span>
+  </div>
+  <div class="onas-inner">
+    <div class="onas-text reveal">
+      <p class="section-sub">O nas</p>
+      <h2 class="section-title">Studio z dušo</h2>
+      <br/>
+      <p>Frizerski studio Najs je prostor, kjer se strast do las sreča z osebno pozornostjo. Lastnica Nataša Markuta z leti izkušenj in iskreno ljubeznijo do svojega poklica poskrbi, da vsak obisk postane prijetna izkušnja.</p>
+      <p>Delamo z najboljšimi produkti znamke Actyva – naravnimi, nežnimi in učinkovitimi. Vsak kupec je edinstven, vsaka pričeska pa prilagojena točno vašemu tipu las in slogu.</p>
+      <p>Najdete nas v Škofji Loki, kjer z veseljem pričakujemo vsakega gosta – stranke iz Škofje Loke in okolice, mlade in odrasle, moške, ženske in otroke.</p>
+      <br/>
+      <a href="#narocanje" class="btn-main" style="background: var(--coral);">Naroči se ✦</a>
+    </div>
+    <div class="onas-img reveal" style="transition-delay:0.15s">
+      <span>Fotografija Nataše kmalu</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NAROČANJE ══════════════════════════════════════════ -->
+<section id="narocanje">
+  <div class="reveal" style="text-align:center; margin-bottom: 1.5rem;">
+    <p class="section-sub">Rezervacija</p>
+    <h2 class="section-title">Naročite se</h2>
+  </div>
+  <div class="narocanje-inner reveal">
+    <p>Naročite se po telefonu, e-pošti ali prek spletnega obrazca. Radi vas vidimo in vam pomagamo do popolnih las!</p>
+    <a href="#" class="btn-main" style="font-size:1rem; padding: 1rem 3rem;">Naroči se ✦</a>
+    <br/><br/>
+    <p style="font-size:0.82rem; opacity:0.55;">Spletno naročanje bo kmalu na voljo. Za takojšnjo rezervacijo nas pokličite na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>
+  </div>
+</section>
+
+<!-- ═══ KONTAKT ════════════════════════════════════════════ -->
+<section id="kontakt">
+  <div class="reveal" style="text-align:center; margin-bottom: 3rem;">
+    <p class="section-sub">Pridite k nam</p>
+    <h2 class="section-title">Kontakt</h2>
+  </div>
+  <div class="kontakt-grid">
+    <div class="kontakt-info">
+      <div class="kontakt-item reveal">
+        <span class="kontakt-icon">📍</span>
+        <div>
+          <p class="kontakt-label">Naslov</p>
+          <p class="kontakt-val">Cesta talcev 3B<br/>4220 Škofja Loka</p>
+        </div>
+      </div>
+      <div class="kontakt-item reveal" style="transition-delay:0.07s">
+        <span class="kontakt-icon">📞</span>
+        <div>
+          <p class="kontakt-label">Telefon</p>
+          <p class="kontakt-val"><a href="tel:+38631217361">+386 31 217 361</a></p>
+        </div>
+      </div>
+      <div class="kontakt-item reveal" style="transition-delay:0.14s">
+        <span class="kontakt-icon">✉️</span>
+        <div>
+          <p class="kontakt-label">E-pošta</p>
+          <p class="kontakt-val"><a href="mailto:frizerskistudonajs@gmail.com">frizerskistudonajs@gmail.com</a></p>
+        </div>
+      </div>
+      <div class="kontakt-item reveal" style="transition-delay:0.21s">
+        <span class="kontakt-icon">🕐</span>
+        <div>
+          <p class="kontakt-label">Delovni čas</p>
+          <p class="kontakt-val">Kmalu na voljo –<br/>pokličite za termin</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-wrap reveal" style="transition-delay:0.1s">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2762.9!2d14.3068!3d46.1659!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477abf3b1a67c3b3%3A0x500c6d1f86d70700!2sCesta%20talcev%203B%2C%204220%20%C5%A0kofja%20Loka!5e0!3m2!1ssl!2ssi!4v1700000000000!5m2!1ssl!2ssi"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        title="Lokacija Frizerski studio Najs">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <svg height="54" viewBox="0 0 260 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Frizerski Studio Najs">
+        <text x="6" y="22" font-family="'Jost', sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F" text-anchor="start">FRIZERSKI</text>
+        <text x="6" y="35" font-family="'Jost', sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F" text-anchor="start">STUDIO</text>
+        <line x1="70" y1="28" x2="142" y2="28" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+        <g stroke="rgba(255,255,255,0.5)" stroke-width="1.2">
+          <line x1="144" y1="18" x2="144" y2="30"/><line x1="148" y1="17" x2="148" y2="30"/>
+          <line x1="152" y1="17" x2="152" y2="30"/><line x1="156" y1="17" x2="156" y2="30"/>
+          <line x1="160" y1="17" x2="160" y2="30"/><line x1="164" y1="17" x2="164" y2="30"/>
+          <line x1="168" y1="18" x2="168" y2="30"/><line x1="172" y1="19" x2="172" y2="30"/>
+        </g>
+        <text x="6" y="75" font-family="'Cormorant Garamond', Georgia, serif" font-size="54" font-weight="300" fill="rgba(255,255,255,0.9)">NAJS</text>
+        <text x="48" y="89" font-family="'Cormorant Garamond', Georgia, serif" font-size="13" font-style="italic" fill="#CE4B7B">by Nataša Markuta</text>
+      </svg>
+    </div>
+    <nav class="footer-links">
+      <a href="#cenik">Cenik</a>
+      <a href="#galerija">Galerija</a>
+      <a href="#onas">O nas</a>
+      <a href="#kontakt">Kontakt</a>
+      <a href="#narocanje">Naroči se</a>
+    </nav>
+    <p class="footer-stamp">✦ &nbsp; Have a nice hair day &nbsp; ✦</p>
+    <p class="footer-copy">© 2024 Frizerski studio Najs, Nataša Rupnik s.p. · Cesta talcev 3B, 4220 Škofja Loka</p>
+  </div>
+</footer>
+
+<!-- ═══ JAVASCRIPT ═════════════════════════════════════════ -->
+<script>
+(function(){
+  /* ── Scroll reveal ── */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => observer.observe(el));
+
+  /* ── Header shadow on scroll ── */
+  const hdr = document.getElementById('site-header');
+  window.addEventListener('scroll', () => {
+    hdr.classList.toggle('scrolled', window.scrollY > 30);
+  }, { passive: true });
+
+  /* ── Mobile nav toggle ── */
+  const toggle = document.getElementById('nav-toggle');
+  const nav = document.getElementById('main-nav');
+  toggle.addEventListener('click', () => {
+    nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', nav.classList.contains('open'));
+  });
+  nav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => nav.classList.remove('open'));
+  });
+
+  /* ── Parallax watermark ── */
+  const wm = document.getElementById('watermark');
+  if (wm && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY * 0.25;
+      wm.style.transform = `translate(-50%, calc(-50% + ${y}px))`;
+    }, { passive: true });
+  }
+
+  /* ── Sparkles ── */
+  const container = document.getElementById('sparkles-container');
+  if (container && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const symbols = ['✦', '✧', '✦', '✦', '✧'];
+    for (let i = 0; i < 18; i++) {
+      const s = document.createElement('span');
+      s.className = 'sparkle';
+      s.textContent = symbols[i % symbols.length];
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = (20 + Math.random() * 70) + '%';
+      s.style.setProperty('--dur', (5 + Math.random() * 7) + 's');
+      s.style.setProperty('--delay', (Math.random() * 6) + 's');
+      s.style.fontSize = (10 + Math.random() * 14) + 'px';
+      container.appendChild(s);
+    }
+  }
+
+  /* ── Staggered cenik items ── */
+  document.querySelectorAll('.cenik-category').forEach((cat, i) => {
+    cat.style.transitionDelay = (i * 0.06) + 's';
+  });
+})();
+</script>
+</body>
+</html>
