@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     /* ── RESET ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -269,6 +270,205 @@
     @media (min-width: 641px) {
       nav.mobile { display: none !important; }
     }
+
+    /* ══ BOOKING MODAL ══════════════════════════════════════════ */
+    .bk-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(23,57,75,.55); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity .35s ease;
+    }
+    .bk-overlay.open { opacity: 1; pointer-events: all; }
+
+    .bk-modal {
+      background: var(--bez2);
+      border-radius: 24px;
+      width: 100%; max-width: 560px;
+      max-height: 92vh; overflow-y: auto; overflow-x: hidden;
+      box-shadow: 0 24px 60px rgba(23,57,75,.22);
+      transform: translateY(24px) scale(.98);
+      transition: transform .35s cubic-bezier(.22,1,.36,1);
+      scrollbar-width: none;
+    }
+    .bk-modal::-webkit-scrollbar { display: none; }
+    .bk-overlay.open .bk-modal { transform: none; }
+
+    .bk-head {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bez2);
+      padding: 1.4rem 1.6rem 0;
+      border-bottom: 1px solid rgba(23,57,75,.08);
+    }
+    .bk-head-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .bk-modal-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--navy); }
+    .bk-close {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(23,57,75,.08); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: var(--navy);
+      transition: background .2s;
+    }
+    .bk-close:hover { background: rgba(23,57,75,.16); }
+
+    /* Step indicator */
+    .bk-steps { display: flex; gap: 0; margin-bottom: 0; }
+    .bk-step-dot {
+      flex: 1; height: 3px;
+      background: rgba(23,57,75,.15);
+      border-radius: 2px;
+      margin: 0 2px;
+      transition: background .3s;
+    }
+    .bk-step-dot.done { background: var(--coral); }
+    .bk-step-dot.active { background: var(--navy); }
+
+    .bk-body { padding: 1.6rem; }
+
+    /* Step label */
+    .bk-step-label {
+      font-size: 0.72rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--coral); margin-bottom: .3rem;
+    }
+    .bk-step-title {
+      font-family: var(--serif); font-size: 1.15rem; color: var(--navy);
+      margin-bottom: 1.2rem;
+    }
+
+    /* Services */
+    .bk-cat-label {
+      font-size: .72rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--coral); margin: 1rem 0 .4rem;
+    }
+    .bk-cat-label:first-child { margin-top: 0; }
+
+    .bk-service-btn {
+      width: 100%; text-align: left;
+      background: #fff; border: 1.5px solid transparent;
+      border-radius: 12px; padding: .7rem 1rem;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: .4rem;
+      transition: border-color .2s, box-shadow .2s;
+      font-family: var(--sans);
+    }
+    .bk-service-btn:hover { border-color: var(--coral); }
+    .bk-service-btn.selected { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(23,57,75,.08); }
+    .bk-svc-name { font-size: .9rem; color: var(--navy); line-height: 1.35; }
+    .bk-svc-dur { font-size: .72rem; color: var(--coral); }
+    .bk-svc-price { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--navy); white-space: nowrap; margin-left: .8rem; }
+
+    /* Calendar */
+    .bk-cal { background: #fff; border-radius: 14px; padding: 1rem; }
+    .bk-cal-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
+    .bk-cal-month { font-family: var(--serif); font-size: 1.1rem; color: var(--navy); }
+    .bk-cal-arrow {
+      background: none; border: 1px solid rgba(23,57,75,.2); border-radius: 8px;
+      width: 30px; height: 30px; cursor: pointer; font-size: .9rem; color: var(--navy);
+      transition: background .2s;
+    }
+    .bk-cal-arrow:hover { background: rgba(23,57,75,.07); }
+    .bk-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+    .bk-cal-dh { text-align: center; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--coral); padding: .3rem 0; }
+    .bk-cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-size: .85rem; color: var(--navy);
+      cursor: pointer; border: none; background: none;
+      transition: background .2s, color .2s;
+    }
+    .bk-cal-day:hover:not(:disabled) { background: rgba(23,57,75,.08); }
+    .bk-cal-day.selected { background: var(--navy); color: #fff; }
+    .bk-cal-day.today { font-weight: 600; color: var(--coral); }
+    .bk-cal-day:disabled { opacity: .28; cursor: not-allowed; }
+    .bk-cal-day.empty { cursor: default; }
+
+    /* Time slots */
+    .bk-slots { display: grid; grid-template-columns: repeat(4,1fr); gap: .5rem; }
+    @media(max-width:400px){ .bk-slots { grid-template-columns: repeat(3,1fr); } }
+    .bk-slot {
+      padding: .55rem .3rem; border-radius: 10px; border: 1.5px solid rgba(23,57,75,.18);
+      background: #fff; cursor: pointer; font-size: .85rem; text-align: center; color: var(--navy);
+      transition: border-color .2s, background .2s;
+    }
+    .bk-slot:hover { border-color: var(--coral); }
+    .bk-slot.selected { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+    /* Nujni termin special */
+    .bk-nujni-box {
+      background: #fff; border-radius: 14px; padding: 1.2rem;
+      border-left: 3px solid var(--coral);
+      font-size: .88rem; line-height: 1.7; color: var(--navy);
+      margin-bottom: 1rem;
+    }
+    .bk-nujni-label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--coral); margin-bottom: .3rem; }
+
+    /* Customer form */
+    .bk-field { margin-bottom: 1rem; }
+    .bk-label {
+      display: block; font-size: .75rem; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--coral); margin-bottom: .35rem;
+    }
+    .bk-input, .bk-textarea {
+      width: 100%; background: #fff; border: 1.5px solid rgba(23,57,75,.2);
+      border-radius: 10px; padding: .65rem .9rem;
+      font-family: var(--sans); font-size: .9rem; color: var(--navy);
+      transition: border-color .2s;
+      outline: none;
+    }
+    .bk-input:focus, .bk-textarea:focus { border-color: var(--navy); }
+    .bk-textarea { resize: vertical; min-height: 70px; }
+    .bk-input.err { border-color: var(--roza); }
+
+    /* Summary */
+    .bk-summary {
+      background: #fff; border-radius: 14px; padding: 1.2rem;
+    }
+    .bk-sum-row {
+      display: flex; justify-content: space-between; gap: .5rem;
+      padding: .45rem 0; border-bottom: 1px dotted rgba(23,57,75,.1);
+      font-size: .88rem;
+    }
+    .bk-sum-row:last-child { border: none; }
+    .bk-sum-key { color: var(--coral); flex-shrink: 0; }
+    .bk-sum-val { color: var(--navy); text-align: right; }
+
+    /* Success */
+    .bk-success { text-align: center; padding: 1.5rem 0; }
+    .bk-success-icon { font-size: 3rem; margin-bottom: .6rem; }
+    .bk-success-title { font-family: var(--serif); font-size: 1.4rem; color: var(--navy); margin-bottom: .5rem; }
+    .bk-success-sub { font-size: .9rem; opacity: .7; line-height: 1.7; }
+
+    /* Error */
+    .bk-error { background: rgba(206,75,123,.08); border: 1px solid rgba(206,75,123,.25); border-radius: 10px; padding: .8rem 1rem; font-size: .85rem; color: var(--roza); margin-bottom: 1rem; display: none; }
+    .bk-error.show { display: block; }
+
+    /* Loading */
+    .bk-loading { text-align: center; padding: 2rem; opacity: .5; font-size: .9rem; }
+
+    /* Footer nav */
+    .bk-foot {
+      padding: 1rem 1.6rem 1.4rem;
+      display: flex; gap: .8rem; justify-content: flex-end;
+      border-top: 1px solid rgba(23,57,75,.08);
+      background: var(--bez2);
+      position: sticky; bottom: 0;
+    }
+    .bk-btn-back {
+      background: none; border: 1.5px solid rgba(23,57,75,.25); border-radius: 30px;
+      padding: .6rem 1.4rem; font-family: var(--sans); font-size: .82rem;
+      letter-spacing: .1em; text-transform: uppercase; cursor: pointer; color: var(--navy);
+      transition: border-color .2s;
+    }
+    .bk-btn-back:hover { border-color: var(--navy); }
+    .bk-btn-next {
+      background: var(--navy); color: #fff; border: none; border-radius: 30px;
+      padding: .6rem 1.6rem; font-family: var(--sans); font-size: .82rem;
+      letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+      transition: background .25s, transform .25s;
+    }
+    .bk-btn-next:hover { background: var(--roza); transform: translateY(-1px); }
+    .bk-btn-next:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
   </style>
 </head>
 <body>
@@ -296,7 +496,7 @@
     <a href="#galerija">Galerija</a>
     <a href="#onas">O nas</a>
     <a href="#kontakt">Kontakt</a>
-    <a href="#narocanje" class="btn-nav">Naroči se</a>
+    <button class="btn-nav open-modal" type="button">Naroči se</button>
   </nav>
 
   <button class="hamburger" id="hmb" aria-label="Odpri meni" aria-expanded="false">
@@ -309,7 +509,7 @@
   <a href="#galerija">Galerija</a>
   <a href="#onas">O nas</a>
   <a href="#kontakt">Kontakt</a>
-  <a href="#narocanje" class="btn-nav">Naroči se</a>
+  <button class="btn-nav open-modal" type="button">Naroči se</button>
 </nav>
 
 <!-- ══ HERO ════════════════════════════════════════════════ -->
@@ -324,7 +524,7 @@
     <h1 class="hero-title">NAJS</h1>
     <p class="hero-sub">by Nataša Markuta</p>
     <p class="hero-desc">Vaš frizerski studio v Škofji Loki. Striženje, barvanje, pramena in nega las – z ljubeznijo in strokovnostjo.</p>
-    <a href="#narocanje" class="btn-main">Naroči se ✦</a>
+    <button class="btn-main open-modal" type="button">Naroči se ✦</button>
   </div>
 </section>
 
@@ -478,7 +678,7 @@
       <p class="onas-p">Delamo z najboljšimi produkti znamke Actyva – naravnimi, nežnimi in učinkovitimi. Vsaka pričeska je prilagojena točno vašemu tipu las in slogu.</p>
       <p class="onas-p">Najdete nas v Škofji Loki, kjer z veseljem pričakujemo vsakega gosta – ženske, moške in otroke.</p>
       <br/>
-      <a href="#narocanje" class="btn-main" style="background:var(--coral)">Naroči se ✦</a>
+      <button class="btn-main open-modal" type="button" style="background:var(--coral)">Naroči se ✦</button>
     </div>
     <div class="onas-img reveal" style="transition-delay:.15s">Fotografija Nataše kmalu</div>
   </div>
@@ -491,7 +691,7 @@
       <p class="sec-label">Rezervacija</p>
       <h2 class="sec-title">Naročite se</h2>
       <p>Naročite se po telefonu, e-pošti ali prek spletnega obrazca. Radi vas vidimo in vam pomagamo do popolnih las!</p>
-      <a href="#" class="btn-main" style="font-size:.95rem;padding:1rem 2.8rem">Naroči se ✦</a>
+      <button class="btn-main open-modal" type="button" style="font-size:.95rem;padding:1rem 2.8rem">Naroči se ✦</button>
       <br/><br/>
       <p style="font-size:.8rem;opacity:.5;margin-bottom:0">Spletno naročanje kmalu. Za takojšnjo rezervacijo pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>
     </div>
@@ -658,6 +858,442 @@
   }
 })();
 </script>
+
+<!-- ══ BOOKING MODAL ══════════════════════════════════════ -->
+<div class="bk-overlay" id="bkOverlay" role="dialog" aria-modal="true" aria-label="Spletno naročanje">
+  <div class="bk-modal" id="bkModal">
+    <div class="bk-head">
+      <div class="bk-head-top">
+        <span class="bk-modal-title">Naročanje ✦</span>
+        <button class="bk-close" id="bkClose" aria-label="Zapri">✕</button>
+      </div>
+      <div class="bk-steps" id="bkStepBar"></div>
+      <div style="height:.8rem"></div>
+    </div>
+    <div class="bk-body" id="bkBody"></div>
+    <div class="bk-foot" id="bkFoot"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ── KONFIGURACIJA ──────────────────────────────────────── */
+var SB_URL = 'https://azqtgvxashunmmydkwop.supabase.co';
+var SB_KEY = '[TUKAJ_PRILEPI_SVOJ_PUBLISHABLE_KLJUC]';
+
+/* Delovni čas: 0=ned, 1=pon ... 6=sob */
+var DELOVNI_CAS = {
+  1: { start: '09:00', end: '18:00' },
+  2: { start: '09:00', end: '18:00' },
+  3: { start: '09:00', end: '18:00' },
+  4: { start: '09:00', end: '18:00' },
+  5: { start: '09:00', end: '18:00' },
+  6: { start: '08:00', end: '13:00' }
+};
+var INTERVAL_MIN = 30; // slot na 30 min
+
+/* ── SUPABASE ───────────────────────────────────────────── */
+var sb = supabase.createClient(SB_URL, SB_KEY);
+
+/* ── STATE ──────────────────────────────────────────────── */
+var state = {
+  step: 1,
+  totalSteps: 5,
+  service: null,
+  date: null,
+  slot: null,       // { start, end }
+  customer: {},
+  isNujni: false,
+  nujniNote: ''
+};
+
+/* ── HELPERS ─────────────────────────────────────────────── */
+function timeToMin(t){ var p=t.split(':'); return +p[0]*60+ +p[1]; }
+function minToTime(m){ var h=Math.floor(m/60),mi=m%60; return (h<10?'0':'')+h+':'+(mi<10?'0':'')+mi; }
+
+var SL_MESECI = ['Januar','Februar','Marec','April','Maj','Junij','Julij','Avgust','September','Oktober','November','December'];
+var SL_DNEVI_K = ['Ne','Po','To','Sr','Če','Pe','So'];
+
+function fmtDate(d){
+  if(!d) return '';
+  var dd=d.getDate(), mm=d.getMonth()+1, yyyy=d.getFullYear();
+  return (dd<10?'0':'')+dd+'.'+(mm<10?'0':'')+mm+'.'+yyyy;
+}
+function isoDate(d){ return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate(); }
+
+/* ── DOM ────────────────────────────────────────────────── */
+var overlay = document.getElementById('bkOverlay');
+var body    = document.getElementById('bkBody');
+var foot    = document.getElementById('bkFoot');
+var stepBar = document.getElementById('bkStepBar');
+
+function openModal(){
+  state = { step:1, totalSteps:5, service:null, date:null, slot:null, customer:{}, isNujni:false, nujniNote:'' };
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  renderStep();
+}
+function closeModal(){
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.querySelectorAll('.open-modal').forEach(function(b){
+  b.addEventListener('click', openModal);
+});
+document.getElementById('bkClose').addEventListener('click', closeModal);
+overlay.addEventListener('click', function(e){ if(e.target===overlay) closeModal(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+/* ── STEP BAR ─────────────────────────────────────────────── */
+function renderStepBar(){
+  var n = state.isNujni ? 3 : state.totalSteps;
+  stepBar.innerHTML = '';
+  for(var i=1;i<=n;i++){
+    var d=document.createElement('div');
+    d.className='bk-step-dot'+(i<state.step?' done':i===state.step?' active':'');
+    stepBar.appendChild(d);
+  }
+}
+
+/* ── RENDER STEP ─────────────────────────────────────────── */
+function renderStep(){
+  renderStepBar();
+  body.innerHTML = '';
+  foot.innerHTML = '';
+
+  var s = state.step;
+  if(s===1) renderStep1();
+  else if(s===2) state.isNujni ? renderStepNujni() : renderStep2();
+  else if(s===3) state.isNujni ? renderStepCustomer() : renderStep3();
+  else if(s===4) state.isNujni ? renderStepConfirm() : renderStepCustomer();
+  else if(s===5) renderStepConfirm();
+
+  body.scrollTop = 0;
+  document.getElementById('bkModal').scrollTop = 0;
+}
+
+/* ── STEP 1: STORITEV ─────────────────────────────────────── */
+function renderStep1(){
+  body.innerHTML = '<div class="bk-step-label">Korak 1</div><div class="bk-step-title">Izbira storitve</div><div class="bk-loading">Nalagam storitve…</div>';
+  foot.innerHTML = '';
+
+  sb.from('services').select('*').eq('active',true).order('sort_order').then(function(res){
+    if(res.error){ showBodyError('Napaka pri nalaganju storitev: '+res.error.message); return; }
+    var services = res.data || [];
+    if(!services.length){ body.innerHTML='<p style="opacity:.6;font-size:.9rem">Ni razpoložljivih storitev.</p>'; return; }
+
+    var cats = {};
+    services.forEach(function(sv){
+      var c = sv.category || 'Ostalo';
+      if(!cats[c]) cats[c]=[];
+      cats[c].push(sv);
+    });
+
+    var html='<div class="bk-step-label">Korak 1</div><div class="bk-step-title">Izbira storitve</div>';
+    Object.keys(cats).forEach(function(cat){
+      html+='<div class="bk-cat-label">'+esc(cat)+'</div>';
+      cats[cat].forEach(function(sv){
+        html+='<button class="bk-service-btn'+(state.service&&state.service.id===sv.id?' selected':'')+'" data-id="'+sv.id+'" type="button">'
+          +'<span><span class="bk-svc-name">'+esc(sv.name)+'</span>'
+          +(sv.duration_minutes?'<span class="bk-svc-dur"> · '+sv.duration_minutes+' min</span>':'')
+          +'</span>'
+          +(sv.price?'<span class="bk-svc-price">'+String(sv.price).replace('.',',')+(sv.price%1===0?',00':'')+'&nbsp;€</span>':'')
+          +'</button>';
+      });
+    });
+    body.innerHTML = html;
+
+    body.querySelectorAll('.bk-service-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = +btn.dataset.id;
+        state.service = services.find(function(sv){ return sv.id===id; });
+        state.isNujni = (state.service.category||'').toLowerCase().indexOf('nujni')>=0;
+        body.querySelectorAll('.bk-service-btn').forEach(function(b){ b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        renderFoot1();
+      });
+    });
+    renderFoot1();
+  });
+}
+function renderFoot1(){
+  foot.innerHTML = '';
+  var nx = document.createElement('button');
+  nx.className='bk-btn-next'; nx.textContent='Naprej →'; nx.disabled=!state.service;
+  nx.addEventListener('click', function(){ state.step=2; renderStep(); });
+  foot.appendChild(nx);
+}
+
+/* ── STEP 2: DATUM ────────────────────────────────────────── */
+var calYear, calMonth;
+function renderStep2(){
+  var now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
+  body.innerHTML='<div class="bk-step-label">Korak 2</div><div class="bk-step-title">Izbira datuma</div>';
+  renderCal();
+  renderFoot2();
+}
+function renderCal(){
+  var old=body.querySelector('.bk-cal');
+  if(old) old.remove();
+
+  var div=document.createElement('div'); div.className='bk-cal';
+  var nav='<div class="bk-cal-nav"><button class="bk-cal-arrow" id="calPrev">‹</button><span class="bk-cal-month">'+SL_MESECI[calMonth]+' '+calYear+'</span><button class="bk-cal-arrow" id="calNext">›</button></div>';
+  var grid='<div class="bk-cal-grid">';
+  SL_DNEVI_K.forEach(function(d){ grid+='<div class="bk-cal-dh">'+d+'</div>'; });
+
+  var first=new Date(calYear,calMonth,1).getDay(); // 0=ned
+  var days=new Date(calYear,calMonth+1,0).getDate();
+  var today=new Date(); today.setHours(0,0,0,0);
+
+  for(var i=0;i<first;i++) grid+='<button class="bk-cal-day empty" disabled></button>';
+  for(var day=1;day<=days;day++){
+    var d=new Date(calYear,calMonth,day);
+    var dow=d.getDay();
+    var past=d<today;
+    var closed=!DELOVNI_CAS[dow]; // ned=0 ni v objektu
+    var sel=state.date&&isoDate(d)===isoDate(state.date);
+    var tod=isoDate(d)===isoDate(today);
+    grid+='<button class="bk-cal-day'+(sel?' selected':'')+(tod&&!sel?' today':'')+'" '
+      +(past||closed?'disabled':'')+' data-date="'+isoDate(d)+'">'+day+'</button>';
+  }
+  grid+='</div>';
+  div.innerHTML=nav+grid;
+  body.appendChild(div);
+
+  div.querySelector('#calPrev').addEventListener('click',function(){
+    calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); renderFoot2();
+  });
+  div.querySelector('#calNext').addEventListener('click',function(){
+    calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); renderFoot2();
+  });
+  div.querySelectorAll('.bk-cal-day:not(:disabled):not(.empty)').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var parts=btn.dataset.date.split('-');
+      state.date=new Date(+parts[0],+parts[1]-1,+parts[2]);
+      div.querySelectorAll('.bk-cal-day').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      renderFoot2();
+    });
+  });
+}
+function renderFoot2(){
+  foot.innerHTML='';
+  var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
+  bk.addEventListener('click',function(){ state.step=1; renderStep(); });
+  foot.appendChild(bk);
+  var nx=document.createElement('button'); nx.className='bk-btn-next'; nx.textContent='Naprej →'; nx.disabled=!state.date;
+  nx.addEventListener('click',function(){ state.step=3; renderStep(); });
+  foot.appendChild(nx);
+}
+
+/* ── STEP 3: TERMIN ───────────────────────────────────────── */
+function renderStep3(){
+  body.innerHTML='<div class="bk-step-label">Korak 3</div><div class="bk-step-title">Izbira termina</div><div class="bk-loading">Preverjam zasedene termine…</div>';
+  renderFoot3(true);
+
+  var dateStr=isoDate(state.date);
+  sb.rpc('zasedeni_termini',{izbrani_datum:dateStr}).then(function(res){
+    if(res.error){ showBodyError('Napaka pri pridobivanju terminov: '+res.error.message); return; }
+    var busy = res.data || [];
+    var dow=state.date.getDay();
+    var dc=DELOVNI_CAS[dow];
+    if(!dc){ body.innerHTML='<p style="opacity:.6;font-size:.9rem;padding:1rem 0">Ta dan smo zaprti.</p>'; return; }
+
+    var dur=state.service.duration_minutes||30;
+    var wStart=timeToMin(dc.start), wEnd=timeToMin(dc.end);
+    var busyArr=busy.map(function(b){ return {s:timeToMin(b.start_time.substring(0,5)),e:timeToMin(b.end_time.substring(0,5))}; });
+
+    var slots=[];
+    for(var t=wStart;t+dur<=wEnd;t+=INTERVAL_MIN){
+      var free=true;
+      for(var i=0;i<busyArr.length;i++){
+        if(t<busyArr[i].e && t+dur>busyArr[i].s){ free=false; break; }
+      }
+      if(free) slots.push(t);
+    }
+
+    var h='<div class="bk-step-label">Korak 3</div><div class="bk-step-title">Izbira termina</div>';
+    h+='<p style="font-size:.8rem;opacity:.6;margin-bottom:.8rem">'+fmtDate(state.date)+' · '+SL_MESECI[state.date.getMonth()]+'</p>';
+    if(!slots.length){
+      h+='<p style="opacity:.6;font-size:.9rem">Žal ta dan ni prostih terminov. Izberite drug datum.</p>';
+      body.innerHTML=h;
+      renderFoot3(false);
+      return;
+    }
+    h+='<div class="bk-slots">';
+    slots.forEach(function(t){
+      var ts=minToTime(t), te=minToTime(t+dur);
+      var sel=state.slot&&state.slot.start===ts;
+      h+='<button class="bk-slot'+(sel?' selected':'')+'" data-s="'+ts+'" data-e="'+te+'" type="button">'+ts+'</button>';
+    });
+    h+='</div>';
+    body.innerHTML=h;
+
+    body.querySelectorAll('.bk-slot').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        state.slot={start:btn.dataset.s,end:btn.dataset.e};
+        body.querySelectorAll('.bk-slot').forEach(function(b){ b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        renderFoot3(false);
+      });
+    });
+    renderFoot3(false);
+  });
+}
+function renderFoot3(loading){
+  foot.innerHTML='';
+  var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
+  bk.addEventListener('click',function(){ state.step=2; renderStep(); });
+  foot.appendChild(bk);
+  var nx=document.createElement('button'); nx.className='bk-btn-next'; nx.textContent='Naprej →';
+  nx.disabled=loading||!state.slot;
+  nx.addEventListener('click',function(){ state.step=4; renderStep(); });
+  foot.appendChild(nx);
+}
+
+/* ── STEP NUJNI TERMIN ─────────────────────────────────────── */
+function renderStepNujni(){
+  body.innerHTML='<div class="bk-step-label">Nujni termin</div><div class="bk-step-title">Dogovor po klicu</div>'
+    +'<div class="bk-nujni-box"><div class="bk-nujni-label">📞 Po dogovoru</div>'
+    +'Po oddaji obrazca vas pokličemo za potrditev termina. Vpišite nam vaš želeni datum in čas.</div>'
+    +'<div class="bk-field"><label class="bk-label">Željeni datum in čas *</label>'
+    +'<input class="bk-input" id="nujniNote" type="text" placeholder="npr. Četrtek 12. junij, med 10 in 12" value="'+esc(state.nujniNote||'')+'"></div>';
+  foot.innerHTML='';
+  var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
+  bk.addEventListener('click',function(){ state.step=1; renderStep(); });
+  foot.appendChild(bk);
+  var nx=document.createElement('button'); nx.className='bk-btn-next'; nx.textContent='Naprej →';
+  nx.addEventListener('click',function(){
+    var v=document.getElementById('nujniNote').value.trim();
+    if(!v){ document.getElementById('nujniNote').classList.add('err'); return; }
+    state.nujniNote=v; state.step=3; renderStep();
+  });
+  foot.appendChild(nx);
+}
+
+/* ── STEP CUSTOMER ─────────────────────────────────────────── */
+function renderStepCustomer(){
+  var c=state.customer;
+  body.innerHTML='<div class="bk-step-label">Korak '+(state.isNujni?3:4)+'</div><div class="bk-step-title">Vaši podatki</div>'
+    +'<div id="bkErr" class="bk-error"></div>'
+    +'<div class="bk-field"><label class="bk-label">Ime in priimek *</label>'
+    +'<input class="bk-input" id="fName" type="text" placeholder="Maja Novak" value="'+esc(c.name||'')+'"></div>'
+    +'<div class="bk-field"><label class="bk-label">Telefon *</label>'
+    +'<input class="bk-input" id="fPhone" type="tel" placeholder="+386 31 000 000" value="'+esc(c.phone||'')+'"></div>'
+    +'<div class="bk-field"><label class="bk-label">E-pošta</label>'
+    +'<input class="bk-input" id="fEmail" type="email" placeholder="maja@email.si" value="'+esc(c.email||'')+'"></div>'
+    +'<div class="bk-field"><label class="bk-label">Opomba</label>'
+    +'<textarea class="bk-textarea" id="fNote" placeholder="Posebne želje ali vprašanja…">'+esc(c.note||'')+'</textarea></div>';
+  foot.innerHTML='';
+  var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
+  bk.addEventListener('click',function(){ state.step=state.isNujni?2:3; renderStep(); });
+  foot.appendChild(bk);
+  var nx=document.createElement('button'); nx.className='bk-btn-next'; nx.textContent='Pregled →';
+  nx.addEventListener('click',function(){
+    var name=document.getElementById('fName').value.trim();
+    var phone=document.getElementById('fPhone').value.trim();
+    var errEl=document.getElementById('bkErr');
+    document.getElementById('fName').classList.remove('err');
+    document.getElementById('fPhone').classList.remove('err');
+    if(!name||!phone){
+      if(!name) document.getElementById('fName').classList.add('err');
+      if(!phone) document.getElementById('fPhone').classList.add('err');
+      errEl.textContent='Prosimo, izpolnite vsa obvezna polja.'; errEl.classList.add('show'); return;
+    }
+    state.customer={name:name,phone:phone,email:document.getElementById('fEmail').value.trim(),note:document.getElementById('fNote').value.trim()};
+    state.step=state.isNujni?4:5; renderStep();
+  });
+  foot.appendChild(nx);
+}
+
+/* ── STEP CONFIRM ─────────────────────────────────────────── */
+function renderStepConfirm(){
+  var c=state.customer; var sv=state.service;
+  var rows='';
+  rows+='<div class="bk-sum-row"><span class="bk-sum-key">Storitev</span><span class="bk-sum-val">'+esc(sv.name)+'</span></div>';
+  if(sv.price) rows+='<div class="bk-sum-row"><span class="bk-sum-key">Cena</span><span class="bk-sum-val">'+String(sv.price).replace('.',',')+' €</span></div>';
+  if(state.isNujni){
+    rows+='<div class="bk-sum-row"><span class="bk-sum-key">Termin</span><span class="bk-sum-val">Po dogovoru</span></div>';
+    rows+='<div class="bk-sum-row"><span class="bk-sum-key">Želja</span><span class="bk-sum-val">'+esc(state.nujniNote)+'</span></div>';
+  } else {
+    rows+='<div class="bk-sum-row"><span class="bk-sum-key">Datum</span><span class="bk-sum-val">'+fmtDate(state.date)+'</span></div>';
+    rows+='<div class="bk-sum-row"><span class="bk-sum-key">Čas</span><span class="bk-sum-val">'+state.slot.start+' – '+state.slot.end+'</span></div>';
+  }
+  rows+='<div class="bk-sum-row"><span class="bk-sum-key">Ime</span><span class="bk-sum-val">'+esc(c.name)+'</span></div>';
+  rows+='<div class="bk-sum-row"><span class="bk-sum-key">Telefon</span><span class="bk-sum-val">'+esc(c.phone)+'</span></div>';
+  if(c.email) rows+='<div class="bk-sum-row"><span class="bk-sum-key">E-pošta</span><span class="bk-sum-val">'+esc(c.email)+'</span></div>';
+  if(c.note||state.nujniNote) rows+='<div class="bk-sum-row"><span class="bk-sum-key">Opomba</span><span class="bk-sum-val">'+esc(c.note||state.nujniNote)+'</span></div>';
+
+  body.innerHTML='<div class="bk-step-label">Korak '+(state.isNujni?4:5)+'</div><div class="bk-step-title">Potrditev</div>'
+    +'<div id="bkErr2" class="bk-error"></div>'
+    +'<div class="bk-summary">'+rows+'</div>'
+    +'<p style="font-size:.78rem;opacity:.5;margin-top:1rem;line-height:1.6">S potrditvijo se strinjate, da nas pokličete v primeru odpovedi vsaj 2 uri pred terminom.</p>';
+
+  foot.innerHTML='';
+  var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
+  bk.addEventListener('click',function(){ state.step=state.isNujni?3:4; renderStep(); });
+  foot.appendChild(bk);
+  var nx=document.createElement('button'); nx.className='bk-btn-next'; nx.textContent='Potrdi naročilo ✦';
+  nx.addEventListener('click',function(){ submitBooking(nx); });
+  foot.appendChild(nx);
+}
+
+/* ── SUBMIT ─────────────────────────────────────────────── */
+function submitBooking(btn){
+  btn.disabled=true; btn.textContent='Pošiljam…';
+  var sv=state.service; var c=state.customer;
+
+  var rec={
+    service_id: sv.id,
+    service_name: sv.name,
+    customer_name: c.name,
+    customer_phone: c.phone,
+    customer_email: c.email||null,
+    booking_date: state.isNujni ? null : isoDate(state.date),
+    start_time: state.isNujni ? '00:00' : state.slot.start,
+    end_time:   state.isNujni ? '00:00' : state.slot.end,
+    status:     state.isNujni ? 'po dogovoru' : 'nova',
+    note:       state.isNujni ? (state.nujniNote+(c.note?(' | '+c.note):'')) : (c.note||null)
+  };
+
+  sb.from('bookings').insert([rec]).then(function(res){
+    if(res.error){
+      var errEl=document.getElementById('bkErr2');
+      errEl.textContent='Prišlo je do napake: '+res.error.message+'. Prosimo, pokličite nas na 031 217 361.';
+      errEl.classList.add('show');
+      btn.disabled=false; btn.textContent='Potrdi naročilo ✦';
+      return;
+    }
+    // Success
+    foot.innerHTML='';
+    body.innerHTML='<div class="bk-success">'
+      +'<div class="bk-success-icon">✦</div>'
+      +'<div class="bk-success-title">Naročeni ste!</div>'
+      +'<p class="bk-success-sub">'+(state.isNujni
+        ?'Vaša zahteva je bila sprejeta. Pokličemo vas za potrditev termina.'
+        :'Vaše naročilo je potrjeno. Vidimo se '+fmtDate(state.date)+' ob '+state.slot.start+'.')+'</p>'
+      +'<br/><p class="bk-success-sub" style="font-size:.8rem">V primeru vprašanj nas pokličite na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>'
+      +'</div>';
+    var cl=document.createElement('button'); cl.className='bk-btn-next'; cl.textContent='Zapri';
+    cl.style.margin='0 auto'; cl.style.display='block';
+    cl.addEventListener('click',closeModal);
+    foot.appendChild(cl);
+  });
+}
+
+/* ── UTILS ─────────────────────────────────────────────── */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showBodyError(msg){
+  body.innerHTML='<div class="bk-error show">'+esc(msg)+'<br/>Pokličite nas na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</div>';
+}
+
+})();
+</script>
+
 </body>
 </html>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
