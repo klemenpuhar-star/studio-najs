@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frizerski Studio Najs – Nataša Markuta, Škofja Loka</title>
   <meta name="description" content="Frizerski studio Najs by Nataša Markuta v Škofji Loki. Striženje, barvanje, pramena, rituali." />
+  <link rel="icon" href="logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -49,8 +50,6 @@
       border-bottom: 1px solid rgba(23,57,75,0.10);
     }
     header.scrolled { box-shadow: 0 2px 20px rgba(23,57,75,0.10); }
-
-    .logo-svg { height: 48px; width: auto; }
 
     nav.desktop { display: flex; align-items: center; gap: 1.8rem; }
     nav.desktop a {
@@ -469,6 +468,28 @@
     .bk-btn-next:hover { background: var(--roza); transform: translateY(-1px); }
     .bk-btn-next:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 
+
+    /* ── LOGOTIP (img) ── */
+    .logo-img {
+      height: 52px;
+      width: auto;
+      display: block;
+    }
+    .hero-logo {
+      width: clamp(200px, 40vw, 340px);
+      height: auto;
+      margin: 0 auto 1.6rem;
+      display: block;
+      filter: drop-shadow(0 2px 12px rgba(23,57,75,.10));
+    }
+    .footer-logo-img {
+      height: 58px;
+      width: auto;
+      display: block;
+      filter: brightness(0) invert(1);
+      opacity: 0.85;
+    }
+
   </style>
 </head>
 <body>
@@ -476,19 +497,7 @@
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
   <a href="#" aria-label="Najs – domov">
-    <svg class="logo-svg" viewBox="0 0 280 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="6" y="22" font-family="'Jost',sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F">FRIZERSKI</text>
-      <text x="6" y="35" font-family="'Jost',sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F">STUDIO</text>
-      <line x1="72" y1="28" x2="148" y2="28" stroke="#17394B" stroke-width="1.4"/>
-      <g stroke="#17394B" stroke-width="1.1">
-        <line x1="150" y1="19" x2="150" y2="30"/><line x1="154" y1="18" x2="154" y2="30"/>
-        <line x1="158" y1="18" x2="158" y2="30"/><line x1="162" y1="18" x2="162" y2="30"/>
-        <line x1="166" y1="18" x2="166" y2="30"/><line x1="170" y1="18" x2="170" y2="30"/>
-        <line x1="174" y1="19" x2="174" y2="30"/><line x1="178" y1="20" x2="178" y2="30"/>
-      </g>
-      <text x="6" y="76" font-family="'Cormorant Garamond',Georgia,serif" font-size="56" font-weight="300" fill="#17394B">NAJS</text>
-      <text x="50" y="90" font-family="'Cormorant Garamond',Georgia,serif" font-size="13" font-style="italic" fill="#CE4B7B">by Nataša Markuta</text>
-    </svg>
+    <img src="logo.png" alt="Frizerski studio Najs" class="logo-img" />
   </a>
 
   <nav class="desktop">
@@ -520,9 +529,7 @@
   <div class="seal"><span class="seal-inner">Have a nice<br/>hair day ✦</span></div>
 
   <div class="hero-content">
-    <p class="hero-eyebrow">✦ &nbsp;Frizerski studio&nbsp; ✦</p>
-    <h1 class="hero-title">NAJS</h1>
-    <p class="hero-sub">by Nataša Markuta</p>
+    <img src="logo.png" alt="Frizerski studio Najs" class="hero-logo" />
     <p class="hero-desc">Vaš frizerski studio v Škofji Loki. Striženje, barvanje, pramena in nega las – z ljubeznijo in strokovnostjo.</p>
     <button class="btn-main open-modal" type="button">Naroči se ✦</button>
   </div>
@@ -736,19 +743,7 @@
 <!-- ══ FOOTER ════════════════════════════════════════════════ -->
 <footer>
   <div class="footer-inner">
-    <svg height="52" viewBox="0 0 280 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Najs logo">
-      <text x="6" y="22" font-family="'Jost',sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F">FRIZERSKI</text>
-      <text x="6" y="35" font-family="'Jost',sans-serif" font-size="10" letter-spacing="3" fill="#CE7E6F">STUDIO</text>
-      <line x1="72" y1="28" x2="148" y2="28" stroke="rgba(255,255,255,.4)" stroke-width="1.4"/>
-      <g stroke="rgba(255,255,255,.4)" stroke-width="1.1">
-        <line x1="150" y1="19" x2="150" y2="30"/><line x1="154" y1="18" x2="154" y2="30"/>
-        <line x1="158" y1="18" x2="158" y2="30"/><line x1="162" y1="18" x2="162" y2="30"/>
-        <line x1="166" y1="18" x2="166" y2="30"/><line x1="170" y1="18" x2="170" y2="30"/>
-        <line x1="174" y1="19" x2="174" y2="30"/><line x1="178" y1="20" x2="178" y2="30"/>
-      </g>
-      <text x="6" y="76" font-family="'Cormorant Garamond',Georgia,serif" font-size="56" font-weight="300" fill="rgba(255,255,255,.9)">NAJS</text>
-      <text x="50" y="90" font-family="'Cormorant Garamond',Georgia,serif" font-size="13" font-style="italic" fill="#CE4B7B">by Nataša Markuta</text>
-    </svg>
+    <img src="logo.png" alt="Frizerski studio Najs" class="footer-logo-img" />
     <nav class="footer-links">
       <a href="#cenik">Cenik</a>
       <a href="#galerija">Galerija</a>
