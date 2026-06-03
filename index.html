@@ -166,6 +166,47 @@
 
     @media (max-width: 600px) { .wide-inner { grid-template-columns: 1fr; } }
 
+
+    /* ── CENIK ── */
+    #cenik { background: var(--bez2); }
+
+    .cenik-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.6rem;
+    }
+    @media (max-width: 900px) { .cenik-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .cenik-grid { grid-template-columns: 1fr; } }
+
+    .cat-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem 1.4rem;
+      box-shadow: 0 2px 14px rgba(23,57,75,.07);
+    }
+    .cat-card.wide { grid-column: 1 / -1; }
+    .cat-title {
+      font-family: var(--serif); font-size: 1.15rem; font-weight: 600;
+      color: var(--navy); padding-bottom: 0.6rem; margin-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(206,126,111,.25);
+    }
+    .cat-title.pink { color: var(--roza); }
+    .pr {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 0.38rem 0; border-bottom: 1px dotted rgba(23,57,75,.08);
+      gap: 0.5rem;
+    }
+    .pr:last-child { border: none; }
+    .pr-name { font-size: 0.86rem; flex: 1; line-height: 1.45; color: var(--navy); }
+    .pr-note { font-size: 0.72rem; color: var(--coral); display: block; font-style: italic; }
+    .pr-val { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--navy); white-space: nowrap; }
+
+    /* wide card inner grid */
+    .wide-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.5rem;
+    }
+    @media (max-width: 600px) { .wide-inner { grid-template-columns: 1fr; } }
+
     /* ── GALERIJA ── */
     #galerija { background: var(--bez); }
     .gallery-grid {
@@ -236,6 +277,71 @@
     @media (min-width: 641px) {
       nav.mobile { display: none !important; }
     }
+
+
+    /* ── BOOKING MULTI-SELECT ACCORDION ── */
+    .bk-macc-item {
+      background: #fff; border-radius: 12px; margin-bottom: .5rem;
+      box-shadow: 0 1px 8px rgba(23,57,75,.06); overflow: hidden;
+    }
+    .bk-macc-trigger {
+      width: 100%; text-align: left; border: none; background: none;
+      padding: .85rem 1.1rem;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; gap: .8rem; transition: background .2s;
+      font-family: var(--sans);
+    }
+    .bk-macc-trigger:hover { background: rgba(23,57,75,.03); }
+    .bk-macc-cat { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--navy); }
+    .bk-macc-cat.nujni { color: var(--roza); }
+    .bk-macc-arr {
+      font-size: 1rem; color: var(--coral); flex-shrink: 0;
+      transition: transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    .bk-macc-item.open .bk-macc-arr { transform: rotate(45deg); }
+    .bk-macc-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height .38s cubic-bezier(.22,1,.36,1);
+    }
+    .bk-macc-item.open .bk-macc-body { max-height: 1600px; }
+    .bk-macc-inner { padding: .1rem 1.1rem .85rem; }
+
+    /* Checkbox vrstica */
+    .bk-chk-row {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .52rem 0; border-bottom: 1px dotted rgba(23,57,75,.08);
+      cursor: pointer;
+    }
+    .bk-chk-row:last-child { border: none; }
+    .bk-chk-row input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--navy);
+      flex-shrink: 0; margin-top: 3px; cursor: pointer;
+    }
+    .bk-chk-left { flex: 1; min-width: 0; }
+    .bk-chk-name { font-size: .87rem; color: var(--navy); line-height: 1.35; }
+    .bk-chk-desc { font-size: .72rem; color: rgba(23,57,75,.5); font-style: italic; margin-top: .1rem; }
+    .bk-chk-price { font-family: var(--serif); font-size: .95rem; font-weight: 600; color: var(--navy); white-space: nowrap; flex-shrink: 0; padding-top: 2px; }
+
+    /* Opozorilo odvisnosti */
+    .bk-dep-warn {
+      background: rgba(206,75,123,.08); border: 1px solid rgba(206,75,123,.25);
+      border-radius: 10px; padding: .65rem .9rem;
+      font-size: .82rem; color: var(--roza); margin-top: .8rem;
+      display: none;
+    }
+    .bk-dep-warn.show { display: block; }
+
+    /* Povzetek izbranih */
+    .bk-sel-summary {
+      margin-top: 1rem; background: var(--bez2); border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+    .bk-sel-label { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); margin-bottom: .5rem; }
+    .bk-sel-list { font-size: .82rem; color: var(--navy); line-height: 1.7; margin-bottom: .5rem; }
+    .bk-sel-list:empty::before { content: "Ni izbranih storitev."; opacity: .45; }
+    .bk-sel-totals { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+    .bk-sel-tot { font-size: .82rem; }
+    .bk-sel-tot strong { font-family: var(--serif); font-size: 1rem; color: var(--navy); }
 
     /* ══ BOOKING MODAL ══════════════════════════════════════════ */
     .bk-overlay {
@@ -456,84 +562,6 @@
       filter: brightness(0) invert(1);
       opacity: 0.85;
     }
-
-
-    /* ── CENIK ACCORDION ── */
-    #cenik { background: var(--bez2); }
-
-    .acc-wrap {
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    .acc-item {
-      background: #fff;
-      border-radius: 14px;
-      margin-bottom: .7rem;
-      box-shadow: 0 2px 12px rgba(23,57,75,.06);
-      overflow: hidden;
-    }
-
-    .acc-trigger {
-      width: 100%; text-align: left; border: none; background: none;
-      padding: 1.1rem 1.4rem;
-      display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; gap: 1rem;
-      transition: background .2s;
-    }
-    .acc-trigger:hover { background: rgba(23,57,75,.03); }
-
-    .acc-cat-name {
-      font-family: var(--serif); font-size: 1.1rem; font-weight: 600;
-      color: var(--navy); line-height: 1.3;
-    }
-    .acc-cat-name.nujni { color: var(--roza); }
-
-    .acc-arrow {
-      font-size: 1.1rem; color: var(--coral); flex-shrink: 0;
-      transition: transform .35s cubic-bezier(.22,1,.36,1);
-      line-height: 1;
-    }
-    .acc-item.open .acc-arrow { transform: rotate(45deg); }
-
-    .acc-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height .4s cubic-bezier(.22,1,.36,1);
-    }
-    .acc-item.open .acc-body { max-height: 2000px; }
-
-    .acc-inner { padding: .2rem 1.4rem 1.1rem; }
-
-    .acc-row {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding: .55rem 0; gap: .8rem;
-      border-bottom: 1px dotted rgba(23,57,75,.09);
-    }
-    .acc-row:last-child { border: none; }
-
-    .acc-svc-left { flex: 1; min-width: 0; }
-    .acc-svc-name { font-size: .9rem; color: var(--navy); line-height: 1.4; }
-    .acc-svc-desc {
-      font-size: .75rem; color: rgba(23,57,75,.5);
-      margin-top: .15rem; line-height: 1.45;
-      font-style: italic;
-    }
-    .acc-svc-price {
-      font-family: var(--serif); font-size: 1rem; font-weight: 600;
-      color: var(--navy); white-space: nowrap; flex-shrink: 0;
-    }
-
-    .acc-loading {
-      text-align: center; padding: 2.5rem 1rem;
-      font-size: .9rem; opacity: .5;
-    }
-    .acc-error {
-      background: rgba(206,75,123,.07); border: 1px solid rgba(206,75,123,.2);
-      border-radius: 12px; padding: 1rem 1.2rem;
-      font-size: .88rem; color: var(--roza); text-align: center;
-    }
-
   </style>
 </head>
 <body>
@@ -587,8 +615,119 @@
     <p style="font-size:.82rem;opacity:.55;margin-bottom:2.5rem">Cene so v EUR · Veljavno od 18. 9. 2023</p>
   </div>
 
-  <div class="acc-wrap" id="accWrap">
-    <div class="acc-loading">Nalagam storitve…</div>
+  <div class="cenik-grid">
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Moško striženje</div>
+      <div class="pr"><span class="pr-name">Striženje<span class="pr-note">Ne vključuje umivanja</span></span><span class="pr-val">12,50 €</span></div>
+      <div class="pr"><span class="pr-name">Striženje<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">16,00 €</span></div>
+      <div class="pr"><span class="pr-name">Striženje z mašinico</span><span class="pr-val">5,00 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Žensko striženje</div>
+      <div class="pr"><span class="pr-name">Kratek las<span class="pr-note">Ne vključuje umivanja</span></span><span class="pr-val">11,20 €</span></div>
+      <div class="pr"><span class="pr-name">Kratek las<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">29,00 €</span></div>
+      <div class="pr"><span class="pr-name">Srednje dolg las<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">31,80 €</span></div>
+      <div class="pr"><span class="pr-name">Dolg las<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">35,00 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Otroško striženje</div>
+      <div class="pr"><span class="pr-name">Baby striženje</span><span class="pr-val">3,00 €</span></div>
+      <div class="pr"><span class="pr-name">Otroško striženje<span class="pr-note">Do 6 let</span></span><span class="pr-val">6,60 €</span></div>
+      <div class="pr"><span class="pr-name">Fantovsko striženje<span class="pr-note">6–14 let</span></span><span class="pr-val">9,80 €</span></div>
+      <div class="pr"><span class="pr-name">Dekliško striženje<span class="pr-note">Ne vključuje umivanja</span></span><span class="pr-val">10,80 €</span></div>
+      <div class="pr"><span class="pr-name">Dekliško striženje<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">17,50 €</span></div>
+      <div class="pr"><span class="pr-name">Kitke otroci</span><span class="pr-val">3,00 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Barvanje</div>
+      <div class="pr"><span class="pr-name">Preliv – kratek las<span class="pr-note">Ton na ton brez amoniaka</span></span><span class="pr-val">15,50 €</span></div>
+      <div class="pr"><span class="pr-name">Preliv – srednje dolg las</span><span class="pr-val">22,40 €</span></div>
+      <div class="pr"><span class="pr-name">Preliv – dolg las</span><span class="pr-val">27,60 €</span></div>
+      <div class="pr"><span class="pr-name">Barvanje – narastek / kratek las<span class="pr-note">S kokosovim oljem in Velian complex</span></span><span class="pr-val">29,00 €</span></div>
+      <div class="pr"><span class="pr-name">Barvanje – srednje dolg las</span><span class="pr-val">32,50 €</span></div>
+      <div class="pr"><span class="pr-name">Barvanje – dolg las</span><span class="pr-val">41,50 €</span></div>
+      <div class="pr"><span class="pr-name">Nanos barve<span class="pr-note">Lastna barva</span></span><span class="pr-val">9,30 €</span></div>
+      <div class="pr"><span class="pr-name">Barvanje moški<span class="pr-note">Naravni videz brez amoniaka</span></span><span class="pr-val">19,80 €</span></div>
+      <div class="pr"><span class="pr-name">Yo cond nega<span class="pr-note">Osvežitev barve</span></span><span class="pr-val">3,90 €</span></div>
+      <div class="pr"><span class="pr-name">Barvna nega Yo – kratek las</span><span class="pr-val">8,80 €</span></div>
+      <div class="pr"><span class="pr-name">Barvna nega Yo – srednje dolg</span><span class="pr-val">10,90 €</span></div>
+      <div class="pr"><span class="pr-name">Barvna nega Yo – dolg las</span><span class="pr-val">15,30 €</span></div>
+      <div class="pr"><span class="pr-name">Dodatek</span><span class="pr-val">5,00 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Pramena</div>
+      <div class="pr"><span class="pr-name">Balayage – srednje dolg las<span class="pr-note">S keratinom in kamilico + toniranje</span></span><span class="pr-val">66,00 €</span></div>
+      <div class="pr"><span class="pr-name">Balayage – dolg las</span><span class="pr-val">77,00 €</span></div>
+      <div class="pr"><span class="pr-name">S folijo – pol glave / kratki<span class="pr-note">Svetlenje z Keratinom in kamilico</span></span><span class="pr-val">49,30 €</span></div>
+      <div class="pr"><span class="pr-name">S folijo – komplet srednje dolg</span><span class="pr-val">59,30 €</span></div>
+      <div class="pr"><span class="pr-name">S folijo – komplet dolg las</span><span class="pr-val">70,00 €</span></div>
+      <div class="pr"><span class="pr-name">Na kapo<span class="pr-note">S keratinom in kamilico + toniranje</span></span><span class="pr-val">24,10 €</span></div>
+      <div class="pr"><span class="pr-name">Posvetlitev narastka</span><span class="pr-val">30,00 €</span></div>
+      <div class="pr"><span class="pr-name">Tonalizacija</span><span class="pr-val">14,00 €</span></div>
+      <div class="pr"><span class="pr-name">Restore</span><span class="pr-val">3,00 €</span></div>
+      <div class="pr"><span class="pr-name">Pramen</span><span class="pr-val">1,00 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Oblikovanje las</div>
+      <div class="pr"><span class="pr-name">Poročna in večerne pričeske<span class="pr-note">Testna + glavna pričeska</span></span><span class="pr-val">66,00 €</span></div>
+      <div class="pr"><span class="pr-name">Spenjanje pričeske<span class="pr-note">Enostavno spenjanje</span></span><span class="pr-val">22,00 €</span></div>
+      <div class="pr"><span class="pr-name">Maturantska pričeska</span><span class="pr-val">33,00 €</span></div>
+      <div class="pr"><span class="pr-name">Trajna + striženje – kratek las<span class="pr-note">Kodranje brez amoniaka</span></span><span class="pr-val">43,80 €</span></div>
+      <div class="pr"><span class="pr-name">Trajna + striženje – srednje dolg</span><span class="pr-val">53,80 €</span></div>
+      <div class="pr"><span class="pr-name">Trajna + striženje – dolg las</span><span class="pr-val">64,70 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Rituali &amp; nega</div>
+      <div class="pr"><span class="pr-name">Čistilni ritual Advanced<span class="pr-note">Očisti, pomiri in osveži lasišče</span></span><span class="pr-val">13,20 €</span></div>
+      <div class="pr"><span class="pr-name">Hidratantni ritual Antiage<span class="pr-note">Vlaženje suhega in napetega lasišča</span></span><span class="pr-val">13,20 €</span></div>
+      <div class="pr"><span class="pr-name">Personalizirani ritual<span class="pr-note">Različne terapije na lasišču</span></span><span class="pr-val">13,20 €</span></div>
+      <div class="pr"><span class="pr-name">Ritual proti izpadanju<span class="pr-note">Advanced ritual za rast</span></span><span class="pr-val">13,20 €</span></div>
+      <div class="pr"><span class="pr-name">Ritual obnova Advanced<span class="pr-note">Nova fibra, BCC Komplet 1 doza</span></span><span class="pr-val">6,50 €</span></div>
+      <div class="pr"><span class="pr-name">Ritual obnova Extra<span class="pr-note">Disciplina Serum, Hialuron &amp; Gloss</span></span><span class="pr-val">15,00 €</span></div>
+      <div class="pr"><span class="pr-name">Ritual vlaženje skodranih las</span><span class="pr-val">15,00 €</span></div>
+      <div class="pr"><span class="pr-name">Laminacija las<span class="pr-note">Obloži, nahrani, navlaži, sijoj</span></span><span class="pr-val">15,00 €</span></div>
+      <div class="pr"><span class="pr-name">Rekonstrukcija las po svetlenju<span class="pr-note">Stabilizira pH, obnovi vezi</span></span><span class="pr-val">9,90 €</span></div>
+    </div>
+
+    <div class="cat-card reveal">
+      <div class="cat-title">Fen &amp; oblikovanje</div>
+      <div class="pr"><span class="pr-name">Fen – kratek las</span><span class="pr-val">18,00 €</span></div>
+      <div class="pr"><span class="pr-name">Fen – srednje dolg las</span><span class="pr-val">20,80 €</span></div>
+      <div class="pr"><span class="pr-name">Fen – dolg las</span><span class="pr-val">24,00 €</span></div>
+      <div class="pr"><span class="pr-name">Likalnik</span><span class="pr-val">5,00 €</span></div>
+      <div class="pr"><span class="pr-name">Figaro</span><span class="pr-val">10,00 €</span></div>
+      <div class="pr"><span class="pr-name">Kitke odrasli</span><span class="pr-val">5,00 €</span></div>
+    </div>
+
+    <div class="cat-card wide reveal" style="background:linear-gradient(135deg,#fff,#fdf6ef)">
+      <div class="cat-title pink">✦ Semi-permanentna barva Actyva Coloro – NOVO v salonu</div>
+      <div class="wide-inner">
+        <div>
+          <div class="pr"><span class="pr-name">Barva svetlobe – kratek las<span class="pr-note">Kokosovo olje + organske rastline</span></span><span class="pr-val">25,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva svetlobe – srednje dolg las</span><span class="pr-val">31,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva svetlobe – dolg las</span><span class="pr-val">46,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva in odsev – srednje dolg<span class="pr-note">Toniranje barvanih in beljenih las</span></span><span class="pr-val">22,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva in odsev – dolg las</span><span class="pr-val">33,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva in intenzivnost – srednje dolg<span class="pr-note">Osvežitev barve</span></span><span class="pr-val">12,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva in intenzivnost – dolg las</span><span class="pr-val">17,00 €</span></div>
+        </div>
+        <div>
+          <div class="pr"><span class="pr-name">Infuzija svetlobe – srednje dolg<span class="pr-note">Sijaj brez spremembe barve</span></span><span class="pr-val">21,00 €</span></div>
+          <div class="pr"><span class="pr-name">Infuzija svetlobe – dolg las</span><span class="pr-val">25,50 €</span></div>
+          <div class="pr"><span class="pr-name">Barva in moč – srednje dolg<span class="pr-note">Negovalna barva z Nouva fibra</span></span><span class="pr-val">30,00 €</span></div>
+          <div class="pr"><span class="pr-name">Barva in moč – dolg las</span><span class="pr-val">35,00 €</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cenik-grid -->
   </div>
 </section>
 
@@ -859,7 +998,7 @@ var foot    = document.getElementById('bkFoot');
 var stepBar = document.getElementById('bkStepBar');
 
 function openModal(){
-  state = { step:1, totalSteps:5, service:null, date:null, slot:null, customer:{}, isNujni:false, nujniNote:'' };
+  state = { step:1, totalSteps:5, service:null, date:null, slot:null, customer:{}, isNujni:false, nujniNote:'', selectedIds:{}, selectedServices:[], allServices:[] };
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
   renderStep();
@@ -904,55 +1043,139 @@ function renderStep(){
   document.getElementById('bkModal').scrollTop = 0;
 }
 
-/* ── STEP 1: STORITEV ─────────────────────────────────────── */
+/* ── STEP 1: STORITEV (multi-select accordion) ──────────────── */
 function renderStep1(){
-  body.innerHTML = '<div class="bk-step-label">Korak 1</div><div class="bk-step-title">Izbira storitve</div><div class="bk-loading">Nalagam storitve…</div>';
+  body.innerHTML = '<div class="bk-step-label">Korak 1</div><div class="bk-step-title">Izbira storitev</div><div class="bk-loading">Nalagam storitve…</div>';
   foot.innerHTML = '';
 
-  sb.from('services').select('*').eq('active',true).order('sort_order').then(function(res){
-    if(res.error){ showBodyError('Napaka pri nalaganju storitev: '+res.error.message); return; }
-    var services = res.data || [];
-    if(!services.length){ body.innerHTML='<p style="opacity:.6;font-size:.9rem">Ni razpoložljivih storitev.</p>'; return; }
+  sb.from('services')
+    .select('id,name,description,price,category,sort_order,duration_minutes,requires_base,is_base,active')
+    .eq('active', true)
+    .order('sort_order', { ascending: true })
+    .then(function(res){
+      if(res.error){ showBodyError('Napaka pri nalaganju storitev: '+res.error.message); return; }
+      var services = res.data || [];
+      if(!services.length){ body.innerHTML='<p style="opacity:.6;font-size:.9rem">Ni razpoložljivih storitev.</p>'; return; }
 
-    var cats = {};
-    services.forEach(function(sv){
-      var c = sv.category || 'Ostalo';
-      if(!cats[c]) cats[c]=[];
-      cats[c].push(sv);
-    });
+      state.allServices = services;
+      if(!state.selectedIds) state.selectedIds = {};
 
-    var html='<div class="bk-step-label">Korak 1</div><div class="bk-step-title">Izbira storitve</div>';
-    Object.keys(cats).forEach(function(cat){
-      html+='<div class="bk-cat-label">'+esc(cat)+'</div>';
-      cats[cat].forEach(function(sv){
-        html+='<button class="bk-service-btn'+(state.service&&state.service.id===sv.id?' selected':'')+'" data-id="'+sv.id+'" type="button">'
-          +'<span><span class="bk-svc-name">'+esc(sv.name)+'</span>'
-          +(sv.duration_minutes?'<span class="bk-svc-dur"> · '+sv.duration_minutes+' min</span>':'')
-          +'</span>'
-          +(sv.price?'<span class="bk-svc-price">'+String(sv.price).replace('.',',')+(sv.price%1===0?',00':'')+'&nbsp;€</span>':'')
-          +'</button>';
+      var catMap = {};
+      services.forEach(function(sv){
+        var c = sv.category || 'Ostalo';
+        if(!catMap[c]) catMap[c] = { minSort: sv.sort_order, items: [] };
+        if(sv.sort_order < catMap[c].minSort) catMap[c].minSort = sv.sort_order;
+        catMap[c].items.push(sv);
       });
-    });
-    body.innerHTML = html;
-
-    body.querySelectorAll('.bk-service-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var id = +btn.dataset.id;
-        state.service = services.find(function(sv){ return sv.id===id; });
-        state.isNujni = (state.service.category||'').toLowerCase().indexOf('nujni')>=0;
-        body.querySelectorAll('.bk-service-btn').forEach(function(b){ b.classList.remove('selected'); });
-        btn.classList.add('selected');
-        renderFoot1();
+      var catNames = Object.keys(catMap).sort(function(a,b){
+        var aN = a.toLowerCase().indexOf('nujni')>=0 ? 99999 : catMap[a].minSort;
+        var bN = b.toLowerCase().indexOf('nujni')>=0 ? 99999 : catMap[b].minSort;
+        return aN - bN;
       });
+
+      var h = '<div class="bk-step-label">Korak 1</div><div class="bk-step-title">Izbira storitev</div>';
+      catNames.forEach(function(cat){
+        var isNujni = cat.toLowerCase().indexOf('nujni') >= 0;
+        h += '<div class="bk-macc-item" data-cat="'+esc(cat)+'">'
+           + '<button class="bk-macc-trigger" type="button">'
+           + '<span class="bk-macc-cat'+(isNujni?' nujni':'')+'">' + esc(cat) + '</span>'
+           + '<span class="bk-macc-arr" aria-hidden="true">+</span>'
+           + '</button>'
+           + '<div class="bk-macc-body"><div class="bk-macc-inner">';
+        catMap[cat].items.forEach(function(sv){
+          var checked = (state.selectedIds[sv.id]) ? ' checked' : '';
+          var priceStr = (sv.price !== null && sv.price !== undefined)
+            ? parseFloat(sv.price).toFixed(2).replace('.',',') + ' €' : '';
+          h += '<label class="bk-chk-row">'
+             + '<input type="checkbox" data-id="'+sv.id+'"'+checked+' />'
+             + '<span class="bk-chk-left">'
+             + '<span class="bk-chk-name">'+esc(sv.name)+'</span>'
+             + (sv.description ? '<span class="bk-chk-desc">'+esc(sv.description)+'</span>' : '')
+             + '</span>'
+             + (priceStr ? '<span class="bk-chk-price">'+priceStr+'</span>' : '')
+             + '</label>';
+        });
+        h += '</div></div></div>';
+      });
+
+      h += '<div class="bk-dep-warn" id="bkDepWarn">⚠ Te storitve ni mogoče izbrati brez striženja ali fen frizure!</div>';
+      h += '<div class="bk-sel-summary">'
+         + '<div class="bk-sel-label">Izbrane storitve</div>'
+         + '<div class="bk-sel-list" id="bkSelList"></div>'
+         + '<div class="bk-sel-totals">'
+         + '<div class="bk-sel-tot">Skupaj: <strong id="bkTotPrice">0,00 €</strong></div>'
+         + '<div class="bk-sel-tot">Trajanje: <strong id="bkTotDur">0 min</strong></div>'
+         + '</div></div>';
+
+      body.innerHTML = h;
+
+      body.querySelectorAll('.bk-macc-trigger').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          btn.closest('.bk-macc-item').classList.toggle('open');
+        });
+      });
+
+      body.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+        cb.addEventListener('change', function(){
+          var id = +cb.dataset.id;
+          if(cb.checked) state.selectedIds[id] = true;
+          else delete state.selectedIds[id];
+          updateSelSummary();
+          renderFoot1();
+        });
+      });
+
+      updateSelSummary();
+      renderFoot1();
     });
-    renderFoot1();
-  });
 }
+
+function updateSelSummary(){
+  var services = state.allServices || [];
+  var selList  = document.getElementById('bkSelList');
+  var totPrice = document.getElementById('bkTotPrice');
+  var totDur   = document.getElementById('bkTotDur');
+  var depWarn  = document.getElementById('bkDepWarn');
+  if(!selList) return;
+
+  var sel = services.filter(function(sv){ return state.selectedIds[sv.id]; });
+  selList.textContent = sel.length ? sel.map(function(sv){ return sv.name; }).join(', ') : '';
+
+  var price = sel.reduce(function(s,sv){ return s+(parseFloat(sv.price)||0); }, 0);
+  var dur   = sel.reduce(function(s,sv){ return s+(parseInt(sv.duration_minutes)||0); }, 0);
+  if(totPrice) totPrice.textContent = price.toFixed(2).replace('.',',') + ' €';
+  if(totDur)   totDur.textContent   = dur + ' min';
+
+  var hasBase   = sel.some(function(sv){ return sv.is_base; });
+  var needsBase = sel.some(function(sv){ return sv.requires_base; });
+  var depOk = !needsBase || hasBase;
+  if(depWarn) depWarn.classList.toggle('show', !depOk && sel.length > 0);
+}
+
+function checkDep(){
+  var services = state.allServices || [];
+  var sel = services.filter(function(sv){ return state.selectedIds[sv.id]; });
+  var hasBase   = sel.some(function(sv){ return sv.is_base; });
+  var needsBase = sel.some(function(sv){ return sv.requires_base; });
+  return !needsBase || hasBase;
+}
+
 function renderFoot1(){
   foot.innerHTML = '';
   var nx = document.createElement('button');
-  nx.className='bk-btn-next'; nx.textContent='Naprej →'; nx.disabled=!state.service;
-  nx.addEventListener('click', function(){ state.step=2; renderStep(); });
+  nx.className = 'bk-btn-next'; nx.textContent = 'Naprej →';
+  var selCount = Object.keys(state.selectedIds||{}).length;
+  nx.disabled = selCount === 0 || !checkDep();
+  nx.addEventListener('click', function(){
+    var services = state.allServices || [];
+    var selArr = services.filter(function(sv){ return state.selectedIds[sv.id]; });
+    if(selArr.length){
+      state.service = selArr[0];
+      state.isNujni = selArr.some(function(sv){ return (sv.category||'').toLowerCase().indexOf('nujni')>=0; });
+      state.selectedServices = selArr;
+    }
+    state.step = 2; renderStep();
+  });
   foot.appendChild(nx);
 }
 
@@ -1174,41 +1397,50 @@ function renderStepConfirm(){
 function submitBooking(btn){
   btn.disabled=true; btn.textContent='Pošiljam…';
   var sv=state.service; var c=state.customer;
+  var selArr = state.selectedServices && state.selectedServices.length ? state.selectedServices : [sv];
 
-  var rec={
-    service_id: sv.id,
-    service_name: sv.name,
-    customer_name: c.name,
-    customer_phone: c.phone,
-    customer_email: c.email||null,
-    booking_date: state.isNujni ? null : isoDate(state.date),
-    start_time: state.isNujni ? '00:00' : state.slot.start,
-    end_time:   state.isNujni ? '00:00' : state.slot.end,
-    status:     state.isNujni ? 'po dogovoru' : 'nova',
-    note:       state.isNujni ? (state.nujniNote+(c.note?(' | '+c.note):'')) : (c.note||null)
+  var servicesText = selArr.map(function(s){ return s.name; }).join(', ');
+  var totalPrice   = selArr.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
+  var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_minutes)||0); }, 0);
+
+  var rec = {
+    service_id:         sv.id,
+    service_name:       sv.name,
+    services_text:      servicesText,
+    total_price:        parseFloat(totalPrice.toFixed(2)),
+    total_duration_min: totalDur,
+    customer_name:      c.name,
+    customer_phone:     c.phone,
+    customer_email:     c.email || null,
+    booking_date:       state.isNujni ? null : isoDate(state.date),
+    start_time:         state.isNujni ? '00:00' : state.slot.start,
+    end_time:           state.isNujni ? '00:00' : state.slot.end,
+    status:             state.isNujni ? 'po dogovoru' : 'nova',
+    note:               state.isNujni
+                          ? (state.nujniNote + (c.note ? (' | '+c.note) : ''))
+                          : (c.note || null)
   };
 
   sb.from('bookings').insert([rec]).then(function(res){
     if(res.error){
-      var errEl=document.getElementById('bkErr2');
-      errEl.textContent='Prišlo je do napake: '+res.error.message+'. Prosimo, pokličite nas na 031 217 361.';
-      errEl.classList.add('show');
-      btn.disabled=false; btn.textContent='Potrdi naročilo ✦';
+      var errEl = document.getElementById('bkErr2');
+      if(errEl){ errEl.textContent = 'Prišlo je do napake: '+res.error.message+'. Pokličite nas na 031 217 361.'; errEl.classList.add('show'); }
+      btn.disabled=false; btn.textContent='Potrdi naročilo ✶';
       return;
     }
-    // Success
-    foot.innerHTML='';
-    body.innerHTML='<div class="bk-success">'
-      +'<div class="bk-success-icon">✦</div>'
-      +'<div class="bk-success-title">Naročeni ste!</div>'
-      +'<p class="bk-success-sub">'+(state.isNujni
-        ?'Vaša zahteva je bila sprejeta. Pokličemo vas za potrditev termina.'
-        :'Vaše naročilo je potrjeno. Vidimo se '+fmtDate(state.date)+' ob '+state.slot.start+'.')+'</p>'
-      +'<br/><p class="bk-success-sub" style="font-size:.8rem">V primeru vprašanj nas pokličite na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>'
-      +'</div>';
-    var cl=document.createElement('button'); cl.className='bk-btn-next'; cl.textContent='Zapri';
+    foot.innerHTML = '';
+    body.innerHTML = '<div class="bk-success">'
+      + '<div class="bk-success-icon">✶</div>'
+      + '<div class="bk-success-title">Naročeni ste!</div>'
+      + '<p class="bk-success-sub">'+(state.isNujni
+          ? 'Vaša zahteva je bila sprejeta. Pokličemo vas za potrditev termina.'
+          : 'Vaše naročilo je potrjeno. Vidimo se '+fmtDate(state.date)+' ob '+state.slot.start+'.')+'</p>'
+      + '<br/><p class="bk-success-sub" style="font-size:.8rem">V primeru vprašanj pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>'
+      + '</div>';
+    var cl = document.createElement('button');
+    cl.className='bk-btn-next'; cl.textContent='Zapri';
     cl.style.margin='0 auto'; cl.style.display='block';
-    cl.addEventListener('click',closeModal);
+    cl.addEventListener('click', closeModal);
     foot.appendChild(cl);
   });
 }
@@ -1222,118 +1454,6 @@ function showBodyError(msg){
 })();
 </script>
 
-
-<script>
-/* ── CENIK ACCORDION (Supabase) ─────────────────────────── */
-(function(){
-  // Počakaj, da je Supabase klient iz booking modala že inicializiran
-  // oz. ustvari ga tukaj z istimi podatki
-  var SB_URL = 'https://azqtgvxashunmmydkwop.supabase.co';
-  var SB_KEY = 'sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
-
-  function initAccordion() {
-    var wrap = document.getElementById('accWrap');
-    if (!wrap) return;
-
-    var client = supabase.createClient(SB_URL, SB_KEY);
-
-    client
-      .from('services')
-      .select('id,name,description,price,category,sort_order')
-      .eq('active', true)
-      .order('sort_order', { ascending: true })
-      .then(function(res) {
-        if (res.error) {
-          wrap.innerHTML = '<div class="acc-error">Napaka pri nalaganju cenika. Pokličite nas na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</div>';
-          return;
-        }
-
-        var services = res.data || [];
-        if (!services.length) {
-          wrap.innerHTML = '<p style="text-align:center;opacity:.5;font-size:.9rem">Storitve še niso vnesene.</p>';
-          return;
-        }
-
-        // Grupiranje po kategorijah
-        var catMap = {};    // category -> { minSort, items[] }
-        services.forEach(function(sv) {
-          var cat = sv.category || 'Ostalo';
-          if (!catMap[cat]) catMap[cat] = { minSort: sv.sort_order, items: [] };
-          if (sv.sort_order < catMap[cat].minSort) catMap[cat].minSort = sv.sort_order;
-          catMap[cat].items.push(sv);
-        });
-
-        // Razvrsti kategorije po minSort; "Nujni termin" vedno zadnji
-        var catNames = Object.keys(catMap).sort(function(a, b) {
-          var aN = a.toLowerCase().indexOf('nujni') >= 0 ? 99999 : catMap[a].minSort;
-          var bN = b.toLowerCase().indexOf('nujni') >= 0 ? 99999 : catMap[b].minSort;
-          return aN - bN;
-        });
-
-        // Zgradi HTML
-        var html = '';
-        catNames.forEach(function(cat) {
-          var isNujni = cat.toLowerCase().indexOf('nujni') >= 0;
-          var rows = '';
-          catMap[cat].items.forEach(function(sv) {
-            var priceStr = '';
-            if (sv.price !== null && sv.price !== undefined) {
-              var p = parseFloat(sv.price);
-              priceStr = p.toFixed(2).replace('.', ',') + ' €';
-            }
-            rows += '<div class="acc-row">'
-              + '<div class="acc-svc-left">'
-              + '<div class="acc-svc-name">' + esc(sv.name) + '</div>'
-              + (sv.description ? '<div class="acc-svc-desc">' + esc(sv.description) + '</div>' : '')
-              + '</div>'
-              + (priceStr ? '<div class="acc-svc-price">' + priceStr + '</div>' : '')
-              + '</div>';
-          });
-
-          html += '<div class="acc-item" data-cat="' + esc(cat) + '">'
-            + '<button class="acc-trigger" type="button" aria-expanded="false">'
-            + '<span class="acc-cat-name' + (isNujni ? ' nujni' : '') + '">' + esc(cat) + '</span>'
-            + '<span class="acc-arrow" aria-hidden="true">+</span>'
-            + '</button>'
-            + '<div class="acc-body" role="region">'
-            + '<div class="acc-inner">' + rows + '</div>'
-            + '</div>'
-            + '</div>';
-        });
-
-        wrap.innerHTML = html;
-
-        // Accordion logika
-        wrap.querySelectorAll('.acc-trigger').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            var item = btn.closest('.acc-item');
-            var isOpen = item.classList.contains('open');
-            // Zapri vse
-            wrap.querySelectorAll('.acc-item.open').forEach(function(el) {
-              el.classList.remove('open');
-              el.querySelector('.acc-trigger').setAttribute('aria-expanded', 'false');
-            });
-            // Odpri kliknjeni (toggle)
-            if (!isOpen) {
-              item.classList.add('open');
-              btn.setAttribute('aria-expanded', 'true');
-            }
-          });
-        });
-      });
-  }
-
-  function esc(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAccordion);
-  } else {
-    initAccordion();
-  }
-})();
-</script>
 
 </body>
 </html>
