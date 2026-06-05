@@ -384,48 +384,102 @@
     .bk-sel-totals { display: flex; gap: 1.2rem; flex-wrap: wrap; }
     .bk-sel-tot { font-size: .82rem; }
     .bk-sel-tot strong { font-family: var(--serif); font-size: 1rem; color: var(--navy); }
-
-
-    /* ── PAMETNI KOLEDAR / TERMINI ── */
-    .bk-cal-day.sob {
-      color: var(--coral);
-      font-style: italic;
+    /* ── TERMINSKI TRAK (novi dizajn) ── */
+    .bk-sched-wrap {
+      display: flex; gap: 1.2rem;
+      align-items: flex-start;
     }
-    .bk-slot-first {
-      background: var(--navy) !important;
-      color: #fff !important;
-      border-color: var(--navy) !important;
-      position: relative;
+    .bk-sched-left { flex: 1; min-width: 0; }
+    .bk-sched-right {
+      width: 200px; flex-shrink: 0;
+      background: #fff; border-radius: 14px;
+      padding: 1rem; box-shadow: 0 2px 12px rgba(23,57,75,.08);
+      font-size: .82rem;
     }
-    .bk-slot-first::after {
-      content: 'prvi';
-      position: absolute; top: -8px; left: 50%;
-      transform: translateX(-50%);
-      font-size: .58rem; letter-spacing: .08em; text-transform: uppercase;
+    @media (max-width: 600px) {
+      .bk-sched-wrap { flex-direction: column; }
+      .bk-sched-right { width: 100%; }
+    }
+
+    /* Dan trak */
+    .bk-day-nav {
+      display: flex; align-items: center; gap: .4rem; margin-bottom: .7rem;
+    }
+    .bk-day-nav-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid rgba(23,57,75,.2); background: none;
+      cursor: pointer; font-size: .9rem; color: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s; flex-shrink: 0;
+    }
+    .bk-day-nav-btn:hover:not(:disabled) { background: rgba(23,57,75,.07); }
+    .bk-day-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .bk-day-strip-outer { flex: 1; overflow: hidden; }
+    .bk-day-strip {
+      display: flex; gap: .5rem;
+      overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .bk-day-strip::-webkit-scrollbar { display: none; }
+
+    .bk-day-card {
+      flex-shrink: 0; width: 72px;
+      border: 1.5px solid rgba(23,57,75,.12); border-radius: 12px;
+      background: #fff; cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+      overflow: hidden; text-align: center;
+      font-family: var(--sans);
+    }
+    .bk-day-card:hover:not(.disabled) { border-color: var(--coral); }
+    .bk-day-card.selected { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(23,57,75,.12); }
+    .bk-day-card.disabled { opacity: .38; cursor: not-allowed; }
+
+    .bk-day-card-top { padding: .5rem .3rem .3rem; }
+    .bk-day-name { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(23,57,75,.5); }
+    .bk-day-num  { font-family: var(--serif); font-size: 1.55rem; font-weight: 300; color: var(--navy); line-height: 1.1; }
+    .bk-day-mon  { font-size: .65rem; color: rgba(23,57,75,.45); }
+    .bk-day-status {
+      padding: .28rem .2rem; font-size: .62rem; text-align: center;
+      border-top: 1px solid rgba(23,57,75,.07); line-height: 1.2;
+    }
+    .bk-day-status.avail  { color: var(--coral); font-weight: 500; }
+    .bk-day-status.busy   { color: rgba(23,57,75,.35); }
+    .bk-day-status.closed { color: rgba(23,57,75,.3); font-style: italic; }
+
+    /* Termini seznam */
+    .bk-slot-list { margin-top: .8rem; }
+    .bk-slot-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .6rem .9rem; border-radius: 10px;
+      border: 1.5px solid rgba(23,57,75,.12);
+      margin-bottom: .4rem; cursor: pointer; background: #fff;
+      transition: border-color .2s, background .2s;
+    }
+    .bk-slot-row:hover { border-color: var(--coral); }
+    .bk-slot-row.selected {
+      border-color: var(--coral); background: rgba(206,126,111,.08);
+    }
+    .bk-slot-time { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--navy); }
+    .bk-slot-price { font-size: .82rem; color: var(--coral); }
+    .bk-slot-first-badge {
+      font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
       background: var(--coral); color: #fff;
-      padding: 1px 5px; border-radius: 4px;
-      white-space: nowrap;
+      padding: 2px 6px; border-radius: 4px; margin-left: .5rem;
+      vertical-align: middle;
     }
-    .bk-slot-first.selected::after { background: var(--roza); }
 
-    /* Timeline – zasedeni bloki */
-    .bk-timeline { margin-bottom: 1rem; }
-    .bk-timeline-title {
-      font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--coral); margin-bottom: .4rem;
+    /* Povzetek (desno) */
+    .bk-sum-hd { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); margin-bottom: .5rem; }
+    .bk-sum-date { font-family: var(--serif); font-size: .95rem; color: var(--navy); margin-bottom: .7rem; line-height: 1.4; }
+    .bk-sum-svc  { font-size: .78rem; color: rgba(23,57,75,.65); padding: .2rem 0; border-bottom: 1px dotted rgba(23,57,75,.08); display: flex; justify-content: space-between; gap: .4rem; }
+    .bk-sum-svc:last-of-type { border: none; }
+    .bk-sum-total { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--navy); margin-top: .6rem; display: flex; justify-content: space-between; }
+
+    .bk-slot-msg {
+      font-size: .85rem; color: rgba(23,57,75,.55); padding: .8rem 0;
+      text-align: center; line-height: 1.6;
     }
-    .bk-busy-block {
-      display: inline-flex; align-items: center; gap: .4rem;
-      background: rgba(23,57,75,.09); border-radius: 8px;
-      padding: .3rem .7rem; font-size: .78rem; color: rgba(23,57,75,.5);
-      margin: .2rem .2rem .2rem 0;
-    }
-    .bk-busy-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(23,57,75,.3); flex-shrink: 0; }
-    .bk-sob-msg {
-      background: rgba(206,126,111,.1); border: 1px solid rgba(206,126,111,.3);
-      border-radius: 12px; padding: 1.1rem 1.2rem;
-      font-size: .9rem; color: var(--navy); line-height: 1.7; text-align: center;
-    }
+    .bk-slot-loading { text-align: center; padding: 1rem; opacity: .5; font-size: .85rem; }
 
     /* ══ BOOKING MODAL ══════════════════════════════════════════ */
     .bk-overlay {
@@ -1163,247 +1217,298 @@ function renderFoot1(){
   foot.appendChild(nx);
 }
 
-/* ── STEP 2 + 3: PAMETNI KOLEDAR IN TERMINI ─────────────── */
-var calYear, calMonth;
+/* ── STEP 2: TERMINSKI TRAK + IZBIRA UREUJE ─────────────── */
+
+/* Delovni čas */
+var DC = {
+  1: { start: '14:00', end: '20:00' },
+  2: { start: '08:00', end: '15:00' },
+  3: { start: '14:00', end: '20:00' },
+  4: { start: '14:00', end: '20:00' },
+  5: { start: '08:00', end: '15:00' },
+  6: 'dogovor'
+};
+var SLOT_STEP = 15; // minutni raaster za generiranje
+var STRIP_DAYS = 14;
+var stripOffset = 0; // teden-offset (0 = ta teden)
+
+/* Cache za statuse dni */
+var dayStatusCache = {};
 
 function renderStep2(){
-  var now = new Date();
-  calYear  = now.getFullYear();
-  calMonth = now.getMonth();
   state.slot = null;
-  renderCalView();
+  stripOffset = 0;
+  dayStatusCache = {};
+  renderSchedView();
 }
 
-function renderCalView(){
-  var h = '<div class="bk-step-label">Korak 2</div><div class="bk-step-title">Izbira datuma in termina</div>';
-  h += '<div class="bk-cal" id="bkCalBox"></div>';
-  h += '<div id="bkSlotArea"></div>';
-  body.innerHTML = h;
-  buildCal();
-  renderFoot2();
-}
-
-function buildCal(){
-  var box = document.getElementById('bkCalBox');
-  if(!box) return;
-
-  var nav = '<div class="bk-cal-nav">'
-    + '<button class="bk-cal-arrow" id="calPrev">‹</button>'
-    + '<span class="bk-cal-month">'+SL_MESECI[calMonth]+' '+calYear+'</span>'
-    + '<button class="bk-cal-arrow" id="calNext">›</button>'
-    + '</div>';
-  var grid = '<div class="bk-cal-grid">';
-  SL_DNEVI_K.forEach(function(d){ grid += '<div class="bk-cal-dh">'+d+'</div>'; });
-
-  var firstDow = new Date(calYear, calMonth, 1).getDay();
-  var daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-  var today = new Date(); today.setHours(0,0,0,0);
-
-  for(var i = 0; i < firstDow; i++)
-    grid += '<button class="bk-cal-day empty" disabled></button>';
-
-  for(var day = 1; day <= daysInMonth; day++){
-    var d   = new Date(calYear, calMonth, day);
-    var dow = d.getDay();
-    var past   = d < today;
-    var isSun  = dow === 0;
-    var isSob  = dow === 6;
-    var isSel  = state.date && isoDate(d) === isoDate(state.date);
-    var isToday= isoDate(d) === isoDate(today);
-
-    var cls = 'bk-cal-day'
-      + (isSel  ? ' selected' : '')
-      + (isToday && !isSel ? ' today' : '')
-      + (isSob  ? ' sob' : '');
-    var disabled = (past || isSun) ? 'disabled' : '';
-    grid += '<button class="'+cls+'" '+disabled+' data-date="'+isoDate(d)+'" data-dow="'+dow+'">'+day+'</button>';
-  }
-  grid += '</div>';
-  box.innerHTML = nav + grid;
-
-  box.querySelector('#calPrev').addEventListener('click', function(){
-    calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } buildCal(); renderFoot2();
-  });
-  box.querySelector('#calNext').addEventListener('click', function(){
-    calMonth++; if(calMonth > 11){ calMonth = 0; calYear++; } buildCal(); renderFoot2();
-  });
-
-  box.querySelectorAll('.bk-cal-day:not(:disabled):not(.empty)').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      box.querySelectorAll('.bk-cal-day').forEach(function(b){ b.classList.remove('selected'); });
-      btn.classList.add('selected');
-      var parts = btn.dataset.date.split('-');
-      state.date = new Date(+parts[0], +parts[1]-1, +parts[2]);
-      state.slot = null;
-      var dow = +btn.dataset.dow;
-      if(dow === 6){
-        showSobMsg();
-      } else {
-        loadSlots();
-      }
-      renderFoot2();
-    });
-  });
-}
-
-function showSobMsg(){
-  var area = document.getElementById('bkSlotArea');
-  if(!area) return;
-  area.innerHTML = '<div class="bk-sob-msg">'
-    + '📞 <strong>Sobota je po dogovoru</strong><br/>'
-    + 'Pokličite nas na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a> in dogovorimo se za termin.'
-    + '</div>';
-}
-
-function loadSlots(){
-  var area = document.getElementById('bkSlotArea');
-  if(!area) return;
-  area.innerHTML = '<div class="bk-loading">Preverjam termine…</div>';
-
-  var dateStr = isoDate(state.date);
-  var dow = state.date.getDay();
-  var dc  = DELOVNI_CAS[dow];
-  if(!dc || dc === 'dogovor'){ area.innerHTML=''; return; }
-
-  // Skupno trajanje vseh izbranih storitev
-  var selArr  = state.selectedServices && state.selectedServices.length
+function getSelArr(){
+  return (state.selectedServices && state.selectedServices.length)
     ? state.selectedServices
     : (state.service ? [state.service] : []);
-  var totalDur = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_min)||0); }, 0);
-  if(!totalDur) totalDur = 30;
+}
+function getTotalDur(){
+  return getSelArr().reduce(function(a,s){ return a+(parseInt(s.duration_min)||0); }, 0) || 30;
+}
+function getTotalPrice(){
+  return getSelArr().reduce(function(a,s){ return a+(parseFloat(s.price)||0); }, 0);
+}
 
-  var wStart = timeToMin(dc.start);
-  var wEnd   = timeToMin(dc.end);
+function renderSchedView(){
+  body.innerHTML =
+    '<div class="bk-step-label">Korak 2</div>'
+    +'<div class="bk-step-title" style="margin-bottom:.9rem">Izbira termina</div>'
+    +'<div class="bk-sched-wrap">'
+    +'<div class="bk-sched-left">'
+    +'<div class="bk-day-nav">'
+    +'<button class="bk-day-nav-btn" id="stripPrev">‹</button>'
+    +'<div class="bk-day-strip-outer"><div class="bk-day-strip" id="dayStrip"></div></div>'
+    +'<button class="bk-day-nav-btn" id="stripNext">›</button>'
+    +'</div>'
+    +'<div id="slotArea"><div class="bk-slot-msg">← Izberite dan</div></div>'
+    +'</div>'
+    +'<div class="bk-sched-right" id="schedSummary"></div>'
+    +'</div>';
 
-  // Danes: ne ponujaj ur, ki so že mimo
-  var nowMin = 0;
-  var todayStr = isoDate(new Date());
-  if(dateStr === todayStr){
-    var n = new Date();
-    nowMin = n.getHours()*60 + n.getMinutes();
+  renderSummaryPanel();
+  buildStrip();
+  renderFoot2();
+
+  document.getElementById('stripPrev').addEventListener('click', function(){
+    stripOffset -= 7; buildStrip();
+  });
+  document.getElementById('stripNext').addEventListener('click', function(){
+    stripOffset += 7; buildStrip();
+  });
+}
+
+function buildStrip(){
+  var strip  = document.getElementById('dayStrip');
+  var prevBtn = document.getElementById('stripPrev');
+  if(!strip) return;
+  if(prevBtn) prevBtn.disabled = (stripOffset <= 0);
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var start = new Date(today); start.setDate(start.getDate() + stripOffset);
+  var SL_DN = ['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  var SL_M  = ['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+
+  var cards = '';
+  for(var i = 0; i < STRIP_DAYS; i++){
+    var d   = new Date(start); d.setDate(d.getDate()+i);
+    var dow = d.getDay();
+    var ds  = isoDate(d);
+    var past  = d < today;
+    var isSel = state.date && isoDate(state.date) === ds;
+
+    var status = dayStatusCache[ds] || null;
+    var statusHtml = '';
+    var disClass = '';
+
+    if(past){ statusHtml='<div class="bk-day-status closed">preteklo</div>'; disClass='disabled'; }
+    else if(dow===0){ statusHtml='<div class="bk-day-status closed">zaprto</div>'; disClass='disabled'; }
+    else if(DC[dow]==='dogovor'){ statusHtml='<div class="bk-day-status closed">po dogovoru</div>'; disClass='disabled'; }
+    else if(status==='all'){ statusHtml='<div class="bk-day-status busy">vse zasedeno</div>'; disClass='disabled'; }
+    else if(status==='free'){
+      var tp = getTotalPrice();
+      statusHtml='<div class="bk-day-status avail">'+(tp>0? tp.toFixed(2).replace('.',',')+ ' €' : 'na voljo')+'</div>';
+    } else {
+      // Neznano – pokaži za zdaj nevtralno, naloži asinhrono
+      var tp2 = getTotalPrice();
+      statusHtml='<div class="bk-day-status avail" id="dstat-'+ds+'">'
+        +(tp2>0? tp2.toFixed(2).replace('.',',')+ ' €' : 'na voljo')+'</div>';
+      prefetchDayStatus(ds, dow, d >= today);
+    }
+
+    cards += '<div class="bk-day-card'+(isSel?' selected':'')+(disClass?' '+disClass:'')+'" '
+      +(disClass?'':'data-date="'+ds+'" data-dow="'+dow+'"')
+      +'>'
+      +'<div class="bk-day-card-top">'
+      +'<div class="bk-day-name">'+SL_DN[dow]+'</div>'
+      +'<div class="bk-day-num">'+d.getDate()+'</div>'
+      +'<div class="bk-day-mon">'+SL_M[d.getMonth()]+'</div>'
+      +'</div>'
+      +statusHtml
+      +'</div>';
+  }
+  strip.innerHTML = cards;
+
+  // Scroll do izbranega
+  if(state.date){
+    var selCard = strip.querySelector('.bk-day-card.selected');
+    if(selCard) selCard.scrollIntoView({inline:'center', behavior:'smooth'});
   }
 
-  sb.rpc('zasedeni_intervali', { izbrani_datum: dateStr }).then(function(res){
-    if(res.error){
-      area.innerHTML = '<div class="bk-error show">Napaka: '+esc(res.error.message)+'</div>';
-      return;
-    }
-
-    var busy = (res.data || []).map(function(b){
-      var s = timeToMin(String(b.start_time).substring(0,5));
-      var d = parseInt(b.duration_min) || 0;
-      return { s: s, e: s+d };
-    }).filter(function(b){ return b.e > wStart && b.s < wEnd; });
-    busy.sort(function(a,b){ return a.s-b.s; });
-
-    // Izračunaj proste intervale
-    var freeIntervals = [];
-    var cur = wStart;
-    busy.forEach(function(b){
-      if(b.s > cur) freeIntervals.push({ s: cur, e: b.s });
-      if(b.e > cur) cur = b.e;
-    });
-    if(cur < wEnd) freeIntervals.push({ s: cur, e: wEnd });
-
-    // Možne začetne ure = začetek vsakega prostega intervala (če se blok prilega)
-    var slots = [];
-    freeIntervals.forEach(function(fi){
-      var t = Math.max(fi.s, nowMin > fi.s ? nowMin : fi.s);
-      if(t + totalDur <= fi.e) slots.push({ start: t, end: t+totalDur, freeEnd: fi.e });
-      // Dodatne začetne ure znotraj prostega intervala (brez fiksnega rastra – tesno)
-      // Ponujamo samo začetek intervala (punkt konca predhodne rezervacije)
-    });
-    // Dodamo tudi točno po vsaki zasedeni rezervaciji, če se interval nadaljuje
-    busy.forEach(function(b){
-      if(b.e >= Math.max(wStart, nowMin) && b.e + totalDur <= wEnd){
-        var ok = !busy.some(function(b2){ return b2 !== b && b2.s < b.e+totalDur && b2.e > b.e; });
-        if(ok && !slots.some(function(sl){ return sl.start === b.e; })){
-          slots.push({ start: b.e, end: b.e+totalDur, freeEnd: wEnd });
-        }
-      }
-    });
-    slots.sort(function(a,b){ return a.start-b.start; });
-    // Filtriraj: start >= max(wStart, nowMin) in end <= wEnd in ne prekriva z zasedenim
-    slots = slots.filter(function(sl){
-      if(sl.start < Math.max(wStart, nowMin)) return false;
-      if(sl.end > wEnd) return false;
-      return !busy.some(function(b){ return b.s < sl.end && b.e > sl.start; });
-    });
-
-    var h = '';
-
-    // Zasedeni bloki
-    if(busy.length){
-      h += '<div class="bk-timeline"><div class="bk-timeline-title">Zasedeni termini</div>';
-      busy.forEach(function(b){
-        h += '<span class="bk-busy-block"><span class="bk-busy-dot"></span>'
-          + minToTime(b.s)+' – '+minToTime(b.e)+'</span>';
-      });
-      h += '</div>';
-    }
-
-    // Prosti termini
-    if(!slots.length){
-      h += '<p style="opacity:.6;font-size:.88rem;padding:.5rem 0">Za ta dan ni prostih terminov. Izberite drug datum.</p>';
-      area.innerHTML = h;
+  strip.querySelectorAll('.bk-day-card:not(.disabled)').forEach(function(card){
+    card.addEventListener('click', function(){
+      strip.querySelectorAll('.bk-day-card').forEach(function(c){ c.classList.remove('selected'); });
+      card.classList.add('selected');
+      var parts = card.dataset.date.split('-');
+      state.date = new Date(+parts[0],+parts[1]-1,+parts[2]);
+      state.slot = null;
+      renderSummaryPanel();
+      loadSlotList();
       renderFoot2();
+    });
+  });
+}
+
+function prefetchDayStatus(ds, dow, isFuture){
+  if(!isFuture || DC[dow]==='dogovor' || !DC[dow]) return;
+  var dur = getTotalDur();
+  sb.rpc('zasedeni_intervali',{izbrani_datum:ds}).then(function(res){
+    if(res.error) return;
+    var slots = calcFreeSlots(ds, dow, res.data||[], dur);
+    var status = slots.length ? 'free' : 'all';
+    dayStatusCache[ds] = status;
+    var el = document.getElementById('dstat-'+ds);
+    if(el){
+      if(status==='all'){
+        el.className='bk-day-status busy'; el.textContent='vse zasedeno';
+        // Onemogoči kartico
+        var card = el.closest('.bk-day-card');
+        if(card){ card.classList.add('disabled'); card.removeAttribute('data-date'); }
+      }
+    }
+  });
+}
+
+function calcFreeSlots(ds, dow, busyRaw, dur){
+  var dc = DC[dow];
+  if(!dc || dc==='dogovor') return [];
+  var wS = timeToMin(dc.start), wE = timeToMin(dc.end);
+  var busy = busyRaw.map(function(b){
+    var s=timeToMin(String(b.start_time).substring(0,5));
+    var d=parseInt(b.duration_min)||0;
+    return {s:s, e:s+d};
+  }).filter(function(b){ return b.e>wS && b.s<wE; });
+  busy.sort(function(a,b){ return a.s-b.s; });
+
+  // Za danes: izloči pretekle
+  var nowMin = 0;
+  var todayStr = isoDate(new Date());
+  if(ds===todayStr){ var n=new Date(); nowMin=n.getHours()*60+n.getMinutes(); }
+
+  var slots=[];
+  for(var t=Math.max(wS,nowMin); t+dur<=wE; t+=SLOT_STEP){
+    var ok=true;
+    for(var i=0;i<busy.length;i++){
+      if(busy[i].s < t+dur && busy[i].e > t){ ok=false; break; }
+    }
+    if(ok) slots.push(t);
+  }
+  return slots;
+}
+
+function loadSlotList(){
+  var area = document.getElementById('slotArea');
+  if(!area) return;
+  if(!state.date){ area.innerHTML='<div class="bk-slot-msg">← Izberite dan</div>'; return; }
+
+  var ds  = isoDate(state.date);
+  var dow = state.date.getDay();
+
+  if(dow===0){ area.innerHTML='<div class="bk-slot-msg">Nedelja smo zaprti.</div>'; return; }
+  if(DC[dow]==='dogovor'){
+    area.innerHTML='<div class="bk-slot-msg">📞 <strong>Sobota je po dogovoru</strong><br/>'
+      +'Pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</div>';
+    return;
+  }
+
+  area.innerHTML='<div class="bk-slot-loading">Preverjam termine…</div>';
+  var dur = getTotalDur();
+  var tp  = getTotalPrice();
+
+  sb.rpc('zasedeni_intervali',{izbrani_datum:ds}).then(function(res){
+    if(res.error){
+      area.innerHTML='<div class="bk-error show">Napaka: '+esc(res.error.message)+'</div>';
+      return;
+    }
+    var slots = calcFreeSlots(ds, dow, res.data||[], dur);
+    dayStatusCache[ds] = slots.length ? 'free' : 'all';
+
+    // Posodobi status kartice v traku
+    var dstat = document.getElementById('dstat-'+ds);
+    if(dstat && !slots.length){
+      dstat.className='bk-day-status busy'; dstat.textContent='vse zasedeno';
+    }
+
+    if(!slots.length){
+      area.innerHTML='<div class="bk-slot-msg">Ta dan ni prostih terminov.<br/>Izberite drug datum.</div>';
       return;
     }
 
-    h += '<div class="bk-timeline-title" style="margin-top:.6rem">Prosti termini ('+(totalDur)+' min)</div>';
-    h += '<div class="bk-slots" style="margin-top:.4rem">';
-    var isFirst = true;
-    slots.forEach(function(sl){
-      var ts  = minToTime(sl.start);
-      var te  = minToTime(sl.end);
-      var sel = state.slot && state.slot.start === ts;
-      var cls = 'bk-slot' + (isFirst ? ' bk-slot-first' : '') + (sel ? ' selected' : '');
-      h += '<button class="'+cls+'" data-s="'+ts+'" data-e="'+te+'" type="button">'
-        + ts + '</button>';
-      isFirst = false;
-    });
-    h += '</div>';
-    area.innerHTML = h;
+    var SL_DN_FULL=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
+    var SL_M_FULL=['januarja','februarja','marca','aprila','maja','junija','julija','avgusta','septembra','oktobra','novembra','decembra'];
+    var dayLabel = SL_DN_FULL[dow]+', '+state.date.getDate()+'. '+SL_M_FULL[state.date.getMonth()];
+    var priceStr = tp>0 ? tp.toFixed(2).replace('.',',')+ ' €' : '';
 
-    area.querySelectorAll('.bk-slot').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        state.slot = { start: btn.dataset.s, end: btn.dataset.e };
-        area.querySelectorAll('.bk-slot').forEach(function(b){ b.classList.remove('selected'); });
-        btn.classList.add('selected');
+    var h='<div class="bk-slot-list">';
+    var first=true;
+    slots.forEach(function(t){
+      var ts=minToTime(t);
+      var sel=state.slot&&state.slot.start===ts;
+      h+='<div class="bk-slot-row'+(sel?' selected':'')+'" data-s="'+ts+'" data-e="'+minToTime(t+dur)+'">'
+        +'<span class="bk-slot-time">'+ts
+        +(first?'<span class="bk-slot-first-badge">prvi prosti</span>':'')
+        +'</span>'
+        +(priceStr?'<span class="bk-slot-price">'+priceStr+'</span>':'')
+        +'</div>';
+      first=false;
+    });
+    h+='</div>';
+    area.innerHTML=h;
+
+    area.querySelectorAll('.bk-slot-row').forEach(function(row){
+      row.addEventListener('click',function(){
+        state.slot={start:row.dataset.s, end:row.dataset.e};
+        area.querySelectorAll('.bk-slot-row').forEach(function(r){ r.classList.remove('selected'); });
+        row.classList.add('selected');
+        renderSummaryPanel();
         renderFoot2();
       });
     });
-
-    renderFoot2();
   });
+}
+
+function renderSummaryPanel(){
+  var panel=document.getElementById('schedSummary');
+  if(!panel) return;
+  var selArr=getSelArr();
+  var tp=getTotalPrice();
+  var SL_DN_FULL=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
+  var SL_M=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+
+  var dateStr='';
+  if(state.date) dateStr=SL_DN_FULL[state.date.getDay()]+', '+state.date.getDate()+'. '+SL_M[state.date.getMonth()];
+  if(state.slot) dateStr+=' ob '+state.slot.start;
+
+  var h='<div class="bk-sum-hd">Povzetek</div>';
+  h+='<div class="bk-sum-date">'+(dateStr||'<span style="opacity:.4">Termin ni izbran</span>')+'</div>';
+  selArr.forEach(function(sv){
+    h+='<div class="bk-sum-svc"><span>'+esc(sv.name)+'</span>'
+      +(sv.price?'<span>'+parseFloat(sv.price).toFixed(2).replace('.',',')+'€</span>':'')
+      +'</div>';
+  });
+  if(tp>0) h+='<div class="bk-sum-total"><span>Skupaj</span><span>'+tp.toFixed(2).replace('.',',')+'€</span></div>';
+  panel.innerHTML=h;
 }
 
 function renderFoot2(){
-  foot.innerHTML = '';
-  var bk = document.createElement('button');
-  bk.className='bk-btn-back'; bk.textContent='← Nazaj';
-  bk.addEventListener('click', function(){ state.step=1; renderStep(); });
+  foot.innerHTML='';
+  var bk=document.createElement('button');
+  bk.className='bk-btn-back'; bk.textContent='← Storitve';
+  bk.addEventListener('click',function(){ state.step=1; renderStep(); });
   foot.appendChild(bk);
-
-  var isSob = state.date && state.date.getDay() === 6;
-  var nx = document.createElement('button');
+  var nx=document.createElement('button');
   nx.className='bk-btn-next'; nx.textContent='Naprej →';
-  nx.disabled = !state.date || (!state.slot && !isSob);
-  nx.addEventListener('click', function(){
-    if(isSob){ state.isNujni=true; state.nujniNote='Sobota – poklic za dogovor'; }
-    state.step = 3; renderStep();
-  });
+  nx.disabled=!state.date||!state.slot;
+  nx.addEventListener('click',function(){ state.step=3; renderStep(); });
   foot.appendChild(nx);
 }
 
-/* ── STEP 3 je sedaj le preusmeritev na customer (datum+čas sta izbrana v step 2) ── */
-function renderStep3(){
-  // Step 3 = podatki stranke (datum+termin sta izbrana v step 2)
-  renderStepCustomer();
-}
-function renderFoot3(loading){
-  // Ni več v uporabi – renderFoot2 pokriva vse
-}
+function renderStep3(){ renderStepCustomer(); }
+function renderFoot3(){ }
 
 /* ── STEP NUJNI TERMIN ─────────────────────────────────────── */
 function renderStepNujni(){
