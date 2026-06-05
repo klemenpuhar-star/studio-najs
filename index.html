@@ -388,6 +388,7 @@
     .bk-sched-wrap {
       display: flex; gap: 1.2rem;
       align-items: flex-start;
+      max-width: 600px; margin: 0 auto;
     }
     .bk-sched-left { flex: 1; min-width: 0; }
     .bk-sched-right {
@@ -446,26 +447,32 @@
     .bk-day-status.busy   { color: rgba(23,57,75,.35); }
     .bk-day-status.closed { color: rgba(23,57,75,.3); font-style: italic; }
 
-    /* Termini seznam */
-    .bk-slot-list { margin-top: .8rem; }
+    /* Termini – mreža kvadratkov */
+    .bk-slot-list {
+      margin-top: .8rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .5rem;
+    }
     .bk-slot-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: .6rem .9rem; border-radius: 10px;
-      border: 1.5px solid rgba(23,57,75,.12);
-      margin-bottom: .4rem; cursor: pointer; background: #fff;
+      display: flex; flex-direction: row;
+      align-items: center; justify-content: space-between; gap: .4rem;
+      min-height: 50px; padding: .55rem .75rem;
+      border-radius: 12px; border: 1.5px solid rgba(23,57,75,.12);
+      cursor: pointer; background: #fff; text-align: left;
       transition: border-color .2s, background .2s;
     }
     .bk-slot-row:hover { border-color: var(--coral); }
     .bk-slot-row.selected {
       border-color: var(--coral); background: rgba(206,126,111,.08);
     }
-    .bk-slot-time { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--navy); }
-    .bk-slot-price { font-size: .82rem; color: var(--coral); }
-    .bk-slot-first-badge {
-      font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
-      background: var(--coral); color: #fff;
-      padding: 2px 6px; border-radius: 4px; margin-left: .5rem;
-      vertical-align: middle;
+    .bk-slot-time { font-family: var(--serif); font-size: 1.02rem; font-weight: 600; color: var(--navy); line-height: 1; white-space: nowrap; }
+    .bk-slot-price { font-size: .76rem; color: var(--coral); white-space: nowrap; }
+
+    @media (max-width: 600px) {
+      .bk-slot-row { padding: .5rem .5rem; min-height: 44px; }
+      .bk-slot-time { font-size: .92rem; }
+      .bk-slot-price { font-size: .68rem; }
     }
 
     /* Povzetek (desno) */
