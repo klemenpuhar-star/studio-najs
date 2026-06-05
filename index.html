@@ -979,7 +979,7 @@ function renderStep1(){
   foot.innerHTML = '';
 
   sb.from('services')
-    .select('id,name,description,price,category,sort_order,duration_minutes,requires_base,is_base,active')
+    .select('id,name,description,price,category,sort_order,duration_min,requires_base,is_base,active')
     .eq('active', true)
     .order('sort_order', { ascending: true })
     .then(function(res){
@@ -1079,7 +1079,7 @@ function updateSelSummary(){
   selList.textContent = sel.length ? sel.map(function(sv){ return sv.name; }).join(' + ') : '';
 
   var price = sel.reduce(function(s,sv){ return s+(parseFloat(sv.price)||0); }, 0);
-  var dur   = sel.reduce(function(s,sv){ return s+(parseInt(sv.duration_minutes)||0); }, 0);
+  var dur   = sel.reduce(function(s,sv){ return s+(parseInt(sv.duration_min)||0); }, 0);
   if(totPrice) totPrice.textContent = price.toFixed(2).replace('.',',') + ' €';
   if(totDur)   totDur.textContent   = dur + ' min';
 
@@ -1196,7 +1196,7 @@ function renderStep3(){
     var dc=DELOVNI_CAS[dow];
     if(!dc){ body.innerHTML='<p style="opacity:.6;font-size:.9rem;padding:1rem 0">Ta dan smo zaprti.</p>'; return; }
 
-    var dur=state.service.duration_minutes||30;
+    var dur=state.service.duration_min||30;
     var wStart=timeToMin(dc.start), wEnd=timeToMin(dc.end);
     var busyArr=busy.map(function(b){ return {s:timeToMin(b.start_time.substring(0,5)),e:timeToMin(b.end_time.substring(0,5))}; });
 
@@ -1346,7 +1346,7 @@ function submitBooking(btn){
 
   var servicesText = selArr.map(function(s){ return s.name; }).join(' + ');
   var totalPrice   = selArr.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
-  var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_minutes)||0); }, 0);
+  var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_min)||0); }, 0);
 
   var rec = {
     service_id:         sv.id,
@@ -1416,7 +1416,7 @@ function showBodyError(msg){
     var client = supabase.createClient(SB_URL, SB_KEY);
     client
       .from('services')
-      .select('id,name,description,price,category,sort_order,duration_minutes')
+      .select('id,name,description,price,category,sort_order,duration_min')
       .eq('active', true)
       .order('sort_order', { ascending: true })
       .then(function(res){
@@ -1454,8 +1454,8 @@ function showBodyError(msg){
           catMap[cat].items.forEach(function(sv){
             var priceStr = (sv.price !== null && sv.price !== undefined)
               ? parseFloat(sv.price).toFixed(2).replace('.',',') + ' €' : '';
-            var durStr = (sv.duration_minutes && sv.duration_minutes > 0)
-              ? sv.duration_minutes + ' min' : '';
+            var durStr = (sv.duration_min && sv.duration_min > 0)
+              ? sv.duration_min + ' min' : '';
             html += '<div class="cenik-row">'
                   + '<div class="cenik-row-left">'
                   + '<span class="cenik-row-name">'+esc(sv.name)+'</span>'
