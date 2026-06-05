@@ -451,13 +451,13 @@
     .bk-slot-list {
       margin-top: .8rem;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: .5rem;
     }
     .bk-slot-row {
       display: flex; flex-direction: row;
-      align-items: center; justify-content: space-between; gap: .4rem;
-      min-height: 50px; padding: .55rem .75rem;
+      align-items: center; justify-content: space-between; gap: .35rem;
+      min-height: 48px; padding: .5rem .55rem;
       border-radius: 12px; border: 1.5px solid rgba(23,57,75,.12);
       cursor: pointer; background: #fff; text-align: left;
       transition: border-color .2s, background .2s;
@@ -466,10 +466,11 @@
     .bk-slot-row.selected {
       border-color: var(--coral); background: rgba(206,126,111,.08);
     }
-    .bk-slot-time { font-family: var(--serif); font-size: 1.02rem; font-weight: 600; color: var(--navy); line-height: 1; white-space: nowrap; }
-    .bk-slot-price { font-size: .76rem; color: var(--coral); white-space: nowrap; }
+    .bk-slot-time { font-family: var(--serif); font-size: .95rem; font-weight: 600; color: var(--navy); line-height: 1; white-space: nowrap; }
+    .bk-slot-price { font-size: .72rem; color: var(--coral); white-space: nowrap; }
 
     @media (max-width: 600px) {
+      .bk-slot-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .bk-slot-row { padding: .5rem .5rem; min-height: 44px; }
       .bk-slot-time { font-size: .92rem; }
       .bk-slot-price { font-size: .68rem; }
