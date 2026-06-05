@@ -457,7 +457,7 @@
     .bk-slot-row {
       display: flex; flex-direction: row;
       align-items: center; justify-content: space-between; gap: .35rem;
-      min-height: 48px; padding: .5rem .55rem;
+      min-height: 52px; padding: .6rem .9rem;
       border-radius: 12px; border: 1.5px solid rgba(23,57,75,.12);
       cursor: pointer; background: #fff; text-align: left;
       transition: border-color .2s, background .2s;
@@ -466,8 +466,8 @@
     .bk-slot-row.selected {
       border-color: var(--coral); background: rgba(206,126,111,.08);
     }
-    .bk-slot-time { font-family: var(--serif); font-size: .95rem; font-weight: 600; color: var(--navy); line-height: 1; white-space: nowrap; }
-    .bk-slot-price { font-size: .72rem; color: var(--coral); white-space: nowrap; }
+    .bk-slot-time { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--navy); line-height: 1; white-space: nowrap; }
+    .bk-slot-price { font-size: .8rem; color: var(--coral); white-space: nowrap; }
 
     @media (max-width: 600px) {
       .bk-slot-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -512,7 +512,7 @@
     }
     .bk-modal::-webkit-scrollbar { display: none; }
     .bk-overlay.open .bk-modal { transform: none; }
-    .bk-modal.bk-modal-wide { max-width: 980px; }
+    .bk-modal.bk-modal-wide { max-width: min(1180px, 94vw); }
 
     .bk-head {
       position: sticky; top: 0; z-index: 10;
