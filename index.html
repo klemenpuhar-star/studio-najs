@@ -1099,7 +1099,7 @@ function renderStep1(){
              + ' />'
              + '<span class="bk-chk-left">'
              + '<span class="bk-chk-name">'+esc(sv.name)+'</span>'
-             + (sv.description ? '<span class="bk-chk-desc">'+esc(sv.description)+'</span>' : '')
+             // opis skrit (description)
              + '</span>'
              + (priceStr ? '<span class="bk-chk-price">'+priceStr+'</span>' : '')
              + '</label>'
@@ -1151,7 +1151,7 @@ function updateSelSummary(){
   if(!selList) return;
 
   var sel = services.filter(function(sv){ return state.selectedIds[sv.id]; });
-  selList.textContent = sel.length ? sel.map(function(sv){ return sv.name; }).join(', ') : '';
+  selList.textContent = sel.length ? sel.map(function(sv){ return sv.name; }).join(' + ') : '';
 
   var price = sel.reduce(function(s,sv){ return s+(parseFloat(sv.price)||0); }, 0);
   var dur   = sel.reduce(function(s,sv){ return s+(parseInt(sv.duration_minutes)||0); }, 0);
@@ -1382,7 +1382,8 @@ function renderStepCustomer(){
 function renderStepConfirm(){
   var c=state.customer; var sv=state.service;
   var rows='';
-  rows+='<div class="bk-sum-row"><span class="bk-sum-key">Storitev</span><span class="bk-sum-val">'+esc(sv.name)+'</span></div>';
+  var allNames = (state.selectedServices&&state.selectedServices.length ? state.selectedServices : [sv]).map(function(s){ return s.name; }).join(' + ');
+  rows+='<div class="bk-sum-row"><span class="bk-sum-key">Storitev</span><span class="bk-sum-val">'+esc(allNames)+'</span></div>';
   if(sv.price) rows+='<div class="bk-sum-row"><span class="bk-sum-key">Cena</span><span class="bk-sum-val">'+String(sv.price).replace('.',',')+' €</span></div>';
   if(state.isNujni){
     rows+='<div class="bk-sum-row"><span class="bk-sum-key">Termin</span><span class="bk-sum-val">Po dogovoru</span></div>';
@@ -1416,7 +1417,7 @@ function submitBooking(btn){
   var sv=state.service; var c=state.customer;
   var selArr = state.selectedServices && state.selectedServices.length ? state.selectedServices : [sv];
 
-  var servicesText = selArr.map(function(s){ return s.name; }).join(', ');
+  var servicesText = selArr.map(function(s){ return s.name; }).join(' + ');
   var totalPrice   = selArr.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
   var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_minutes)||0); }, 0);
 
@@ -1434,7 +1435,7 @@ function submitBooking(btn){
     end_time:           state.isNujni ? '00:00' : state.slot.end,
     status:             state.isNujni ? 'po dogovoru' : 'nova',
     note:               state.isNujni
-                          ? (state.nujniNote + (c.note ? (' | '+c.note) : ''))
+                          ? (state.nujniNote + (c.note ? ('\n'+c.note) : ''))
                           : (c.note || null)
   };
 
