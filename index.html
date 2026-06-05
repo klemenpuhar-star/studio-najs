@@ -207,6 +207,43 @@
     }
     @media (max-width: 600px) { .wide-inner { grid-template-columns: 1fr; } }
 
+    /* ── CENIK ── */
+    #cenik { background: var(--bez2); }
+
+    .cenik-dyn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.6rem;
+    }
+    @media (max-width: 900px) { .cenik-dyn-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px)  { .cenik-dyn-grid { grid-template-columns: 1fr; } }
+
+    .cenik-cat-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem 1.4rem;
+      box-shadow: 0 2px 14px rgba(23,57,75,.07);
+    }
+    .cenik-cat-title {
+      font-family: var(--serif); font-size: 1.15rem; font-weight: 600;
+      color: var(--navy); padding-bottom: .6rem; margin-bottom: .8rem;
+      border-bottom: 1px solid rgba(206,126,111,.25);
+    }
+    .cenik-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: .38rem 0; border-bottom: 1px dotted rgba(23,57,75,.08);
+      gap: .5rem;
+    }
+    .cenik-row:last-child { border: none; }
+    .cenik-row-left { flex: 1; min-width: 0; }
+    .cenik-row-name { font-size: .86rem; color: var(--navy); line-height: 1.4; }
+    .cenik-row-desc { font-size: .72rem; color: var(--coral); font-style: italic; display: block; }
+    .cenik-row-right { text-align: right; flex-shrink: 0; }
+    .cenik-row-price { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--navy); white-space: nowrap; display: block; }
+    .cenik-row-dur   { font-size: .7rem; color: rgba(23,57,75,.45); white-space: nowrap; display: block; }
+    .cenik-loading   { text-align: center; padding: 2.5rem; opacity: .5; font-size: .9rem; }
+    .cenik-error     { background: rgba(206,75,123,.07); border: 1px solid rgba(206,75,123,.2); border-radius: 12px; padding: 1rem 1.2rem; font-size: .88rem; color: var(--roza); text-align: center; }
+
     /* ── GALERIJA ── */
     #galerija { background: var(--bez); }
     .gallery-grid {
@@ -619,120 +656,8 @@
     <h2 class="sec-title" style="margin-bottom:0.3rem">Cenik</h2>
     <p style="font-size:.82rem;opacity:.55;margin-bottom:2.5rem">Cene so v EUR · Veljavno od 18. 9. 2023</p>
   </div>
-
-  <div class="cenik-grid">
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Moško striženje</div>
-      <div class="pr"><span class="pr-name">Striženje<span class="pr-note">Ne vključuje umivanja</span></span><span class="pr-val">12,50 €</span></div>
-      <div class="pr"><span class="pr-name">Striženje<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">16,00 €</span></div>
-      <div class="pr"><span class="pr-name">Striženje z mašinico</span><span class="pr-val">5,00 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Žensko striženje</div>
-      <div class="pr"><span class="pr-name">Kratek las<span class="pr-note">Ne vključuje umivanja</span></span><span class="pr-val">11,20 €</span></div>
-      <div class="pr"><span class="pr-name">Kratek las<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">29,00 €</span></div>
-      <div class="pr"><span class="pr-name">Srednje dolg las<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">31,80 €</span></div>
-      <div class="pr"><span class="pr-name">Dolg las<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">35,00 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Otroško striženje</div>
-      <div class="pr"><span class="pr-name">Baby striženje</span><span class="pr-val">3,00 €</span></div>
-      <div class="pr"><span class="pr-name">Otroško striženje<span class="pr-note">Do 6 let</span></span><span class="pr-val">6,60 €</span></div>
-      <div class="pr"><span class="pr-name">Fantovsko striženje<span class="pr-note">6–14 let</span></span><span class="pr-val">9,80 €</span></div>
-      <div class="pr"><span class="pr-name">Dekliško striženje<span class="pr-note">Ne vključuje umivanja</span></span><span class="pr-val">10,80 €</span></div>
-      <div class="pr"><span class="pr-name">Dekliško striženje<span class="pr-note">Z Actyva šamponom Velian Complex</span></span><span class="pr-val">17,50 €</span></div>
-      <div class="pr"><span class="pr-name">Kitke otroci</span><span class="pr-val">3,00 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Barvanje</div>
-      <div class="pr"><span class="pr-name">Preliv – kratek las<span class="pr-note">Ton na ton brez amoniaka</span></span><span class="pr-val">15,50 €</span></div>
-      <div class="pr"><span class="pr-name">Preliv – srednje dolg las</span><span class="pr-val">22,40 €</span></div>
-      <div class="pr"><span class="pr-name">Preliv – dolg las</span><span class="pr-val">27,60 €</span></div>
-      <div class="pr"><span class="pr-name">Barvanje – narastek / kratek las<span class="pr-note">S kokosovim oljem in Velian complex</span></span><span class="pr-val">29,00 €</span></div>
-      <div class="pr"><span class="pr-name">Barvanje – srednje dolg las</span><span class="pr-val">32,50 €</span></div>
-      <div class="pr"><span class="pr-name">Barvanje – dolg las</span><span class="pr-val">41,50 €</span></div>
-      <div class="pr"><span class="pr-name">Nanos barve<span class="pr-note">Lastna barva</span></span><span class="pr-val">9,30 €</span></div>
-      <div class="pr"><span class="pr-name">Barvanje moški<span class="pr-note">Naravni videz brez amoniaka</span></span><span class="pr-val">19,80 €</span></div>
-      <div class="pr"><span class="pr-name">Yo cond nega<span class="pr-note">Osvežitev barve</span></span><span class="pr-val">3,90 €</span></div>
-      <div class="pr"><span class="pr-name">Barvna nega Yo – kratek las</span><span class="pr-val">8,80 €</span></div>
-      <div class="pr"><span class="pr-name">Barvna nega Yo – srednje dolg</span><span class="pr-val">10,90 €</span></div>
-      <div class="pr"><span class="pr-name">Barvna nega Yo – dolg las</span><span class="pr-val">15,30 €</span></div>
-      <div class="pr"><span class="pr-name">Dodatek</span><span class="pr-val">5,00 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Pramena</div>
-      <div class="pr"><span class="pr-name">Balayage – srednje dolg las<span class="pr-note">S keratinom in kamilico + toniranje</span></span><span class="pr-val">66,00 €</span></div>
-      <div class="pr"><span class="pr-name">Balayage – dolg las</span><span class="pr-val">77,00 €</span></div>
-      <div class="pr"><span class="pr-name">S folijo – pol glave / kratki<span class="pr-note">Svetlenje z Keratinom in kamilico</span></span><span class="pr-val">49,30 €</span></div>
-      <div class="pr"><span class="pr-name">S folijo – komplet srednje dolg</span><span class="pr-val">59,30 €</span></div>
-      <div class="pr"><span class="pr-name">S folijo – komplet dolg las</span><span class="pr-val">70,00 €</span></div>
-      <div class="pr"><span class="pr-name">Na kapo<span class="pr-note">S keratinom in kamilico + toniranje</span></span><span class="pr-val">24,10 €</span></div>
-      <div class="pr"><span class="pr-name">Posvetlitev narastka</span><span class="pr-val">30,00 €</span></div>
-      <div class="pr"><span class="pr-name">Tonalizacija</span><span class="pr-val">14,00 €</span></div>
-      <div class="pr"><span class="pr-name">Restore</span><span class="pr-val">3,00 €</span></div>
-      <div class="pr"><span class="pr-name">Pramen</span><span class="pr-val">1,00 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Oblikovanje las</div>
-      <div class="pr"><span class="pr-name">Poročna in večerne pričeske<span class="pr-note">Testna + glavna pričeska</span></span><span class="pr-val">66,00 €</span></div>
-      <div class="pr"><span class="pr-name">Spenjanje pričeske<span class="pr-note">Enostavno spenjanje</span></span><span class="pr-val">22,00 €</span></div>
-      <div class="pr"><span class="pr-name">Maturantska pričeska</span><span class="pr-val">33,00 €</span></div>
-      <div class="pr"><span class="pr-name">Trajna + striženje – kratek las<span class="pr-note">Kodranje brez amoniaka</span></span><span class="pr-val">43,80 €</span></div>
-      <div class="pr"><span class="pr-name">Trajna + striženje – srednje dolg</span><span class="pr-val">53,80 €</span></div>
-      <div class="pr"><span class="pr-name">Trajna + striženje – dolg las</span><span class="pr-val">64,70 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Rituali &amp; nega</div>
-      <div class="pr"><span class="pr-name">Čistilni ritual Advanced<span class="pr-note">Očisti, pomiri in osveži lasišče</span></span><span class="pr-val">13,20 €</span></div>
-      <div class="pr"><span class="pr-name">Hidratantni ritual Antiage<span class="pr-note">Vlaženje suhega in napetega lasišča</span></span><span class="pr-val">13,20 €</span></div>
-      <div class="pr"><span class="pr-name">Personalizirani ritual<span class="pr-note">Različne terapije na lasišču</span></span><span class="pr-val">13,20 €</span></div>
-      <div class="pr"><span class="pr-name">Ritual proti izpadanju<span class="pr-note">Advanced ritual za rast</span></span><span class="pr-val">13,20 €</span></div>
-      <div class="pr"><span class="pr-name">Ritual obnova Advanced<span class="pr-note">Nova fibra, BCC Komplet 1 doza</span></span><span class="pr-val">6,50 €</span></div>
-      <div class="pr"><span class="pr-name">Ritual obnova Extra<span class="pr-note">Disciplina Serum, Hialuron &amp; Gloss</span></span><span class="pr-val">15,00 €</span></div>
-      <div class="pr"><span class="pr-name">Ritual vlaženje skodranih las</span><span class="pr-val">15,00 €</span></div>
-      <div class="pr"><span class="pr-name">Laminacija las<span class="pr-note">Obloži, nahrani, navlaži, sijoj</span></span><span class="pr-val">15,00 €</span></div>
-      <div class="pr"><span class="pr-name">Rekonstrukcija las po svetlenju<span class="pr-note">Stabilizira pH, obnovi vezi</span></span><span class="pr-val">9,90 €</span></div>
-    </div>
-
-    <div class="cat-card reveal">
-      <div class="cat-title">Fen &amp; oblikovanje</div>
-      <div class="pr"><span class="pr-name">Fen – kratek las</span><span class="pr-val">18,00 €</span></div>
-      <div class="pr"><span class="pr-name">Fen – srednje dolg las</span><span class="pr-val">20,80 €</span></div>
-      <div class="pr"><span class="pr-name">Fen – dolg las</span><span class="pr-val">24,00 €</span></div>
-      <div class="pr"><span class="pr-name">Likalnik</span><span class="pr-val">5,00 €</span></div>
-      <div class="pr"><span class="pr-name">Figaro</span><span class="pr-val">10,00 €</span></div>
-      <div class="pr"><span class="pr-name">Kitke odrasli</span><span class="pr-val">5,00 €</span></div>
-    </div>
-
-    <div class="cat-card wide reveal" style="background:linear-gradient(135deg,#fff,#fdf6ef)">
-      <div class="cat-title pink">✦ Semi-permanentna barva Actyva Coloro – NOVO v salonu</div>
-      <div class="wide-inner">
-        <div>
-          <div class="pr"><span class="pr-name">Barva svetlobe – kratek las<span class="pr-note">Kokosovo olje + organske rastline</span></span><span class="pr-val">25,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva svetlobe – srednje dolg las</span><span class="pr-val">31,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva svetlobe – dolg las</span><span class="pr-val">46,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva in odsev – srednje dolg<span class="pr-note">Toniranje barvanih in beljenih las</span></span><span class="pr-val">22,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva in odsev – dolg las</span><span class="pr-val">33,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva in intenzivnost – srednje dolg<span class="pr-note">Osvežitev barve</span></span><span class="pr-val">12,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva in intenzivnost – dolg las</span><span class="pr-val">17,00 €</span></div>
-        </div>
-        <div>
-          <div class="pr"><span class="pr-name">Infuzija svetlobe – srednje dolg<span class="pr-note">Sijaj brez spremembe barve</span></span><span class="pr-val">21,00 €</span></div>
-          <div class="pr"><span class="pr-name">Infuzija svetlobe – dolg las</span><span class="pr-val">25,50 €</span></div>
-          <div class="pr"><span class="pr-name">Barva in moč – srednje dolg<span class="pr-note">Negovalna barva z Nouva fibra</span></span><span class="pr-val">30,00 €</span></div>
-          <div class="pr"><span class="pr-name">Barva in moč – dolg las</span><span class="pr-val">35,00 €</span></div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /cenik-grid -->
+  <div class="cenik-dyn-grid reveal" id="cenikGrid">
+    <div class="cenik-loading">Nalagam cenik…</div>
   </div>
 </section>
 
@@ -1474,6 +1399,93 @@ function showBodyError(msg){
 })();
 </script>
 
+
+
+<script>
+/* ── DINAMIČEN CENIK ────────────────────────────────────── */
+(function(){
+  var SB_URL = 'https://azqtgvxashunmmydkwop.supabase.co';
+  var SB_KEY = 'sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function initCenik(){
+    var grid = document.getElementById('cenikGrid');
+    if(!grid) return;
+
+    var client = supabase.createClient(SB_URL, SB_KEY);
+    client
+      .from('services')
+      .select('id,name,description,price,category,sort_order,duration_minutes')
+      .eq('active', true)
+      .order('sort_order', { ascending: true })
+      .then(function(res){
+        if(res.error){
+          grid.innerHTML = '<div class="cenik-error">Napaka pri nalaganju cenika. Pokličite nas na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</div>';
+          return;
+        }
+
+        var services = res.data || [];
+        if(!services.length){
+          grid.innerHTML = '<p style="opacity:.5;font-size:.9rem">Storitve še niso vnesene.</p>';
+          return;
+        }
+
+        // Grupiranje po kategorijah
+        var catMap = {};
+        services.forEach(function(sv){
+          var c = sv.category || 'Ostalo';
+          if(!catMap[c]) catMap[c] = { minSort: sv.sort_order, items: [] };
+          if(sv.sort_order < catMap[c].minSort) catMap[c].minSort = sv.sort_order;
+          catMap[c].items.push(sv);
+        });
+
+        // Razvrsti: "Nujni termin" vedno zadnji
+        var catNames = Object.keys(catMap).sort(function(a, b){
+          var aN = a.toLowerCase().indexOf('nujni') >= 0 ? 99999 : catMap[a].minSort;
+          var bN = b.toLowerCase().indexOf('nujni') >= 0 ? 99999 : catMap[b].minSort;
+          return aN - bN;
+        });
+
+        var html = '';
+        catNames.forEach(function(cat){
+          html += '<div class="cenik-cat-card reveal">'
+                + '<div class="cenik-cat-title">'+esc(cat)+'</div>';
+          catMap[cat].items.forEach(function(sv){
+            var priceStr = (sv.price !== null && sv.price !== undefined)
+              ? parseFloat(sv.price).toFixed(2).replace('.',',') + ' €' : '';
+            var durStr = (sv.duration_minutes && sv.duration_minutes > 0)
+              ? sv.duration_minutes + ' min' : '';
+            html += '<div class="cenik-row">'
+                  + '<div class="cenik-row-left">'
+                  + '<span class="cenik-row-name">'+esc(sv.name)+'</span>'
+                  + (sv.description ? '<span class="cenik-row-desc">'+esc(sv.description)+'</span>' : '')
+                  + '</div>'
+                  + '<div class="cenik-row-right">'
+                  + (priceStr ? '<span class="cenik-row-price">'+priceStr+'</span>' : '')
+                  + (durStr   ? '<span class="cenik-row-dur">'+durStr+'</span>' : '')
+                  + '</div>'
+                  + '</div>';
+          });
+          html += '</div>';
+        });
+
+        grid.innerHTML = html;
+
+        // Poženi reveal na novih elementih
+        grid.querySelectorAll('.reveal').forEach(function(el){
+          el.classList.add('visible');
+        });
+      });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initCenik);
+  } else {
+    initCenik();
+  }
+})();
+</script>
 
 </body>
 </html>
