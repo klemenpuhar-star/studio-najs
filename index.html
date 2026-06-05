@@ -355,8 +355,9 @@
       flex-shrink: 0; margin-top: 3px; cursor: pointer;
     }
     .bk-chk-left { flex: 1; min-width: 0; }
-    .bk-chk-name { font-size: .87rem; color: var(--navy); line-height: 1.35; }
-    .bk-chk-desc { font-size: .72rem; color: rgba(23,57,75,.5); font-style: italic; margin-top: .1rem; }
+    .bk-chk-name { font-size: .87rem; color: var(--navy); line-height: 1.35; display: block; }
+    .bk-chk-desc { font-size: .72rem; color: var(--coral); font-style: italic; margin-top: .1rem; display: block; }
+    .bk-chk-dur { font-size: .72rem; color: rgba(23,57,75,.5); white-space: nowrap; flex-shrink: 0; padding-top: 3px; }
     .bk-chk-price { font-family: var(--serif); font-size: .95rem; font-weight: 600; color: var(--navy); white-space: nowrap; flex-shrink: 0; padding-top: 2px; }
 
     /* Opozorilo odvisnosti */
@@ -1127,6 +1128,7 @@ function renderStep1(){
           var checked = (state.selectedIds[sv.id]) ? ' checked' : '';
           var priceStr = (sv.price !== null && sv.price !== undefined)
             ? parseFloat(sv.price).toFixed(2).replace('.',',') + ' €' : '';
+          var durStr = (sv.duration_min && sv.duration_min > 0) ? sv.duration_min + ' min' : '';
           var depId = sv.requires_base ? 'dep-'+sv.id : '';
           h += '<label class="bk-chk-row">'
              + '<input type="checkbox" data-id="'+sv.id+'"'+checked
@@ -1135,8 +1137,9 @@ function renderStep1(){
              + ' />'
              + '<span class="bk-chk-left">'
              + '<span class="bk-chk-name">'+esc(sv.name)+'</span>'
-             // opis skrit (description)
+             + (sv.description ? '<span class="bk-chk-desc">'+esc(sv.description)+'</span>' : '')
              + '</span>'
+             + (durStr ? '<span class="bk-chk-dur">'+durStr+'</span>' : '')
              + (priceStr ? '<span class="bk-chk-price">'+priceStr+'</span>' : '')
              + '</label>'
              + (sv.requires_base
