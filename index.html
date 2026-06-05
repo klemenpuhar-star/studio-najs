@@ -416,14 +416,14 @@
     .bk-day-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
     .bk-day-strip-outer { flex: 1; overflow: hidden; }
     .bk-day-strip {
-      display: flex; gap: .5rem;
-      overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none;
+      display: flex; gap: .4rem;
+      scroll-behavior: smooth; scrollbar-width: none;
       padding-bottom: 2px;
     }
     .bk-day-strip::-webkit-scrollbar { display: none; }
 
     .bk-day-card {
-      flex-shrink: 0; width: 72px;
+      flex: 1 1 0; min-width: 0;
       border: 1.5px solid rgba(23,57,75,.12); border-radius: 12px;
       background: #fff; cursor: pointer;
       transition: border-color .2s, box-shadow .2s;
@@ -445,6 +445,11 @@
     .bk-day-status.avail  { color: var(--coral); font-weight: 500; }
     .bk-day-status.busy   { color: rgba(23,57,75,.35); }
     .bk-day-status.closed { color: rgba(23,57,75,.3); font-style: italic; }
+
+    @media (max-width: 600px) {
+      .bk-day-strip { overflow-x: auto; }
+      .bk-day-card { flex: 0 0 auto; width: 58px; }
+    }
 
     /* Termini seznam */
     .bk-slot-list { margin-top: .8rem; }
@@ -1229,7 +1234,7 @@ var DC = {
   6: 'dogovor'
 };
 var SLOT_STEP = 15; // minutni raaster za generiranje
-var STRIP_DAYS = 14;
+var STRIP_DAYS = 8;
 var stripOffset = 0; // teden-offset (0 = ta teden)
 
 /* Cache za statuse dni */
@@ -1258,13 +1263,13 @@ function renderSchedView(){
   body.innerHTML =
     '<div class="bk-step-label">Korak 2</div>'
     +'<div class="bk-step-title" style="margin-bottom:.9rem">Izbira termina</div>'
-    +'<div class="bk-sched-wrap">'
-    +'<div class="bk-sched-left">'
     +'<div class="bk-day-nav">'
     +'<button class="bk-day-nav-btn" id="stripPrev">‹</button>'
     +'<div class="bk-day-strip-outer"><div class="bk-day-strip" id="dayStrip"></div></div>'
     +'<button class="bk-day-nav-btn" id="stripNext">›</button>'
     +'</div>'
+    +'<div class="bk-sched-wrap">'
+    +'<div class="bk-sched-left">'
     +'<div id="slotArea"><div class="bk-slot-msg">← Izberite dan</div></div>'
     +'</div>'
     +'<div class="bk-sched-right" id="schedSummary"></div>'
@@ -1275,10 +1280,10 @@ function renderSchedView(){
   renderFoot2();
 
   document.getElementById('stripPrev').addEventListener('click', function(){
-    stripOffset -= 7; buildStrip();
+    stripOffset -= 8; buildStrip();
   });
   document.getElementById('stripNext').addEventListener('click', function(){
-    stripOffset += 7; buildStrip();
+    stripOffset += 8; buildStrip();
   });
 }
 
@@ -1450,7 +1455,6 @@ function loadSlotList(){
       var sel=state.slot&&state.slot.start===ts;
       h+='<div class="bk-slot-row'+(sel?' selected':'')+'" data-s="'+ts+'" data-e="'+minToTime(t+dur)+'">'
         +'<span class="bk-slot-time">'+ts
-        +(first?'<span class="bk-slot-first-badge">prvi prosti</span>':'')
         +'</span>'
         +(priceStr?'<span class="bk-slot-price">'+priceStr+'</span>':'')
         +'</div>';
