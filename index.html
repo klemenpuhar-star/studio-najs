@@ -323,13 +323,18 @@
     .bk-chk-price { font-family: var(--serif); font-size: .95rem; font-weight: 600; color: var(--navy); white-space: nowrap; flex-shrink: 0; padding-top: 2px; }
 
     /* Opozorilo odvisnosti */
-    .bk-dep-warn {
-      background: rgba(206,75,123,.08); border: 1px solid rgba(206,75,123,.25);
-      border-radius: 10px; padding: .65rem .9rem;
-      font-size: .82rem; color: var(--roza); margin-top: .8rem;
+    /* inline opozorilo pod vrstico */
+    .bk-dep-inline {
+      font-size: .76rem; color: var(--roza);
+      padding: .28rem .6rem .28rem .4rem;
+      background: rgba(206,75,123,.07);
+      border-left: 2px solid var(--roza);
+      border-radius: 0 6px 6px 0;
+      margin: .1rem 0 .3rem 1.9rem;
       display: none;
+      line-height: 1.4;
     }
-    .bk-dep-warn.show { display: block; }
+    .bk-dep-inline.show { display: block; }
 
     /* Povzetek izbranih */
     .bk-sel-summary {
@@ -1086,19 +1091,26 @@ function renderStep1(){
           var checked = (state.selectedIds[sv.id]) ? ' checked' : '';
           var priceStr = (sv.price !== null && sv.price !== undefined)
             ? parseFloat(sv.price).toFixed(2).replace('.',',') + ' €' : '';
+          var depId = sv.requires_base ? 'dep-'+sv.id : '';
           h += '<label class="bk-chk-row">'
-             + '<input type="checkbox" data-id="'+sv.id+'"'+checked+' />'
+             + '<input type="checkbox" data-id="'+sv.id+'"'+checked
+             + (sv.requires_base ? ' data-requires-base="1"' : '')
+             + (sv.is_base       ? ' data-is-base="1"' : '')
+             + ' />'
              + '<span class="bk-chk-left">'
              + '<span class="bk-chk-name">'+esc(sv.name)+'</span>'
              + (sv.description ? '<span class="bk-chk-desc">'+esc(sv.description)+'</span>' : '')
              + '</span>'
              + (priceStr ? '<span class="bk-chk-price">'+priceStr+'</span>' : '')
-             + '</label>';
+             + '</label>'
+             + (sv.requires_base
+               ? '<div class="bk-dep-inline" id="'+depId+'">⚠ Te storitve ni mogoče izbrati brez striženja ali fen frizure!</div>'
+               : '');
         });
         h += '</div></div></div>';
       });
 
-      h += '<div class="bk-dep-warn" id="bkDepWarn">⚠ Te storitve ni mogoče izbrati brez striženja ali fen frizure!</div>';
+      // bk-dep-warn je zdaj inline pod vsako vrstico – ne dodajamo globalnega
       h += '<div class="bk-sel-summary">'
          + '<div class="bk-sel-label">Izbrane storitve</div>'
          + '<div class="bk-sel-list" id="bkSelList"></div>'
@@ -1146,10 +1158,15 @@ function updateSelSummary(){
   if(totPrice) totPrice.textContent = price.toFixed(2).replace('.',',') + ' €';
   if(totDur)   totDur.textContent   = dur + ' min';
 
-  var hasBase   = sel.some(function(sv){ return sv.is_base; });
-  var needsBase = sel.some(function(sv){ return sv.requires_base; });
-  var depOk = !needsBase || hasBase;
-  if(depWarn) depWarn.classList.toggle('show', !depOk && sel.length > 0);
+  // Inline opozorila: prikaži pod vsako requires_base storitvijo, če ni izbrana is_base
+  var hasBase = sel.some(function(sv){ return sv.is_base; });
+  document.querySelectorAll('input[data-requires-base="1"]').forEach(function(cb){
+    var id = cb.dataset.id;
+    var warn = document.getElementById('dep-'+id);
+    if(!warn) return;
+    var thisChecked = !!state.selectedIds[+id];
+    warn.classList.toggle('show', thisChecked && !hasBase);
+  });
 }
 
 function checkDep(){
@@ -1157,7 +1174,7 @@ function checkDep(){
   var sel = services.filter(function(sv){ return state.selectedIds[sv.id]; });
   var hasBase   = sel.some(function(sv){ return sv.is_base; });
   var needsBase = sel.some(function(sv){ return sv.requires_base; });
-  return !needsBase || hasBase;
+  return sel.length > 0 && (!needsBase || hasBase);
 }
 
 function renderFoot1(){
