@@ -446,11 +446,6 @@
     .bk-day-status.busy   { color: rgba(23,57,75,.35); }
     .bk-day-status.closed { color: rgba(23,57,75,.3); font-style: italic; }
 
-    @media (max-width: 600px) {
-      .bk-day-strip { overflow-x: auto; }
-      .bk-day-card { flex: 0 0 auto; width: 58px; }
-    }
-
     /* Termini seznam */
     .bk-slot-list { margin-top: .8rem; }
     .bk-slot-row {
@@ -509,6 +504,7 @@
     }
     .bk-modal::-webkit-scrollbar { display: none; }
     .bk-overlay.open .bk-modal { transform: none; }
+    .bk-modal.bk-modal-wide { max-width: 980px; }
 
     .bk-head {
       position: sticky; top: 0; z-index: 10;
@@ -1064,6 +1060,13 @@ function renderStep(){
   foot.innerHTML = '';
 
   var s = state.step;
+
+  var modalEl = document.getElementById('bkModal');
+  if(modalEl){
+    if(s===2 && !state.isNujni) modalEl.classList.add('bk-modal-wide');
+    else modalEl.classList.remove('bk-modal-wide');
+  }
+
   if(s===1) renderStep1();
   else if(s===2) state.isNujni ? renderStepNujni() : renderStep2();
   else if(s===3) state.isNujni ? renderStepCustomer() : renderStep3();
@@ -1234,8 +1237,8 @@ var DC = {
   6: 'dogovor'
 };
 var SLOT_STEP = 15; // minutni raaster za generiranje
-var STRIP_DAYS = 8;
-var stripOffset = 0; // teden-offset (0 = ta teden)
+function daysPerView(){ return window.innerWidth <= 600 ? 3 : 8; }
+var stripOffset = 0; // offset v dnevih (0 = danes)
 
 /* Cache za statuse dni */
 var dayStatusCache = {};
@@ -1280,11 +1283,13 @@ function renderSchedView(){
   renderFoot2();
 
   document.getElementById('stripPrev').addEventListener('click', function(){
-    stripOffset -= 8; buildStrip();
+    stripOffset -= daysPerView(); buildStrip();
   });
   document.getElementById('stripNext').addEventListener('click', function(){
-    stripOffset += 8; buildStrip();
+    stripOffset += daysPerView(); buildStrip();
   });
+
+  window.onresize = function(){ if(document.getElementById('dayStrip')) buildStrip(); };
 }
 
 function buildStrip(){
@@ -1299,7 +1304,8 @@ function buildStrip(){
   var SL_M  = ['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
 
   var cards = '';
-  for(var i = 0; i < STRIP_DAYS; i++){
+  var per = daysPerView();
+  for(var i = 0; i < per; i++){
     var d   = new Date(start); d.setDate(d.getDate()+i);
     var dow = d.getDay();
     var ds  = isoDate(d);
