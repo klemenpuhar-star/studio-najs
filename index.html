@@ -113,8 +113,8 @@
     }
     @keyframes heroFadeA { 0%{opacity:1} 42%{opacity:1} 50%{opacity:0} 92%{opacity:0} 100%{opacity:1} }
     @keyframes heroFadeB { 0%{opacity:0} 42%{opacity:0} 50%{opacity:1} 92%{opacity:1} 100%{opacity:0} }
-    @keyframes heroKenA { from{transform:scale(1.05) translate(0%,0%)} to{transform:scale(1.15) translate(-1%,-0.7%)} }
-    @keyframes heroKenB { from{transform:scale(1.15) translate(0.7%,0.7%)} to{transform:scale(1.05) translate(0%,0%)} }
+    @keyframes heroKenA { from{transform:translate3d(0,0,0) scale(1.05)} to{transform:translate3d(-1%,-0.7%,0) scale(1.15)} }
+    @keyframes heroKenB { from{transform:translate3d(0.7%,0.7%,0) scale(1.15)} to{transform:translate3d(0,0,0) scale(1.05)} }
 
     .hero-bg {
       position: absolute; inset: 0; z-index: 0;
