@@ -85,6 +85,16 @@
     .act:hover{border-color:var(--coral);color:var(--coral)}
     .act.danger:hover{border-color:#b04a3a;color:#b04a3a}
     .loading{text-align:center;opacity:.6;padding:2rem 0}
+
+    /* Blokade */
+    .block-card{background:repeating-linear-gradient(45deg,#fff,#fff 10px,rgba(206,126,111,.08) 10px,rgba(206,126,111,.08) 20px);border:1px dashed rgba(206,126,111,.5)}
+    .block-card .svc{color:var(--coral)}
+    .block-form{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1.1rem;margin-bottom:1.2rem;max-width:520px}
+    .block-form .bf-row{display:flex;gap:1rem;flex-wrap:wrap}
+    .block-form label{display:block;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.9rem}
+    .block-form input{display:block;margin-top:.3rem;padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy);background:#fff}
+    .block-form input[type=text]{width:100%}
+    .block-form .bf-actions{display:flex;gap:.6rem;align-items:center}
     @media(max-width:560px){
       .card .time{min-width:100%}
       .card .side{min-width:100%;align-items:flex-start}
@@ -135,6 +145,22 @@
         <button class="btn-ghost today-btn" id="todayBtn">Danes</button>
         <span class="daylabel" id="dayLabel"></span>
         <span class="count" id="countLabel"></span>
+      </div>
+
+      <div id="blockArea">
+        <button class="btn-ghost" id="blockToggle" style="margin-bottom:1rem">⛔ Blokiraj čas</button>
+        <div class="block-form hidden" id="blockForm">
+          <div class="bf-row">
+            <label>Od <input type="time" id="blkFrom" step="900"></label>
+            <label>Do <input type="time" id="blkTo" step="900"></label>
+          </div>
+          <label class="bf-note">Opomba (neobvezno)<input type="text" id="blkNote" placeholder="npr. malica, dopust"></label>
+          <div class="bf-actions">
+            <button class="btn btn-main" id="blkSave" style="width:auto;padding:.55rem 1.3rem">Shrani blokado</button>
+            <button class="btn-ghost" id="blkCancel">Prekliči</button>
+          </div>
+          <p class="msg" id="blkMsg"></p>
+        </div>
       </div>
 
       <div class="cards" id="cards"></div>
@@ -216,72 +242,131 @@
       load();
     }
 
+    /* ---- BLOKADE ---- */
+    var blockForm=document.getElementById('blockForm');
+    document.getElementById('blockToggle').addEventListener('click', function(){ blockForm.classList.toggle('hidden'); });
+    document.getElementById('blkCancel').addEventListener('click', function(){ blockForm.classList.add('hidden'); document.getElementById('blkMsg').textContent=''; });
+    document.getElementById('blkSave').addEventListener('click', function(){
+      var from=document.getElementById('blkFrom').value;
+      var to=document.getElementById('blkTo').value;
+      var note=document.getElementById('blkNote').value.trim();
+      var msg=document.getElementById('blkMsg'); msg.className='msg';
+      if(!from||!to){ msg.textContent='Vnesi začetek in konec.'; msg.className='msg err'; return; }
+      if(to<=from){ msg.textContent='Konec mora biti za začetkom.'; msg.className='msg err'; return; }
+      var rec={ block_date: dateInput.value, start_time: from, end_time: to, note: note||null };
+      var btn=document.getElementById('blkSave'); btn.disabled=true; btn.textContent='Shranjujem …';
+      sb.from('blocks').insert([rec]).then(function(res){
+        btn.disabled=false; btn.textContent='Shrani blokado';
+        if(res.error){ msg.textContent='Napaka: '+res.error.message; msg.className='msg err'; return; }
+        document.getElementById('blkFrom').value=''; document.getElementById('blkTo').value=''; document.getElementById('blkNote').value='';
+        blockForm.classList.add('hidden'); msg.textContent='';
+        load();
+      });
+    });
+
     /* ---- NALAGANJE ---- */
+    function toMin(t){ t=String(t||'').substring(0,5); var p=t.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); }
+    function showLoadErr(err){
+      cards.innerHTML='<div class="empty">Napaka pri nalaganju.<br><small>'+esc(err.message)+'</small><br><small>Preveri, da so nastavljene pravice (RLS) za prijavljene.</small></div>';
+    }
+
     function load(){
       cards.innerHTML='<div class="loading">Nalagam …</div>';
-      var q = sb.from('bookings').select('*');
+      document.getElementById('blockArea').style.display = (currentView==='date') ? 'block' : 'none';
       if(currentView==='date'){
         document.getElementById('dayLabel').textContent = prettyDate(dateInput.value);
-        q = q.eq('booking_date', dateInput.value).order('start_time',{ascending:true});
+        Promise.all([
+          sb.from('bookings').select('*').eq('booking_date', dateInput.value).order('start_time',{ascending:true}),
+          sb.from('blocks').select('*').eq('block_date', dateInput.value).order('start_time',{ascending:true})
+        ]).then(function(r){
+          if(r[0].error){ showLoadErr(r[0].error); return; }
+          render(r[0].data||[], (r[1] && !r[1].error) ? (r[1].data||[]) : []);
+        });
       } else {
-        q = q.is('booking_date', null).order('id',{ascending:false});
+        sb.from('bookings').select('*').is('booking_date', null).order('id',{ascending:false}).then(function(res){
+          if(res.error){ showLoadErr(res.error); return; }
+          render(res.data||[], []);
+        });
       }
-      q.then(function(res){
-        if(res.error){
-          cards.innerHTML='<div class="empty">Napaka pri nalaganju.<br><small>'+esc(res.error.message)+'</small><br><small>Preveri, da so nastavljene pravice (RLS) za prijavljene.</small></div>';
-          return;
-        }
-        render(res.data||[]);
-      });
     }
 
     function statusBadge(s){
       var map={'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano','po dogovoru':'podogovoru'};
       var cls=map[s]||'nova';
-      var label=(s||'nova');
-      return '<span class="badge '+cls+'">'+esc(label)+'</span>';
+      return '<span class="badge '+cls+'">'+esc(s||'nova')+'</span>';
     }
 
-    function render(rows){
-      document.getElementById('countLabel').textContent = rows.length+' '+(rows.length===1?'rezervacija':'rezervacij');
-      if(!rows.length){ cards.innerHTML='<div class="empty">Ni rezervacij'+(currentView==='date'?' za ta dan':'')+'.</div>'; return; }
-      var html='';
-      rows.forEach(function(b){
-        var cancelled = (b.status==='preklicano');
-        var timeBlock = (currentView==='date')
-          ? '<div class="time">'+esc((b.start_time||'').substring(0,5))+'<small>'+esc((b.end_time||'').substring(0,5))+' · '+(b.total_duration_min||0)+' min</small></div>'
-          : '<div class="time" style="font-size:1rem;min-width:90px">Po dogovoru</div>';
-        var gapTag = (b.gap_duration_min>0) ? '<div class="gap-tag">vmesni prosti čas '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>' : '';
-        html += '<div class="card'+(cancelled?' cancelled':'')+'">'
-          + timeBlock
-          + '<div class="body">'
-          +   '<div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
-          +   '<div class="meta">'+esc(b.customer_name||'—')
-          +     (b.customer_phone?(' · <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')
-          +     (b.customer_email?('<br>'+esc(b.customer_email)):'')
-          +   '</div>'
-          +   (b.note?('<div class="note">'+esc(b.note)+'</div>'):'')
-          +   gapTag
-          + '</div>'
-          + '<div class="side">'
-          +   '<div class="price">'+eur(b.total_price)+'</div>'
-          +   statusBadge(b.status)
-          +   '<div class="actions">'
-          +     '<button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button>'
-          +     '<button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button>'
-          +     '<button class="act danger" data-id="'+b.id+'" data-s="preklicano">Prekliči</button>'
-          +   '</div>'
-          + '</div>'
-          + '</div>';
-      });
-      cards.innerHTML=html;
-      cards.querySelectorAll('.act').forEach(function(btn){
+    function bookingCard(b){
+      var cancelled = (b.status==='preklicano');
+      var timeBlock = (currentView==='date')
+        ? '<div class="time">'+esc((b.start_time||'').substring(0,5))+'<small>'+esc((b.end_time||'').substring(0,5))+' · '+(b.total_duration_min||0)+' min</small></div>'
+        : '<div class="time" style="font-size:1rem;min-width:90px">Po dogovoru</div>';
+      var gapTag = (b.gap_duration_min>0) ? '<div class="gap-tag">vmesni prosti čas '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>' : '';
+      return '<div class="card'+(cancelled?' cancelled':'')+'">'
+        + timeBlock
+        + '<div class="body">'
+        +   '<div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
+        +   '<div class="meta">'+esc(b.customer_name||'—')
+        +     (b.customer_phone?(' · <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')
+        +     (b.customer_email?('<br>'+esc(b.customer_email)):'')
+        +   '</div>'
+        +   (b.note?('<div class="note">'+esc(b.note)+'</div>'):'')
+        +   gapTag
+        + '</div>'
+        + '<div class="side">'
+        +   '<div class="price">'+eur(b.total_price)+'</div>'
+        +   statusBadge(b.status)
+        +   '<div class="actions">'
+        +     '<button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button>'
+        +     '<button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button>'
+        +     '<button class="act danger" data-id="'+b.id+'" data-s="preklicano">Prekliči</button>'
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function blockCard(bl){
+      return '<div class="card block-card">'
+        + '<div class="time">'+esc(String(bl.start_time).substring(0,5))+'<small>'+esc(String(bl.end_time).substring(0,5))+'</small></div>'
+        + '<div class="body">'
+        +   '<div class="svc">⛔ Blokirano</div>'
+        +   (bl.note?('<div class="note">'+esc(bl.note)+'</div>'):'')
+        + '</div>'
+        + '<div class="side">'
+        +   '<div class="actions"><button class="act danger" data-block="'+bl.id+'">Odstrani</button></div>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function render(rows, blocks){
+      blocks = blocks || [];
+      document.getElementById('countLabel').textContent =
+        rows.length+' '+(rows.length===1?'rezervacija':'rezervacij')+(blocks.length?(' · '+blocks.length+' blokad'):'');
+      var items = [];
+      rows.forEach(function(b){ items.push({m:toMin(b.start_time), html:bookingCard(b)}); });
+      blocks.forEach(function(bl){ items.push({m:toMin(bl.start_time), html:blockCard(bl)}); });
+      if(currentView==='date') items.sort(function(a,b){ return a.m-b.m; });
+      if(!items.length){ cards.innerHTML='<div class="empty">Ni rezervacij'+(currentView==='date'?' za ta dan':'')+'.</div>'; return; }
+      cards.innerHTML = items.map(function(i){ return i.html; }).join('');
+
+      cards.querySelectorAll('.act[data-id]').forEach(function(btn){
         btn.addEventListener('click', function(){
           var id=btn.getAttribute('data-id'); var s=btn.getAttribute('data-s');
           if(s==='preklicano' && !confirm('Prekličem to rezervacijo?')) return;
           btn.textContent='…';
           sb.from('bookings').update({status:s}).eq('id',id).then(function(res){
-            if(res.error){ alert('Napaka: '+res.error.message); load(); return; }
+            if(res.error){ alert('Napaka: '+res.error.message); }
+            load();
+          });
+        });
+      });
+      cards.querySelectorAll('.act[data-block]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          if(!confirm('Odstranim to blokado?')) return;
+          var id=btn.getAttribute('data-block');
+          btn.textContent='…';
+          sb.from('blocks').delete().eq('id',id).then(function(res){
+            if(res.error){ alert('Napaka: '+res.error.message); }
             load();
           });
         });
