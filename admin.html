@@ -63,11 +63,14 @@ header .who{font-size:.74rem;opacity:.65}
 .dayhead .dnum{font-family:var(--serif);font-size:1.3rem;line-height:1}
 .dayhead.today .dnum{color:var(--coral)}
 .dayhead.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
+.dayhead.arr{background:rgba(206,126,111,.08)}
 .gutter{position:relative;height:624px}
 .gutter .hr{position:absolute;right:6px;font-size:.64rem;opacity:.5;transform:translateY(-50%)}
 .col{position:relative;height:624px;border-left:1px solid #f0eee9;background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px)}
 .col.off{background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px),repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f4f4f4 6px,#f4f4f4 12px)}
-.ev{position:absolute;left:3px;right:3px;border-radius:7px;padding:3px 6px;font-size:.7rem;line-height:1.2;cursor:pointer;overflow:hidden;border-left:3px solid var(--coral);background:#f3eee7;color:var(--navy)}
+.off-band{position:absolute;left:0;right:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(45deg,rgba(23,57,75,.035),rgba(23,57,75,.035) 7px,rgba(23,57,75,.07) 7px,rgba(23,57,75,.07) 14px)}
+.off-band.arr{background:repeating-linear-gradient(45deg,rgba(206,126,111,.06),rgba(206,126,111,.06) 7px,rgba(206,126,111,.12) 7px,rgba(206,126,111,.12) 14px)}
+.ev{position:absolute;left:3px;right:3px;z-index:2;border-radius:7px;padding:3px 6px;font-size:.7rem;line-height:1.2;cursor:pointer;overflow:hidden;border-left:3px solid var(--coral);background:#f3eee7;color:var(--navy)}
 .ev:hover{filter:brightness(.97);box-shadow:0 2px 8px rgba(23,57,75,.15)}
 .ev .ev-t{font-size:.62rem;opacity:.7}
 .ev .ev-n{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -204,7 +207,12 @@ var H0=8,H1=20,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
-var WORK_OFF=[6]; // nedelja = neaktivna (samo zatemnitev)
+function dayInfo(dow){ // dow: 0=ned, 1=pon ... 6=sob
+  if(dow===1||dow===3||dow===4) return {h:[14,20]};   // pon, sre, čet
+  if(dow===2||dow===5)          return {h:[8,15]};    // tor, pet
+  if(dow===6)                   return {arrangement:true}; // sobota – po dogovoru
+  return {closed:true};                               // nedelja – zaprto
+}
 var mode='week', cur=new Date(); cur.setHours(0,0,0,0);
 var cache={}; // id -> booking
 
@@ -322,9 +330,10 @@ function renderCal(days, bookings, blocks){
   head+='<div class="cal-head" style="grid-template-columns:'+gridCols+'">';
   head+='<div></div>';
   days.forEach(function(d){
-    var off=WORK_OFF.indexOf(d.getDay())>=0;
+    var info=dayInfo(d.getDay());
+    var hcls=info.closed?'off':(info.arrangement?'arr':'');
     var isT=isoOf(d)===isoToday();
-    head+='<div class="dayhead'+(off?' off':'')+(isT?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';
+    head+='<div class="dayhead '+hcls+(isT?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';
   });
   head+='</div>';
   // telo
@@ -334,9 +343,15 @@ function renderCal(days, bookings, blocks){
   g+='</div>';
   head+=g;
   days.forEach(function(d){
-    var off=WORK_OFF.indexOf(d.getDay())>=0;
+    var info=dayInfo(d.getDay());
     var di=isoOf(d);
-    var col='<div class="col'+(off?' off':'')+'">';
+    var col='<div class="col">';
+    if(info.closed){ col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>'; }
+    else if(info.arrangement){ col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>'; }
+    else if(info.h){
+      if(info.h[0]>H0) col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';
+      if(info.h[1]<H1) col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';
+    }
     bookings.filter(function(b){return b.booking_date===di;}).forEach(function(b){
       cache[b.id]=b;
       var s=toMin(b.start_time), e=toMin(b.end_time)||(s+(b.total_duration_min||30));
