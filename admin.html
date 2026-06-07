@@ -15,7 +15,6 @@ body{font-family:var(--sans);background:var(--bez2);color:var(--navy);min-height
 .hidden{display:none!important}
 a{color:inherit}
 
-/* Prijava */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
 .login-card{background:#fff;border-radius:18px;box-shadow:0 10px 40px rgba(23,57,75,.12);padding:2.4rem 2rem;width:100%;max-width:380px;text-align:center}
 .login-card h1{font-family:var(--serif);font-weight:300;font-size:1.9rem}
@@ -31,7 +30,6 @@ a{color:inherit}
 .msg{font-size:.82rem;margin-top:.9rem;min-height:1em}
 .msg.err{color:#b04a3a}
 
-/* Glava */
 header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 4%;height:60px;background:rgba(234,215,193,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(23,57,75,.1)}
 header .brand{font-family:var(--serif);font-size:1.35rem;font-weight:300}
 header .brand span{color:var(--coral)}
@@ -40,26 +38,41 @@ header .who{font-size:.74rem;opacity:.65}
 .btn-ghost{background:#fff;border:1.5px solid rgba(23,57,75,.2);color:var(--navy);padding:.45rem .9rem;font-size:.74rem;border-radius:999px;cursor:pointer}
 .btn-ghost:hover{border-color:var(--coral);color:var(--coral)}
 
-/* Orodna vrstica */
 .toolbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:1rem 4% .4rem}
 .nav-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(23,57,75,.15);background:#fff;cursor:pointer;font-size:1rem;color:var(--navy)}
 .nav-btn:hover{border-color:var(--coral);color:var(--coral)}
-.range{font-family:var(--serif);font-size:1.25rem;margin:0 .4rem;min-width:170px}
-.seg{display:flex;border:1.5px solid rgba(23,57,75,.15);border-radius:999px;overflow:hidden;background:#fff;margin-left:auto}
-.seg button{border:none;background:transparent;padding:.45rem .95rem;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:var(--sans)}
+.range{font-family:var(--serif);font-size:1.25rem;margin:0 .4rem;min-width:160px}
+.seg{display:flex;border:1.5px solid rgba(23,57,75,.15);border-radius:999px;overflow:hidden;background:#fff;margin-left:auto;flex-wrap:wrap}
+.seg button{border:none;background:transparent;padding:.45rem .85rem;font-size:.76rem;cursor:pointer;color:var(--navy);font-family:var(--sans)}
 .seg button.active{background:var(--navy);color:#fff}
 
 .wrap{padding:.4rem 4% 3rem}
+.layout{display:flex;gap:1.2rem;align-items:flex-start}
+.side{width:218px;flex-shrink:0}
+.main{flex:1;min-width:0}
+@media(max-width:820px){.layout{flex-direction:column}.side{width:100%;max-width:300px}}
 
-/* Koledar */
-.cal-scroll{overflow-x:auto;background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(23,57,75,.08);padding:0}
+/* Mini koledar */
+.mini{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:.9rem}
+.mini-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;font-family:var(--serif);font-size:1.05rem}
+.mini-nav{border:none;background:transparent;cursor:pointer;font-size:1.1rem;color:var(--navy);padding:.1rem .45rem;border-radius:6px}
+.mini-nav:hover{color:var(--coral)}
+.mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.mini-dow{font-size:.6rem;text-align:center;opacity:.5;padding:.2rem 0}
+.mini-day{border:none;background:transparent;cursor:pointer;font-size:.74rem;padding:.35rem 0;border-radius:8px;color:var(--navy)}
+.mini-day:hover{background:rgba(206,126,111,.12)}
+.mini-day.out{opacity:.3}
+.mini-day.today{color:var(--coral);font-weight:600}
+.mini-day.sel{background:var(--navy);color:#fff}
+
+/* Časovni koledar */
+.cal-scroll{overflow-x:auto;background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(23,57,75,.08)}
 .cal{min-width:100%}
-.cal.week{min-width:760px}
+.cal.multi{min-width:660px}
 .cal-head{display:grid;position:sticky;top:0;background:#fff;z-index:5;border-bottom:1px solid #eceae6}
 .cal-body{display:grid}
-.gutter-cell,.gutter{}
 .dayhead{padding:.6rem .3rem;text-align:center;border-left:1px solid #f0eee9}
-.dayhead .dow{font-size:.66rem;letter-spacing:.1em;opacity:.55;text-transform:uppercase}
+.dayhead .dow{font-size:.64rem;letter-spacing:.1em;opacity:.55;text-transform:uppercase}
 .dayhead .dnum{font-family:var(--serif);font-size:1.3rem;line-height:1}
 .dayhead.today .dnum{color:var(--coral)}
 .dayhead.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
@@ -67,7 +80,6 @@ header .who{font-size:.74rem;opacity:.65}
 .gutter{position:relative;height:624px}
 .gutter .hr{position:absolute;right:6px;font-size:.64rem;opacity:.5;transform:translateY(-50%)}
 .col{position:relative;height:624px;border-left:1px solid #f0eee9;background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px)}
-.col.off{background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px),repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f4f4f4 6px,#f4f4f4 12px)}
 .off-band{position:absolute;left:0;right:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(45deg,rgba(23,57,75,.035),rgba(23,57,75,.035) 7px,rgba(23,57,75,.07) 7px,rgba(23,57,75,.07) 14px)}
 .off-band.arr{background:repeating-linear-gradient(45deg,rgba(206,126,111,.06),rgba(206,126,111,.06) 7px,rgba(206,126,111,.12) 7px,rgba(206,126,111,.12) 14px)}
 .ev{position:absolute;left:3px;right:3px;z-index:2;border-radius:7px;padding:3px 6px;font-size:.7rem;line-height:1.2;cursor:pointer;overflow:hidden;border-left:3px solid var(--coral);background:#f3eee7;color:var(--navy)}
@@ -75,39 +87,49 @@ header .who{font-size:.74rem;opacity:.65}
 .ev .ev-t{font-size:.62rem;opacity:.7}
 .ev .ev-n{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ev .ev-s{opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ev.nova{background:#f3eee7;border-left-color:var(--coral)}
 .ev.potrjeno{background:#e6f0e9;border-left-color:#3f8f5b}
 .ev.opravljeno{background:#e4e9ec;border-left-color:var(--navy);opacity:.85}
 .ev.preklicano{background:#f2e3e0;border-left-color:#b04a3a;opacity:.5;text-decoration:line-through}
 .ev.block{background:repeating-linear-gradient(45deg,#fff,#fff 7px,rgba(206,126,111,.14) 7px,rgba(206,126,111,.14) 14px);border-left:3px dashed var(--coral);color:var(--coral)}
 
+/* Mesečni pregled */
+.month{background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(23,57,75,.08);padding:1rem}
+.month .mhead{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.month .mhead div{text-align:center;font-size:.64rem;letter-spacing:.08em;opacity:.55;text-transform:uppercase}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mcell{position:relative;min-height:74px;border:1px solid #f0eee9;border-radius:10px;background:#fff;cursor:pointer;text-align:left;padding:.4rem;color:var(--navy)}
+.mcell:hover{border-color:var(--coral)}
+.mcell .mnum{font-family:var(--serif);font-size:1.05rem}
+.mcell.out{opacity:.4}
+.mcell.today{border-color:var(--coral);box-shadow:0 0 0 2px rgba(206,126,111,.2)}
+.mcell.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
+.mcell .mcount{position:absolute;right:.4rem;bottom:.4rem;background:var(--coral);color:#fff;font-size:.66rem;border-radius:999px;padding:.05rem .45rem}
+@media(max-width:560px){.mcell{min-height:54px;padding:.3rem}.mcell .mnum{font-size:.9rem}}
+
 /* Nujni seznam */
-.cards{display:flex;flex-direction:column;gap:.8rem;max-width:760px}
+.cards{display:flex;flex-direction:column;gap:.8rem}
 .empty{text-align:center;opacity:.55;padding:2.5rem 0;font-style:italic}
 .card{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1rem 1.1rem;display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap}
 .card .body{flex:1;min-width:200px}
 .card .svc{font-weight:500;margin-bottom:.25rem}
 .card .meta{font-size:.82rem;opacity:.8;line-height:1.5}
 .card .meta a{color:var(--coral);text-decoration:none}
-.card .side{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+.card .side2{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
 .price{font-family:var(--serif);font-size:1.2rem;font-weight:600}
 
-/* Značke + akcije */
 .badge{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .6rem;border-radius:999px;display:inline-block}
 .badge.nova{background:rgba(23,57,75,.1);color:var(--navy)}
 .badge.potrjeno{background:rgba(70,140,90,.16);color:#2f6b43}
 .badge.opravljeno{background:rgba(23,57,75,.85);color:#fff}
 .badge.preklicano{background:rgba(176,74,58,.15);color:#b04a3a}
 .badge.podogovoru{background:rgba(206,126,111,.18);color:var(--coral)}
-.actions{display:flex;gap:.35rem;flex-wrap:wrap}
 .act{font-size:.72rem;padding:.4rem .7rem;border-radius:999px;border:1.5px solid rgba(23,57,75,.18);background:#fff;cursor:pointer;color:var(--navy)}
 .act:hover{border-color:var(--coral);color:var(--coral)}
 .act.danger:hover{border-color:#b04a3a;color:#b04a3a}
 
-/* Overlay / popup */
 .overlay{position:fixed;inset:0;z-index:50;background:rgba(23,57,75,.4);display:flex;align-items:center;justify-content:center;padding:1.2rem}
 .pop{background:#fff;border-radius:16px;box-shadow:0 18px 50px rgba(23,57,75,.25);width:100%;max-width:420px;padding:1.5rem;position:relative}
-.pop .x{position:absolute;top:.7rem;right:.9rem;border:none;background:transparent;font-size:1.4rem;cursor:pointer;color:var(--navy);line-height:1}
+.pop .x{position:absolute;top:.7rem;right:.9rem;border:none;background:transparent;font-size:1.4rem;cursor:pointer;color:var(--navy)}
 .pop .d-date{font-size:.78rem;opacity:.6}
 .pop .d-time{font-family:var(--serif);font-size:1.5rem;font-weight:600;margin:.1rem 0 .5rem}
 .pop .d-svc{font-weight:500;margin-bottom:.5rem}
@@ -117,23 +139,17 @@ header .who{font-size:.74rem;opacity:.65}
 .pop .d-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .pop .d-actions{display:flex;gap:.4rem;flex-wrap:wrap}
 
-/* Blokada obrazec */
-.block-form{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1.1rem;margin:.6rem 0 1rem;max-width:560px}
+.block-form{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1.1rem;margin-bottom:1rem;max-width:560px}
 .block-form .bf-row{display:flex;gap:1rem;flex-wrap:wrap}
 .block-form label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.9rem}
 .block-form input{display:block;margin-top:.3rem;padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy)}
 .block-form input[type=text]{width:100%}
 .block-form .bf-actions{display:flex;gap:.6rem;align-items:center}
-
-@media(max-width:700px){
-  .range{min-width:120px;font-size:1.1rem}
-  .toolbar{gap:.4rem}
-}
+@media(max-width:700px){.range{min-width:110px;font-size:1.05rem}}
 </style>
 </head>
 <body>
 
-<!-- PRIJAVA -->
 <div class="login-wrap" id="loginView">
   <div class="login-card">
     <h1>Najs <span style="color:var(--coral)">&#10022;</span></h1>
@@ -145,7 +161,6 @@ header .who{font-size:.74rem;opacity:.65}
   </div>
 </div>
 
-<!-- ADMIN -->
 <div id="appView" class="hidden">
   <header>
     <div class="brand">Najs <span>&#10022;</span> admin</div>
@@ -159,9 +174,11 @@ header .who{font-size:.74rem;opacity:.65}
     <span class="range" id="rangeLabel"></span>
     <button class="btn-ghost" id="blockToggle">&#9210; Blokiraj čas</button>
     <div class="seg">
-      <button data-mode="day" id="segDay">Dan</button>
-      <button data-mode="week" id="segWeek" class="active">Teden</button>
-      <button data-mode="nujni" id="segNujni">Nujni</button>
+      <button data-mode="day">Dan</button>
+      <button data-mode="workweek">Delovni teden</button>
+      <button data-mode="week" class="active">Teden</button>
+      <button data-mode="month">Mesec</button>
+      <button data-mode="nujni">Nujni</button>
     </div>
   </div>
 
@@ -180,17 +197,18 @@ header .who{font-size:.74rem;opacity:.65}
       <p class="msg" id="blkMsg"></p>
     </div>
 
-    <div class="cal-scroll" id="calScroll"></div>
-    <div class="cards hidden" id="nujniList"></div>
+    <div class="layout">
+      <aside class="side"><div class="mini" id="mini"></div></aside>
+      <div class="main">
+        <div class="cal-scroll" id="calScroll"></div>
+        <div class="cards hidden" id="nujniList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Podrobnosti -->
 <div class="overlay hidden" id="detail">
-  <div class="pop">
-    <button class="x" id="detailClose">&times;</button>
-    <div id="detailBody"></div>
-  </div>
+  <div class="pop"><button class="x" id="detailClose">&times;</button><div id="detailBody"></div></div>
 </div>
 
 <script>
@@ -198,34 +216,31 @@ var SB_URL='https://azqtgvxashunmmydkwop.supabase.co';
 var SB_KEY='sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
 var sb=supabase.createClient(SB_URL,SB_KEY);
 
-var loginView=document.getElementById('loginView');
-var appView=document.getElementById('appView');
-var calScroll=document.getElementById('calScroll');
-var nujniList=document.getElementById('nujniList');
+var loginView=document.getElementById('loginView'),appView=document.getElementById('appView');
+var calScroll=document.getElementById('calScroll'),nujniList=document.getElementById('nujniList'),miniEl=document.getElementById('mini');
 
 var H0=8,H1=20,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
-function dayInfo(dow){ // dow: 0=ned, 1=pon ... 6=sob
-  if(dow===1||dow===3||dow===4) return {h:[14,20]};   // pon, sre, čet
-  if(dow===2||dow===5)          return {h:[8,15]};    // tor, pet
-  if(dow===6)                   return {arrangement:true}; // sobota – po dogovoru
-  return {closed:true};                               // nedelja – zaprto
-}
 var mode='week', cur=new Date(); cur.setHours(0,0,0,0);
-var cache={}; // id -> booking
+var miniRef=new Date(cur);
+var cache={};
 
 function pad(n){return String(n).padStart(2,'0');}
 function isoOf(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function isoToday(){return isoOf(new Date());}
 function mondayOf(d){var x=new Date(d);var k=(x.getDay()+6)%7;x.setDate(x.getDate()-k);x.setHours(0,0,0,0);return x;}
 function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function addMonths(d,n){var x=new Date(d);x.setDate(1);x.setMonth(x.getMonth()+n);return x;}
+function monthGrid(ref){var first=new Date(ref.getFullYear(),ref.getMonth(),1);var s=mondayOf(first);var a=[];for(var i=0;i<42;i++)a.push(addDays(s,i));return a;}
 function toMin(t){t=String(t||'').substring(0,5);var p=t.split(':');return (parseInt(p[0])||0)*60+(parseInt(p[1])||0);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function eur(v){return (parseFloat(v)||0).toFixed(2).replace('.',',')+' €';}
-function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DNI[d.getDay()]+', '+(+p[2])+'. '+MES[+p[1]-1]+' '+p[0];}
 function hm(t){return String(t||'').substring(0,5);}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DNI[d.getDay()]+', '+(+p[2])+'. '+MES[+p[1]-1]+' '+p[0];}
+function dayInfo(dow){if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};}
 
 /* AUTH */
 function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;load();}
@@ -246,23 +261,22 @@ function doLogin(){
 }
 document.getElementById('logoutBtn').addEventListener('click',function(){sb.auth.signOut().then(showLogin);});
 
-/* NAVIGACIJA */
-document.querySelectorAll('.seg button').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('.seg button').forEach(function(x){x.classList.remove('active');});
-    b.classList.add('active');mode=b.getAttribute('data-mode');load();
-  });
-});
-document.getElementById('todayBtn').addEventListener('click',function(){cur=new Date();cur.setHours(0,0,0,0);load();});
-document.getElementById('prevBtn').addEventListener('click',function(){cur=addDays(cur,mode==='day'?-1:-7);load();});
-document.getElementById('nextBtn').addEventListener('click',function(){cur=addDays(cur,mode==='day'?1:7);load();});
+/* SEGMENT + NAV */
+function setSeg(m){document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-mode')===m);});}
+document.querySelectorAll('.seg button').forEach(function(b){b.addEventListener('click',function(){mode=b.getAttribute('data-mode');setSeg(mode);load();});});
+document.getElementById('todayBtn').addEventListener('click',function(){cur=new Date();cur.setHours(0,0,0,0);miniRef=new Date(cur);load();});
+document.getElementById('prevBtn').addEventListener('click',function(){nav(-1);});
+document.getElementById('nextBtn').addEventListener('click',function(){nav(1);});
+function nav(dir){
+  if(mode==='day')cur=addDays(cur,dir);
+  else if(mode==='month')cur=addMonths(cur,dir);
+  else cur=addDays(cur,dir*7);
+  miniRef=new Date(cur);load();
+}
 
 /* BLOKADE */
 var blockForm=document.getElementById('blockForm');
-document.getElementById('blockToggle').addEventListener('click',function(){
-  blockForm.classList.toggle('hidden');
-  if(!blockForm.classList.contains('hidden')) document.getElementById('blkDate').value=isoOf(cur);
-});
+document.getElementById('blockToggle').addEventListener('click',function(){blockForm.classList.toggle('hidden');if(!blockForm.classList.contains('hidden'))document.getElementById('blkDate').value=isoOf(cur);});
 document.getElementById('blkCancel').addEventListener('click',function(){blockForm.classList.add('hidden');document.getElementById('blkMsg').textContent='';});
 document.getElementById('blkSave').addEventListener('click',function(){
   var date=document.getElementById('blkDate').value,from=document.getElementById('blkFrom').value,to=document.getElementById('blkTo').value,note=document.getElementById('blkNote').value.trim();
@@ -278,15 +292,40 @@ document.getElementById('blkSave').addEventListener('click',function(){
   });
 });
 
+/* MINI KOLEDAR */
+function renderMini(){
+  var cells=monthGrid(miniRef);
+  var html='<div class="mini-head"><button class="mini-nav" id="miniPrev">&#8249;</button><span>'+cap(MES[miniRef.getMonth()])+' '+miniRef.getFullYear()+'</span><button class="mini-nav" id="miniNext">&#8250;</button></div><div class="mini-grid">';
+  ['Po','To','Sr','Če','Pe','So','Ne'].forEach(function(d){html+='<div class="mini-dow">'+d+'</div>';});
+  cells.forEach(function(d){
+    var out=d.getMonth()!==miniRef.getMonth();
+    html+='<button class="mini-day'+(out?' out':'')+(isoOf(d)===isoToday()?' today':'')+(isoOf(d)===isoOf(cur)?' sel':'')+'" data-d="'+isoOf(d)+'">'+d.getDate()+'</button>';
+  });
+  html+='</div>';
+  miniEl.innerHTML=html;
+  document.getElementById('miniPrev').addEventListener('click',function(){miniRef=addMonths(miniRef,-1);renderMini();});
+  document.getElementById('miniNext').addEventListener('click',function(){miniRef=addMonths(miniRef,1);renderMini();});
+  miniEl.querySelectorAll('.mini-day').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);load();});});
+}
+
 /* NALAGANJE */
+function daysForMode(){
+  if(mode==='day')return [new Date(cur)];
+  var mon=mondayOf(cur);
+  if(mode==='workweek')return [0,1,2,3,4,5].map(function(i){return addDays(mon,i);}); // pon–sob
+  return [0,1,2,3,4,5,6].map(function(i){return addDays(mon,i);});
+}
 function rangeText(days){
-  if(mode==='day'){var d=days[0];return DNI[d.getDay()].charAt(0).toUpperCase()+DNI[d.getDay()].slice(1)+', '+d.getDate()+'. '+MES[d.getMonth()]+' '+d.getFullYear();}
-  var a=days[0],b=days[6];return a.getDate()+'. '+MES[a.getMonth()].substring(0,3)+' – '+b.getDate()+'. '+MES[b.getMonth()].substring(0,3)+' '+b.getFullYear();
+  if(mode==='day'){var d=days[0];return cap(DNI[d.getDay()])+', '+d.getDate()+'. '+MES[d.getMonth()]+' '+d.getFullYear();}
+  if(mode==='month')return cap(MES[cur.getMonth()])+' '+cur.getFullYear();
+  var a=days[0],b=days[days.length-1];return a.getDate()+'. '+MES[a.getMonth()].substring(0,3)+' – '+b.getDate()+'. '+MES[b.getMonth()].substring(0,3)+' '+b.getFullYear();
 }
 function load(){
+  renderMini();
   if(mode==='nujni'){loadNujni();return;}
+  if(mode==='month'){loadMonth();return;}
   calScroll.classList.remove('hidden');nujniList.classList.add('hidden');
-  var days=(mode==='week')?[0,1,2,3,4,5,6].map(function(i){return addDays(mondayOf(cur),i);}):[new Date(cur)];
+  var days=daysForMode();
   document.getElementById('rangeLabel').textContent=rangeText(days);
   var fromISO=isoOf(days[0]),toISO=isoOf(days[days.length-1]);
   calScroll.innerHTML='<div class="empty">Nalagam …</div>';
@@ -295,7 +334,18 @@ function load(){
     sb.from('blocks').select('*').gte('block_date',fromISO).lte('block_date',toISO)
   ]).then(function(r){
     if(r[0].error){calScroll.innerHTML='<div class="empty">Napaka: '+esc(r[0].error.message)+'<br><small>Preveri pravice (RLS).</small></div>';return;}
-    renderCal(days, r[0].data||[], (r[1]&&!r[1].error)?(r[1].data||[]):[]);
+    renderCal(days,r[0].data||[],(r[1]&&!r[1].error)?(r[1].data||[]):[]);
+  });
+}
+function loadMonth(){
+  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');
+  document.getElementById('rangeLabel').textContent=rangeText();
+  var cells=monthGrid(cur);
+  calScroll.innerHTML='<div class="empty">Nalagam …</div>';
+  sb.from('bookings').select('booking_date,status').gte('booking_date',isoOf(cells[0])).lte('booking_date',isoOf(cells[41])).then(function(res){
+    var counts={};
+    if(!res.error)(res.data||[]).forEach(function(b){if(b.status!=='preklicano'){counts[b.booking_date]=(counts[b.booking_date]||0)+1;}});
+    renderMonth(cells,counts);
   });
 }
 function loadNujni(){
@@ -304,16 +354,13 @@ function loadNujni(){
   nujniList.innerHTML='<div class="empty">Nalagam …</div>';
   sb.from('bookings').select('*').is('booking_date',null).order('id',{ascending:false}).then(function(res){
     if(res.error){nujniList.innerHTML='<div class="empty">Napaka: '+esc(res.error.message)+'</div>';return;}
-    var rows=res.data||[];
+    var rows=res.data||[];cache={};
     if(!rows.length){nujniList.innerHTML='<div class="empty">Ni nujnih rezervacij.</div>';return;}
-    cache={};
     nujniList.innerHTML=rows.map(function(b){cache[b.id]=b;return ''
-      +'<div class="card">'
-      +'<div class="body"><div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
+      +'<div class="card"><div class="body"><div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
       +'<div class="meta">'+esc(b.customer_name||'—')+(b.customer_phone?(' · <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>'+esc(b.customer_email)):'')+'</div>'
       +(b.note?('<div class="meta" style="font-style:italic">'+esc(b.note)+'</div>'):'')+'</div>'
-      +'<div class="side"><div class="price">'+eur(b.total_price)+'</div>'+badge(b.status)
-      +'<button class="act" data-open="'+b.id+'">Podrobnosti</button></div></div>';
+      +'<div class="side2"><div class="price">'+eur(b.total_price)+'</div>'+badge(b.status)+'<button class="act" data-open="'+b.id+'">Podrobnosti</button></div></div>';
     }).join('');
     nujniList.querySelectorAll('[data-open]').forEach(function(x){x.addEventListener('click',function(){openDetail(cache[x.getAttribute('data-open')]);});});
   });
@@ -321,64 +368,45 @@ function loadNujni(){
 
 function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano','po dogovoru':'podogovoru'};return '<span class="badge '+(m[s]||'nova')+'">'+esc(s||'nova')+'</span>';}
 
-function renderCal(days, bookings, blocks){
-  cache={};
-  var N=days.length;
-  var gridCols='64px repeat('+N+',1fr)';
-  // glava
-  var head='<div class="cal '+(mode==='week'?'week':'')+'">';
-  head+='<div class="cal-head" style="grid-template-columns:'+gridCols+'">';
-  head+='<div></div>';
+function renderCal(days,bookings,blocks){
+  cache={};var N=days.length;var gc='64px repeat('+N+',1fr)';
+  var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
+  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
+  h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter">';
+  for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
+  h+='</div>';
   days.forEach(function(d){
-    var info=dayInfo(d.getDay());
-    var hcls=info.closed?'off':(info.arrangement?'arr':'');
-    var isT=isoOf(d)===isoToday();
-    head+='<div class="dayhead '+hcls+(isT?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';
-  });
-  head+='</div>';
-  // telo
-  head+='<div class="cal-body" style="grid-template-columns:'+gridCols+'">';
-  var g='<div class="gutter">';
-  for(var h=H0;h<=H1;h++){ g+='<div class="hr" style="top:'+((h-H0)*HOUR_PX)+'px">'+pad(h)+':00</div>'; }
-  g+='</div>';
-  head+=g;
-  days.forEach(function(d){
-    var info=dayInfo(d.getDay());
-    var di=isoOf(d);
-    var col='<div class="col">';
-    if(info.closed){ col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>'; }
-    else if(info.arrangement){ col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>'; }
-    else if(info.h){
-      if(info.h[0]>H0) col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';
-      if(info.h[1]<H1) col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';
-    }
+    var info=dayInfo(d.getDay()),di=isoOf(d),col='<div class="col">';
+    if(info.closed)col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>';
+    else if(info.arrangement)col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>';
+    else if(info.h){if(info.h[0]>H0)col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';if(info.h[1]<H1)col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';}
     bookings.filter(function(b){return b.booking_date===di;}).forEach(function(b){
-      cache[b.id]=b;
-      var s=toMin(b.start_time), e=toMin(b.end_time)||(s+(b.total_duration_min||30));
-      var top=(s-H0*60)*PXMIN, hgt=Math.max((e-s)*PXMIN,20);
-      var cls=({'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano'})[b.status]||'nova';
-      col+='<div class="ev '+cls+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px">'
-        +'<div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div>'
-        +'<div class="ev-n">'+esc(b.customer_name||'—')+'</div>'
-        +'<div class="ev-s">'+esc(b.services_text||b.service_name||'')+'</div></div>';
+      cache[b.id]=b;var s=toMin(b.start_time),e=toMin(b.end_time)||(s+(b.total_duration_min||30));
+      var top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,20);
+      var cls=({'potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano'})[b.status]||'';
+      col+='<div class="ev '+cls+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div><div class="ev-n">'+esc(b.customer_name||'—')+'</div><div class="ev-s">'+esc(b.services_text||b.service_name||'')+'</div></div>';
     });
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
-      var s=toMin(bl.start_time), e=toMin(bl.end_time);
-      var top=(s-H0*60)*PXMIN, hgt=Math.max((e-s)*PXMIN,18);
-      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px">'
-        +'<div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div>'
-        +'<div class="ev-n">Blokirano</div>'+(bl.note?('<div class="ev-s">'+esc(bl.note)+'</div>'):'')+'</div>';
+      var s=toMin(bl.start_time),e=toMin(bl.end_time),top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,18);
+      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">Blokirano</div>'+(bl.note?('<div class="ev-s">'+esc(bl.note)+'</div>'):'')+'</div>';
     });
-    col+='</div>';
-    head+=col;
+    col+='</div>';h+=col;
   });
-  head+='</div></div>';
-  calScroll.innerHTML=head;
-
+  h+='</div></div>';calScroll.innerHTML=h;
   calScroll.querySelectorAll('.ev[data-bid]').forEach(function(el){el.addEventListener('click',function(){openDetail(cache[el.getAttribute('data-bid')]);});});
-  calScroll.querySelectorAll('.ev[data-blk]').forEach(function(el){el.addEventListener('click',function(){
-    if(confirm('Odstranim to blokado?')){sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});}
-  });});
+  calScroll.querySelectorAll('.ev[data-blk]').forEach(function(el){el.addEventListener('click',function(){if(confirm('Odstranim to blokado?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});});
+}
+
+function renderMonth(cells,counts){
+  var h='<div class="month"><div class="mhead">';
+  DOW.forEach(function(d){h+='<div>'+d+'</div>';});
+  h+='</div><div class="mgrid">';
+  cells.forEach(function(d){
+    var iso=isoOf(d),out=d.getMonth()!==cur.getMonth(),c=counts[iso]||0,off=(d.getDay()===0);
+    h+='<button class="mcell'+(out?' out':'')+(iso===isoToday()?' today':'')+(off?' off':'')+'" data-d="'+iso+'"><span class="mnum">'+d.getDate()+'</span>'+(c?'<span class="mcount">'+c+'</span>':'')+'</button>';
+  });
+  h+='</div></div>';calScroll.innerHTML=h;
+  calScroll.querySelectorAll('.mcell').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();});});
 }
 
 /* PODROBNOSTI */
@@ -392,33 +420,20 @@ function openDetail(b){
     +'<div class="d-date">'+(b.booking_date?prettyDate(b.booking_date):'Po dogovoru / nujni')+'</div>'
     +'<div class="d-time">'+(b.booking_date?(hm(b.start_time)+'–'+hm(b.end_time)+' · '+(b.total_duration_min||0)+' min'):'')+'</div>'
     +'<div class="d-svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
-    +'<div class="d-meta">👤 '+esc(b.customer_name||'—')
-      +(b.customer_phone?('<br>📞 <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')
-      +(b.customer_email?('<br>✉️ '+esc(b.customer_email)):'')+'</div>'
-    +(b.note?('<div class="d-note">'+esc(b.note)+'</div>'):'')
-    +gap
+    +'<div class="d-meta">👤 '+esc(b.customer_name||'—')+(b.customer_phone?('<br>📞 <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>✉️ '+esc(b.customer_email)):'')+'</div>'
+    +(b.note?('<div class="d-note">'+esc(b.note)+'</div>'):'')+gap
     +'<div class="d-row"><span class="price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>'
-    +'<div class="d-actions">'
-    +'<button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button>'
-    +'<button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button>'
-    +'<button class="act danger" data-id="'+b.id+'" data-s="preklicano">Prekliči</button>'
-    +'</div>';
-  detailBody.querySelectorAll('.act').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var id=btn.getAttribute('data-id'),s=btn.getAttribute('data-s');
-      if(s==='preklicano'&&!confirm('Prekličem to rezervacijo?'))return;
-      btn.textContent='…';
-      sb.from('bookings').update({status:s}).eq('id',id).then(function(res){
-        if(res.error)alert('Napaka: '+res.error.message);
-        detail.classList.add('hidden');load();
-      });
-    });
-  });
+    +'<div class="d-actions"><button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button><button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act danger" data-id="'+b.id+'" data-s="preklicano">Prekliči</button></div>';
+  detailBody.querySelectorAll('.act').forEach(function(btn){btn.addEventListener('click',function(){
+    var id=btn.getAttribute('data-id'),s=btn.getAttribute('data-s');
+    if(s==='preklicano'&&!confirm('Prekličem to rezervacijo?'))return;
+    btn.textContent='…';
+    sb.from('bookings').update({status:s}).eq('id',id).then(function(res){if(res.error)alert('Napaka: '+res.error.message);detail.classList.add('hidden');load();});
+  });});
   detail.classList.remove('hidden');
 }
 
-/* ZAGON */
-sb.auth.getSession().then(function(res){ if(res.data&&res.data.session)showApp(res.data.session); else showLogin(); });
+sb.auth.getSession().then(function(res){if(res.data&&res.data.session)showApp(res.data.session);else showLogin();});
 </script>
 </body>
 </html>
