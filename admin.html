@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Najs · Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root{
+      --bez:#EAD7C1; --bez2:#f5ebe0; --navy:#17394B; --coral:#CE7E6F;
+      --serif:'Cormorant Garamond',Georgia,serif; --sans:'Jost',sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--sans);background:var(--bez2);color:var(--navy);min-height:100vh}
+    a{color:inherit}
+    .hidden{display:none!important}
+
+    /* Prijava */
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+    .login-card{background:#fff;border-radius:18px;box-shadow:0 10px 40px rgba(23,57,75,.12);padding:2.4rem 2rem;width:100%;max-width:380px;text-align:center}
+    .login-card h1{font-family:var(--serif);font-weight:300;font-size:1.9rem;margin-bottom:.2rem}
+    .login-card .sub{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--coral);margin-bottom:1.6rem}
+    .field{text-align:left;margin-bottom:1rem}
+    .field label{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.6;margin-bottom:.35rem}
+    .field input{width:100%;padding:.7rem .8rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);font-size:.95rem;color:var(--navy);background:#fff}
+    .field input:focus{outline:none;border-color:var(--coral)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:none;border-radius:999px;cursor:pointer;font-family:var(--sans);transition:.2s}
+    .btn-main{background:var(--coral);color:#fff;padding:.75rem 1.4rem;font-size:.85rem;letter-spacing:.05em;width:100%}
+    .btn-main:hover{filter:brightness(.95)}
+    .btn-main:disabled{opacity:.6;cursor:default}
+    .msg{font-size:.82rem;margin-top:.9rem;min-height:1em}
+    .msg.err{color:#b04a3a}
+
+    /* Glava */
+    header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:64px;background:rgba(234,215,193,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(23,57,75,.1)}
+    header .brand{font-family:var(--serif);font-size:1.4rem;font-weight:300}
+    header .brand span{color:var(--coral)}
+    header .right{display:flex;align-items:center;gap:.9rem}
+    header .who{font-size:.74rem;opacity:.65}
+    .btn-ghost{background:transparent;border:1.5px solid rgba(23,57,75,.2);color:var(--navy);padding:.45rem .9rem;font-size:.74rem;border-radius:999px;cursor:pointer}
+    .btn-ghost:hover{border-color:var(--coral);color:var(--coral)}
+
+    main{max-width:880px;margin:0 auto;padding:1.6rem 5% 4rem}
+
+    /* Zavihki */
+    .tabs{display:flex;gap:.5rem;margin-bottom:1.2rem}
+    .tab{padding:.5rem 1rem;border-radius:999px;border:1.5px solid rgba(23,57,75,.15);background:#fff;cursor:pointer;font-size:.8rem;font-family:var(--sans);color:var(--navy)}
+    .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+    /* Datum vrstica */
+    .datebar{display:flex;align-items:center;gap:.5rem;margin-bottom:1.2rem;flex-wrap:wrap}
+    .datebar input[type=date]{padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy);background:#fff}
+    .nav-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(23,57,75,.15);background:#fff;cursor:pointer;font-size:1.1rem;color:var(--navy);line-height:1}
+    .nav-btn:hover{border-color:var(--coral);color:var(--coral)}
+    .datebar .today-btn{margin-left:.2rem}
+    .daylabel{font-family:var(--serif);font-size:1.25rem;margin-left:.4rem}
+    .count{font-size:.78rem;opacity:.6;margin-left:auto}
+
+    /* Kartice rezervacij */
+    .cards{display:flex;flex-direction:column;gap:.8rem}
+    .empty{text-align:center;opacity:.55;padding:2.5rem 0;font-style:italic}
+    .card{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1rem 1.1rem;display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap}
+    .card.cancelled{opacity:.55}
+    .card .time{font-family:var(--serif);font-size:1.35rem;font-weight:600;min-width:110px;line-height:1.1}
+    .card .time small{display:block;font-family:var(--sans);font-size:.7rem;font-weight:400;opacity:.6;letter-spacing:.04em}
+    .card .body{flex:1;min-width:200px}
+    .card .svc{font-size:.95rem;font-weight:500;margin-bottom:.25rem}
+    .card .meta{font-size:.82rem;opacity:.8;line-height:1.5}
+    .card .meta a{color:var(--coral);text-decoration:none}
+    .card .note{font-size:.8rem;font-style:italic;opacity:.7;margin-top:.35rem;border-left:2px solid var(--coral);padding-left:.5rem}
+    .card .gap-tag{display:inline-block;font-size:.68rem;color:var(--coral);border:1px solid var(--coral);border-radius:999px;padding:.05rem .5rem;margin-top:.4rem}
+    .card .side{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem;min-width:130px}
+    .price{font-family:var(--serif);font-size:1.2rem;font-weight:600}
+    .badge{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .6rem;border-radius:999px}
+    .badge.nova{background:rgba(23,57,75,.1);color:var(--navy)}
+    .badge.potrjeno{background:rgba(70,140,90,.16);color:#2f6b43}
+    .badge.opravljeno{background:rgba(23,57,75,.85);color:#fff}
+    .badge.preklicano{background:rgba(176,74,58,.15);color:#b04a3a}
+    .badge.podogovoru{background:rgba(206,126,111,.18);color:var(--coral)}
+    .actions{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
+    .act{font-size:.72rem;padding:.35rem .65rem;border-radius:999px;border:1.5px solid rgba(23,57,75,.18);background:#fff;cursor:pointer;color:var(--navy)}
+    .act:hover{border-color:var(--coral);color:var(--coral)}
+    .act.danger:hover{border-color:#b04a3a;color:#b04a3a}
+    .loading{text-align:center;opacity:.6;padding:2rem 0}
+    @media(max-width:560px){
+      .card .time{min-width:100%}
+      .card .side{min-width:100%;align-items:flex-start}
+      .actions{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PRIJAVA -->
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>Najs <span style="color:var(--coral)">✦</span></h1>
+      <p class="sub">Administracija</p>
+      <div class="field">
+        <label>E-pošta</label>
+        <input type="email" id="email" autocomplete="username" placeholder="vasa@posta.si" />
+      </div>
+      <div class="field">
+        <label>Geslo</label>
+        <input type="password" id="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-main" id="loginBtn">Prijava</button>
+      <p class="msg" id="loginMsg"></p>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="appView" class="hidden">
+    <header>
+      <div class="brand">Najs <span>✦</span> admin</div>
+      <div class="right">
+        <span class="who" id="whoLabel"></span>
+        <button class="btn-ghost" id="logoutBtn">Odjava</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="tabs">
+        <button class="tab active" id="tabDate" data-view="date">Po datumu</button>
+        <button class="tab" id="tabNujni" data-view="nujni">Po dogovoru / nujni</button>
+      </div>
+
+      <div class="datebar" id="datebar">
+        <button class="nav-btn" id="prevDay" aria-label="Prejšnji dan">‹</button>
+        <input type="date" id="dateInput" />
+        <button class="nav-btn" id="nextDay" aria-label="Naslednji dan">›</button>
+        <button class="btn-ghost today-btn" id="todayBtn">Danes</button>
+        <span class="daylabel" id="dayLabel"></span>
+        <span class="count" id="countLabel"></span>
+      </div>
+
+      <div class="cards" id="cards"></div>
+    </main>
+  </div>
+
+  <script>
+    var SB_URL = 'https://azqtgvxashunmmydkwop.supabase.co';
+    var SB_KEY = 'sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
+    var sb = supabase.createClient(SB_URL, SB_KEY);
+
+    var loginView = document.getElementById('loginView');
+    var appView   = document.getElementById('appView');
+    var cards     = document.getElementById('cards');
+    var dateInput = document.getElementById('dateInput');
+    var currentView = 'date';
+
+    var DNI = ['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+    var MESECI = ['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
+
+    function isoToday(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    function prettyDate(iso){ var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return DNI[d.getDay()]+', '+(+p[2])+'. '+MESECI[+p[1]-1]+' '+p[0]; }
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+    function eur(v){ return (parseFloat(v)||0).toFixed(2).replace('.',',')+' €'; }
+
+    /* ---- AUTH ---- */
+    function showApp(session){
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      document.getElementById('whoLabel').textContent = session.user.email;
+      if(!dateInput.value) dateInput.value = isoToday();
+      load();
+    }
+    function showLogin(){
+      appView.classList.add('hidden');
+      loginView.classList.remove('hidden');
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', doLogin);
+    document.getElementById('password').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+    function doLogin(){
+      var btn=document.getElementById('loginBtn'), msg=document.getElementById('loginMsg');
+      var email=document.getElementById('email').value.trim();
+      var pass=document.getElementById('password').value;
+      msg.textContent=''; msg.className='msg';
+      if(!email||!pass){ msg.textContent='Vnesi e-pošto in geslo.'; msg.className='msg err'; return; }
+      btn.disabled=true; btn.textContent='Prijavljam …';
+      sb.auth.signInWithPassword({email:email,password:pass}).then(function(res){
+        btn.disabled=false; btn.textContent='Prijava';
+        if(res.error){ msg.textContent='Napačna e-pošta ali geslo.'; msg.className='msg err'; return; }
+        showApp(res.data.session);
+      });
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', function(){
+      sb.auth.signOut().then(showLogin);
+    });
+
+    /* ---- ZAVIHKI ---- */
+    document.querySelectorAll('.tab').forEach(function(t){
+      t.addEventListener('click', function(){
+        document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+        t.classList.add('active');
+        currentView = t.getAttribute('data-view');
+        document.getElementById('datebar').style.display = (currentView==='date') ? 'flex' : 'none';
+        load();
+      });
+    });
+
+    /* ---- DATUM ---- */
+    dateInput.addEventListener('change', load);
+    document.getElementById('prevDay').addEventListener('click', function(){ shiftDay(-1); });
+    document.getElementById('nextDay').addEventListener('click', function(){ shiftDay(1); });
+    document.getElementById('todayBtn').addEventListener('click', function(){ dateInput.value=isoToday(); load(); });
+    function shiftDay(n){
+      var p=dateInput.value.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); d.setDate(d.getDate()+n);
+      dateInput.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      load();
+    }
+
+    /* ---- NALAGANJE ---- */
+    function load(){
+      cards.innerHTML='<div class="loading">Nalagam …</div>';
+      var q = sb.from('bookings').select('*');
+      if(currentView==='date'){
+        document.getElementById('dayLabel').textContent = prettyDate(dateInput.value);
+        q = q.eq('booking_date', dateInput.value).order('start_time',{ascending:true});
+      } else {
+        q = q.is('booking_date', null).order('id',{ascending:false});
+      }
+      q.then(function(res){
+        if(res.error){
+          cards.innerHTML='<div class="empty">Napaka pri nalaganju.<br><small>'+esc(res.error.message)+'</small><br><small>Preveri, da so nastavljene pravice (RLS) za prijavljene.</small></div>';
+          return;
+        }
+        render(res.data||[]);
+      });
+    }
+
+    function statusBadge(s){
+      var map={'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano','po dogovoru':'podogovoru'};
+      var cls=map[s]||'nova';
+      var label=(s||'nova');
+      return '<span class="badge '+cls+'">'+esc(label)+'</span>';
+    }
+
+    function render(rows){
+      document.getElementById('countLabel').textContent = rows.length+' '+(rows.length===1?'rezervacija':'rezervacij');
+      if(!rows.length){ cards.innerHTML='<div class="empty">Ni rezervacij'+(currentView==='date'?' za ta dan':'')+'.</div>'; return; }
+      var html='';
+      rows.forEach(function(b){
+        var cancelled = (b.status==='preklicano');
+        var timeBlock = (currentView==='date')
+          ? '<div class="time">'+esc((b.start_time||'').substring(0,5))+'<small>'+esc((b.end_time||'').substring(0,5))+' · '+(b.total_duration_min||0)+' min</small></div>'
+          : '<div class="time" style="font-size:1rem;min-width:90px">Po dogovoru</div>';
+        var gapTag = (b.gap_duration_min>0) ? '<div class="gap-tag">vmesni prosti čas '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>' : '';
+        html += '<div class="card'+(cancelled?' cancelled':'')+'">'
+          + timeBlock
+          + '<div class="body">'
+          +   '<div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
+          +   '<div class="meta">'+esc(b.customer_name||'—')
+          +     (b.customer_phone?(' · <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')
+          +     (b.customer_email?('<br>'+esc(b.customer_email)):'')
+          +   '</div>'
+          +   (b.note?('<div class="note">'+esc(b.note)+'</div>'):'')
+          +   gapTag
+          + '</div>'
+          + '<div class="side">'
+          +   '<div class="price">'+eur(b.total_price)+'</div>'
+          +   statusBadge(b.status)
+          +   '<div class="actions">'
+          +     '<button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button>'
+          +     '<button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button>'
+          +     '<button class="act danger" data-id="'+b.id+'" data-s="preklicano">Prekliči</button>'
+          +   '</div>'
+          + '</div>'
+          + '</div>';
+      });
+      cards.innerHTML=html;
+      cards.querySelectorAll('.act').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id=btn.getAttribute('data-id'); var s=btn.getAttribute('data-s');
+          if(s==='preklicano' && !confirm('Prekličem to rezervacijo?')) return;
+          btn.textContent='…';
+          sb.from('bookings').update({status:s}).eq('id',id).then(function(res){
+            if(res.error){ alert('Napaka: '+res.error.message); load(); return; }
+            load();
+          });
+        });
+      });
+    }
+
+    /* ---- ZAGON ---- */
+    sb.auth.getSession().then(function(res){
+      if(res.data && res.data.session) showApp(res.data.session);
+      else showLogin();
+    });
+  </script>
+</body>
+</html>
