@@ -1120,7 +1120,7 @@ function renderStep1(){
   foot.innerHTML = '';
 
   sb.from('services')
-    .select('id,name,description,price,category,sort_order,duration_min,requires_base,is_base,active')
+    .select('id,name,description,price,category,sort_order,duration_min,requires_base,is_base,active,gap_after_min,gap_duration_min')
     .eq('active', true)
     .order('sort_order', { ascending: true })
     .then(function(res){
@@ -1427,11 +1427,21 @@ function calcFreeSlots(ds, dow, busyRaw, dur){
   var dc = DC[dow];
   if(!dc || dc==='dogovor') return [];
   var wS = timeToMin(dc.start), wE = timeToMin(dc.end);
-  var busy = busyRaw.map(function(b){
-    var s=timeToMin(String(b.start_time).substring(0,5));
-    var d=parseInt(b.duration_min)||0;
-    return {s:s, e:s+d};
-  }).filter(function(b){ return b.e>wS && b.s<wE; });
+  var busy = [];
+  busyRaw.forEach(function(b){
+    var s = timeToMin(String(b.start_time).substring(0,5));
+    var d = parseInt(b.duration_min)||0;
+    var ga = parseInt(b.gap_after_min)||0;
+    var gd = parseInt(b.gap_duration_min)||0;
+    if(gd > 0 && ga > 0 && (ga + gd) <= d){
+      // vrzel je prosta → dva zasedena dela (pred in po vrzeli)
+      busy.push({s:s, e:s+ga});
+      busy.push({s:s+ga+gd, e:s+d});
+    } else {
+      busy.push({s:s, e:s+d});
+    }
+  });
+  busy = busy.filter(function(b){ return b.e>wS && b.s<wE; });
   busy.sort(function(a,b){ return a.s-b.s; });
 
   // Za danes: izloči pretekle
@@ -1659,12 +1669,22 @@ function submitBooking(btn){
   var totalPrice   = selArr.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
   var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_min)||0); }, 0);
 
+  // Vmesni prosti čas (vrzel) – varno samo pri eni storitvi
+  var gapAfter = 0, gapDuration = 0;
+  if(selArr.length === 1){
+    var ga = parseInt(selArr[0].gap_after_min)||0;
+    var gd = parseInt(selArr[0].gap_duration_min)||0;
+    if(gd > 0 && ga > 0 && (ga + gd) <= totalDur){ gapAfter = ga; gapDuration = gd; }
+  }
+
   var rec = {
     service_id:         sv.id,
     service_name:       sv.name,
     services_text:      servicesText,
     total_price:        parseFloat(totalPrice.toFixed(2)),
     total_duration_min: totalDur,
+    gap_after_min:      gapAfter,
+    gap_duration_min:   gapDuration,
     customer_name:      c.name,
     customer_phone:     c.phone,
     customer_email:     c.email || null,
