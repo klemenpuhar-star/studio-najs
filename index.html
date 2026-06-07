@@ -1669,12 +1669,20 @@ function submitBooking(btn){
   var totalPrice   = selArr.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
   var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_min)||0); }, 0);
 
-  // Vmesni prosti čas (vrzel) – varno samo pri eni storitvi
+  // Vmesni prosti čas (vrzel) – velja tudi za kombinacije (npr. barvanje + striženje/fen)
   var gapAfter = 0, gapDuration = 0;
-  if(selArr.length === 1){
-    var ga = parseInt(selArr[0].gap_after_min)||0;
-    var gd = parseInt(selArr[0].gap_duration_min)||0;
-    if(gd > 0 && ga > 0 && (ga + gd) <= totalDur){ gapAfter = ga; gapDuration = gd; }
+  var gapSvc = null;
+  selArr.forEach(function(s){
+    var gd = parseInt(s.gap_duration_min)||0;
+    var ga = parseInt(s.gap_after_min)||0;
+    if(gd > 0 && ga > 0){
+      if(!gapSvc || gd > (parseInt(gapSvc.gap_duration_min)||0)) gapSvc = s;
+    }
+  });
+  if(gapSvc){
+    var gsa = parseInt(gapSvc.gap_after_min)||0;
+    var gsd = parseInt(gapSvc.gap_duration_min)||0;
+    if((gsa + gsd) <= totalDur){ gapAfter = gsa; gapDuration = gsd; }
   }
 
   var rec = {
