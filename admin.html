@@ -453,7 +453,7 @@ function renderCal(days,bookings,blocks){
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
   days.forEach(function(d){
-    var info=dayInfo(d.getDay()),di=isoOf(d),col='<div class="col" style="height:'+TOTAL+'px">';
+    var info=dayInfo(d.getDay()),di=isoOf(d),col='<div class="col" data-date="'+di+'" style="height:'+TOTAL+'px">';
     if(info.closed)col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.arrangement)col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.h){if(info.h[0]>H0)col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';if(info.h[1]<H1)col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';}
@@ -484,6 +484,16 @@ function renderCal(days,bookings,blocks){
     el.addEventListener('mouseleave',hideTip);
     el.addEventListener('touchstart',function(){showTip(tipBlock(bl),el);},{passive:true});
     el.addEventListener('click',function(){hideTip();if(confirm('Odstranim to blokado?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});
+  });
+  calScroll.querySelectorAll('.col').forEach(function(colEl){
+    colEl.addEventListener('dblclick',function(e){
+      if(e.target.closest('.ev'))return;
+      var rect=colEl.getBoundingClientRect();
+      var mins=H0*60 + (e.clientY-rect.top)/PXMIN;
+      mins=Math.round(mins/15)*15;
+      if(mins<H0*60)mins=H0*60; if(mins>H1*60)mins=H1*60;
+      openNewAt(colEl.getAttribute('data-date'), pad(Math.floor(mins/60))+':'+pad(mins%60));
+    });
   });
   syncMiniHeight();
 }
@@ -595,6 +605,11 @@ function openNew(){
   buildNbServices();
   document.getElementById('nbSummary').textContent='Izberi vsaj eno storitev.';
   document.getElementById('newbk').classList.remove('hidden');
+}
+function openNewAt(dateISO,timeStr){
+  openNew();
+  if(dateISO)document.getElementById('nbDate').value=dateISO;
+  if(timeStr){document.getElementById('nbTime').value=timeStr;updateNbSummary();}
 }
 function saveNew(){
   var sel=nbSelected(),msg=document.getElementById('nbMsg');msg.className='msg';
