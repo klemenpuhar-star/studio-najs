@@ -53,7 +53,7 @@ header .who{font-size:.74rem;opacity:.65}
 .mini-stack{max-height:calc(100vh - 96px);overflow-y:auto;display:flex;flex-direction:column;gap:.8rem;padding-right:4px}
 .mini-stack::-webkit-scrollbar{width:6px}
 .mini-stack::-webkit-scrollbar-thumb{background:rgba(23,57,75,.2);border-radius:3px}
-@media(max-width:820px){.layout{flex-direction:column;align-items:stretch}.main{width:100%}.side{width:100%;max-width:340px;position:static}.mini-stack{max-height:none}.cal.multi{min-width:0}.who{display:none}.toolbar{padding:.8rem 1rem .4rem}.wrap{padding:.4rem 1rem 3rem}}
+@media(max-width:820px){.layout{flex-direction:column;align-items:stretch}.main{width:100%}.side{width:100%;max-width:340px;position:static}.mini-stack{max-height:none}.cal.multi{min-width:0}.who{display:none}.toolbar{padding:.8rem 1rem .4rem;gap:.5rem}.wrap{padding:.4rem 1rem 3rem}.range{flex:1 1 auto;text-align:right;font-size:1.05rem;min-width:0;margin:0}#newBtn,#blockToggle{flex:1 1 0;text-align:center}.seg{width:100%;margin-left:0;flex-wrap:nowrap;margin-top:.1rem}.seg button{flex:1;padding:.5rem .15rem;font-size:.72rem;text-align:center}}
 
 /* Mini koledar */
 .mini{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:.9rem}
@@ -395,8 +395,14 @@ function ensureMiniDelegation(){
 }
 function adjustSegLabels(){
   var wk=document.querySelector('.seg button[data-mode="week"]'), ww=document.querySelector('.seg button[data-mode="workweek"]');
-  if(isMobile()){ if(wk)wk.style.display='none'; if(ww)ww.style.display='none'; if(mode==='week'||mode==='workweek'){mode='day';setSeg('day');} }
-  else { if(wk){wk.style.display='';wk.textContent='Teden';} if(ww)ww.style.display=''; }
+  if(isMobile()){
+    if(wk)wk.style.display='none';
+    if(ww){ww.style.display='';ww.textContent='Teden';}
+    if(mode==='week'){mode='workweek';setSeg('workweek');}
+  } else {
+    if(wk){wk.style.display='';wk.textContent='Teden';}
+    if(ww){ww.style.display='';ww.textContent='Delovni teden';}
+  }
 }
 function buildMini(){
   ensureMiniDelegation();
@@ -432,7 +438,7 @@ function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; m
 function daysForMode(){
   if(mode==='day')return [new Date(cur)];
   var mon=mondayOf(cur);
-  if(mode==='workweek')return [0,1,2,3,4,5].map(function(i){return addDays(mon,i);}); // pon–sob
+  if(mode==='workweek')return [0,1,2,3,4].map(function(i){return addDays(mon,i);}); // pon–pet
   return [0,1,2,3,4,5,6].map(function(i){return addDays(mon,i);});
 }
 function rangeText(days){
