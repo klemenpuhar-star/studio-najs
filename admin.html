@@ -297,6 +297,7 @@ var calScroll=document.getElementById('calScroll'),nujniList=document.getElement
 
 var H0=6,H1=21,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
+var DOWF=['PONEDELJEK','TOREK','SREDA','ČETRTEK','PETEK','SOBOTA','NEDELJA'];
 var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
 var mode='day', cur=new Date(); cur.setHours(0,0,0,0);
@@ -577,7 +578,7 @@ function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'oprav
 function renderCal(days,bookings,blocks){
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
-  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
+  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
