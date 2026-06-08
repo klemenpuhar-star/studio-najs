@@ -168,6 +168,21 @@ header .who{font-size:.74rem;opacity:.65}
 .nb-summary{background:var(--bez2);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem;font-size:.88rem;min-height:1.2em}
 .nb-actions{display:flex;gap:.6rem;align-items:center}
 
+.stranke{max-width:760px}
+.stranke .search{width:100%;padding:.7rem .9rem;border:1.5px solid rgba(23,57,75,.15);border-radius:12px;font-family:var(--sans);font-size:.95rem;color:var(--navy);margin-bottom:1rem;background:#fff}
+.stranke .search:focus{outline:none;border-color:var(--coral)}
+.cust{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);margin-bottom:.7rem;overflow:hidden}
+.cust-head{display:flex;align-items:flex-start;gap:.8rem;padding:.9rem 1.1rem;cursor:pointer}
+.cust-head .cust-name{font-weight:500}
+.cust-head .cust-sub{font-size:.8rem;opacity:.7}
+.cust-head .cust-meta{margin-left:auto;text-align:right;font-size:.76rem;opacity:.65;white-space:nowrap}
+.cust-hist{border-top:1px solid #f0eee9;padding:.2rem 1.1rem .7rem}
+.hist-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;font-size:.84rem;cursor:pointer;border-bottom:1px solid #f6f3ee;flex-wrap:wrap}
+.hist-row:last-child{border-bottom:none}
+.hist-row .h-date{min-width:120px;opacity:.8}
+.hist-row .h-svc{flex:1;min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-row .h-price{font-family:var(--serif);font-weight:600}
+
 .block-form{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1.1rem;margin-bottom:1rem;max-width:560px}
 .block-form .bf-row{display:flex;gap:1rem;flex-wrap:wrap}
 .block-form label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.9rem}
@@ -209,6 +224,7 @@ header .who{font-size:.74rem;opacity:.65}
       <button data-mode="week">Teden</button>
       <button data-mode="month">Mesec</button>
       <button data-mode="nujni">Nujni</button>
+      <button data-mode="stranke">Stranke</button>
     </div>
   </div>
 
@@ -232,6 +248,7 @@ header .who{font-size:.74rem;opacity:.65}
       <div class="main">
         <div class="cal-scroll" id="calScroll"></div>
         <div class="cards hidden" id="nujniList"></div>
+        <div class="stranke hidden" id="strankeView"></div>
       </div>
     </div>
   </div>
@@ -254,11 +271,12 @@ header .who{font-size:.74rem;opacity:.65}
     <div class="nb-services" id="nbServices"></div>
     <div class="nb-summary" id="nbSummary"></div>
     <div class="nb-grid">
-      <label>Ime in priimek<input type="text" id="nbName" placeholder="npr. Ana Novak"></label>
+      <label>Ime in priimek<input type="text" id="nbName" list="custNames" placeholder="npr. Ana Novak"></label>
       <label>Telefon<input type="tel" id="nbPhone" placeholder="npr. 031 234 567"></label>
     </div>
     <label class="nb-full">E-pošta (neobvezno)<input type="email" id="nbEmail"></label>
     <label class="nb-full">Opomba (neobvezno)<input type="text" id="nbNote"></label>
+    <datalist id="custNames"></datalist>
     <p class="msg" id="nbMsg"></p>
     <div class="nb-actions">
       <button class="btn btn-main" id="nbSave" style="width:auto;padding:.6rem 1.5rem">Shrani rezervacijo</button>
@@ -425,8 +443,9 @@ function rangeText(days){
 function load(){
   if(isMobile()&&MINI_BUILT){buildMini();}else{updateMiniSel();}
   if(mode==='nujni'){loadNujni();return;}
+  if(mode==='stranke'){loadStranke();return;}
   if(mode==='month'){loadMonth();return;}
-  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');
+  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');
   var days=daysForMode();
   document.getElementById('rangeLabel').textContent=rangeText(days);
   var fromISO=isoOf(days[0]),toISO=isoOf(days[days.length-1]);
@@ -440,7 +459,7 @@ function load(){
   });
 }
 function loadMonth(){
-  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');
+  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');
   document.getElementById('rangeLabel').textContent=rangeText();
   var cells=monthGrid(cur);
   calScroll.innerHTML='<div class="empty">Nalagam …</div>';
@@ -451,7 +470,7 @@ function loadMonth(){
   });
 }
 function loadNujni(){
-  calScroll.classList.add('hidden');nujniList.classList.remove('hidden');resetMiniHeight();
+  calScroll.classList.add('hidden');nujniList.classList.remove('hidden');document.getElementById('strankeView').classList.add('hidden');resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Nujni / po dogovoru';
   nujniList.innerHTML='<div class="empty">Nalagam …</div>';
   sb.from('bookings').select('*').is('booking_date',null).order('id',{ascending:false}).then(function(res){
@@ -466,6 +485,83 @@ function loadNujni(){
     }).join('');
     nujniList.querySelectorAll('[data-open]').forEach(function(x){x.addEventListener('click',function(){openDetail(cache[x.getAttribute('data-open')]);});});
   });
+}
+
+/* STRANKE */
+var CUSTOMERS=[];
+function obiski(n){var d=n%10,dd=n%100;if(dd>=11&&dd<=14)return n+' obiskov';if(d===1)return n+' obisk';if(d===2)return n+' obiska';if(d===3||d===4)return n+' obiski';return n+' obiskov';}
+function prettyShort(iso){if(!iso)return '';var p=iso.split('-');return (+p[2])+'. '+MES[+p[1]-1].substring(0,3)+' '+p[0];}
+function buildCustomers(rows){
+  var map={};
+  rows.forEach(function(b){
+    var ph=(b.customer_phone||'').replace(/\D/g,'');
+    var key=ph||('n:'+(b.customer_name||'').toLowerCase().trim());
+    if(!key||key==='n:')return;
+    if(!map[key])map[key]={key:key,name:b.customer_name||'',phone:b.customer_phone||'',email:b.customer_email||'',bookings:[]};
+    var c=map[key];
+    if(b.customer_name)c.name=b.customer_name;
+    if(b.customer_phone)c.phone=b.customer_phone;
+    if(b.customer_email)c.email=b.customer_email;
+    c.bookings.push(b);
+  });
+  var arr=Object.keys(map).map(function(k){return map[k];});
+  arr.forEach(function(c){
+    c.bookings.sort(function(a,b){return (b.booking_date||'').localeCompare(a.booking_date||'')||(b.start_time||'').localeCompare(a.start_time||'');});
+    c.visits=c.bookings.length; c.last=c.bookings.length?c.bookings[0].booking_date:null;
+  });
+  arr.sort(function(a,b){return (b.last||'').localeCompare(a.last||'');});
+  return arr;
+}
+function loadCustomersThen(cb){
+  sb.from('bookings').select('id,customer_name,customer_phone,customer_email,booking_date,start_time,end_time,total_duration_min,services_text,service_name,total_price,status,note,gap_after_min,gap_duration_min').order('booking_date',{ascending:false,nullsFirst:false}).then(function(res){
+    CUSTOMERS=res.error?[]:buildCustomers(res.data||[]);
+    if(cb)cb();
+  });
+}
+function loadStranke(){
+  calScroll.classList.add('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.remove('hidden');
+  resetMiniHeight();
+  document.getElementById('rangeLabel').textContent='Stranke';
+  var box=document.getElementById('strankeView');
+  box.innerHTML='<input class="search" id="custSearch" placeholder="Išči po imenu ali telefonu …"><div id="custList"><div class="empty">Nalagam …</div></div>';
+  document.getElementById('custSearch').addEventListener('input',refreshStrankeList);
+  loadCustomersThen(refreshStrankeList);
+}
+function refreshStrankeList(){
+  var listEl=document.getElementById('custList'); if(!listEl)return;
+  var q=(document.getElementById('custSearch').value||'').toLowerCase().trim(), qd=q.replace(/\D/g,'');
+  if(!CUSTOMERS.length){listEl.innerHTML='<div class="empty">Ni strank.</div>';return;}
+  var list=CUSTOMERS.filter(function(c){if(!q)return true;return (c.name||'').toLowerCase().indexOf(q)>=0||(qd&&(c.phone||'').replace(/\D/g,'').indexOf(qd)>=0);});
+  if(!list.length){listEl.innerHTML='<div class="empty">Ni zadetkov.</div>';return;}
+  var html='';
+  list.slice(0,300).forEach(function(c,i){
+    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'"><div><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div><div class="cust-meta">'+obiski(c.visits)+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div></div><div class="cust-hist hidden"></div></div>';
+  });
+  listEl.innerHTML=html;
+  listEl.querySelectorAll('.cust-head').forEach(function(hd){
+    hd.addEventListener('click',function(){
+      var c=list[+hd.getAttribute('data-ci')], hist=hd.nextElementSibling;
+      if(!hist.classList.contains('hidden')){hist.classList.add('hidden');hist.innerHTML='';return;}
+      var hh='';
+      c.bookings.forEach(function(b){cache[b.id]=b;hh+='<div class="hist-row" data-id="'+b.id+'"><span class="h-date">'+(b.booking_date?(prettyShort(b.booking_date)+' '+hm(b.start_time)):'Po dogovoru')+'</span><span class="h-svc">'+esc(b.services_text||b.service_name||'')+'</span><span class="h-price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>';});
+      hist.innerHTML=hh; hist.classList.remove('hidden');
+      hist.querySelectorAll('.hist-row').forEach(function(r){r.addEventListener('click',function(){openDetail(cache[r.getAttribute('data-id')]);});});
+    });
+  });
+}
+function populateCustDatalist(){
+  var dl=document.getElementById('custNames'); if(!dl)return;
+  var seen={},html='';
+  CUSTOMERS.forEach(function(c){var n=c.name||''; if(n&&!seen[n.toLowerCase()]){seen[n.toLowerCase()]=1;html+='<option value="'+esc(n)+'">'+esc(c.phone||'')+'</option>';}});
+  dl.innerHTML=html;
+}
+function fillFromCustomer(){
+  var name=document.getElementById('nbName').value.trim().toLowerCase(); if(!name)return;
+  var c=null;for(var i=0;i<CUSTOMERS.length;i++){if((CUSTOMERS[i].name||'').toLowerCase()===name){c=CUSTOMERS[i];break;}}
+  if(!c)return;
+  var ph=document.getElementById('nbPhone'), em=document.getElementById('nbEmail');
+  if(!ph.value&&c.phone)ph.value=c.phone;
+  if(!em.value&&c.email)em.value=c.email;
 }
 
 function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano','po dogovoru':'podogovoru'};return '<span class="badge '+(m[s]||'nova')+'">'+esc(s||'nova')+'</span>';}
@@ -630,6 +726,7 @@ function openNew(){
   buildNbServices();
   document.getElementById('nbSummary').textContent='Izberi vsaj eno storitev.';
   document.getElementById('newbk').classList.remove('hidden');
+  loadCustomersThen(populateCustDatalist);
 }
 function openNewAt(dateISO,timeStr){
   openNew();
@@ -667,6 +764,7 @@ document.getElementById('newClose').addEventListener('click',function(){document
 document.getElementById('nbCancel').addEventListener('click',function(){document.getElementById('newbk').classList.add('hidden');});
 document.getElementById('newbk').addEventListener('click',function(e){if(e.target.id==='newbk')document.getElementById('newbk').classList.add('hidden');});
 document.getElementById('nbTime').addEventListener('change',updateNbSummary);
+document.getElementById('nbName').addEventListener('change',fillFromCustomer);
 document.getElementById('nbSave').addEventListener('click',saveNew);
 
 sb.auth.getSession().then(function(res){if(res.data&&res.data.session)showApp(res.data.session);else showLogin();});
