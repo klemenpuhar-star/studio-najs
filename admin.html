@@ -53,7 +53,7 @@ header .who{font-size:.74rem;opacity:.65}
 .mini-stack{max-height:calc(100vh - 96px);overflow-y:auto;display:flex;flex-direction:column;gap:.8rem;padding-right:4px}
 .mini-stack::-webkit-scrollbar{width:6px}
 .mini-stack::-webkit-scrollbar-thumb{background:rgba(23,57,75,.2);border-radius:3px}
-@media(max-width:820px){.layout{flex-direction:column}.side{width:100%;max-width:320px;position:static}.mini-stack{max-height:300px}}
+@media(max-width:820px){.layout{flex-direction:column}.side{width:100%;max-width:340px;position:static}.mini-stack{max-height:none}.cal.multi{min-width:0}.who{display:none}.toolbar{padding:.8rem 1rem .4rem}.wrap{padding:.4rem 1rem 3rem}}
 
 /* Mini koledar */
 .mini{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:.9rem}
@@ -296,11 +296,12 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function eur(v){return (parseFloat(v)||0).toFixed(2).replace('.',',')+' €';}
 function hm(t){return String(t||'').substring(0,5);}
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function isMobile(){return window.innerWidth<=820;}
 function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DNI[d.getDay()]+', '+(+p[2])+'. '+MES[+p[1]-1]+' '+p[0];}
 function dayInfo(dow){if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};}
 
 /* AUTH */
-function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMiniStack();loadServices();load();}
+function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMini();loadServices();load();}
 function showLogin(){appView.classList.add('hidden');loginView.classList.remove('hidden');}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('password').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
@@ -327,6 +328,7 @@ document.getElementById('nextBtn').addEventListener('click',function(){nav(1);})
 function nav(dir){
   if(mode==='day')cur=addDays(cur,dir);
   else if(mode==='month')cur=addMonths(cur,dir);
+  else if(isMobile())cur=addDays(cur,dir*3);
   else cur=addDays(cur,dir*7);
   miniRef=new Date(cur);load();
 }
@@ -350,25 +352,49 @@ document.getElementById('blkSave').addEventListener('click',function(){
 });
 
 /* MINI KOLEDAR – drseč seznam mesecev */
-var MINI_BUILT=false;
-function buildMiniStack(){
-  var base=addMonths(new Date(),-1); base=new Date(base.getFullYear(),base.getMonth(),1);
-  var N=15, html='';
-  for(var m=0;m<N;m++){
-    var ref=addMonths(base,m), cells=compactGrid(ref);
-    html+='<div class="mini"><div class="mini-head"><span>'+cap(MES[ref.getMonth()])+' '+ref.getFullYear()+'</span></div><div class="mini-grid">';
-    ['Po','To','Sr','Če','Pe','So','Ne'].forEach(function(d){html+='<div class="mini-dow">'+d+'</div>';});
-    cells.forEach(function(d){
-      if(d.getMonth()!==ref.getMonth()){ html+='<div class="mini-day empty"></div>'; return; }
-      html+='<button class="mini-day'+(isoOf(d)===isoToday()?' today':'')+'" data-d="'+isoOf(d)+'">'+d.getDate()+'</button>';
-    });
-    html+='</div></div>';
+var MINI_BUILT=false, lastMobile=null;
+function miniMonthHTML(ref,withNav){
+  var cells=compactGrid(ref),html='<div class="mini"><div class="mini-head">';
+  if(withNav)html+='<button class="mini-nav" data-mn="-1">&#8249;</button>';
+  html+='<span>'+cap(MES[ref.getMonth()])+' '+ref.getFullYear()+'</span>';
+  if(withNav)html+='<button class="mini-nav" data-mn="1">&#8250;</button>';
+  html+='</div><div class="mini-grid">';
+  ['Po','To','Sr','Če','Pe','So','Ne'].forEach(function(d){html+='<div class="mini-dow">'+d+'</div>';});
+  cells.forEach(function(d){
+    if(d.getMonth()!==ref.getMonth()){html+='<div class="mini-day empty"></div>';return;}
+    html+='<button class="mini-day'+(isoOf(d)===isoToday()?' today':'')+'" data-d="'+isoOf(d)+'">'+d.getDate()+'</button>';
+  });
+  return html+'</div></div>';
+}
+var miniDelegated=false;
+function ensureMiniDelegation(){
+  if(miniDelegated)return;miniDelegated=true;
+  miniEl.addEventListener('click',function(e){
+    var nav=e.target.closest('.mini-nav');
+    if(nav){miniRef=addMonths(miniRef,parseInt(nav.getAttribute('data-mn')));buildMini();return;}
+    var day=e.target.closest('.mini-day[data-d]');
+    if(day){var p=day.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();}
+  });
+}
+function adjustSegLabels(){
+  var wk=document.querySelector('.seg button[data-mode="week"]'), ww=document.querySelector('.seg button[data-mode="workweek"]');
+  if(isMobile()){ if(wk)wk.textContent='3 dni'; if(ww)ww.style.display='none'; if(mode==='workweek'){mode='week';setSeg('week');} }
+  else { if(wk)wk.textContent='Teden'; if(ww)ww.style.display=''; }
+}
+function buildMini(){
+  ensureMiniDelegation();
+  lastMobile=isMobile();
+  adjustSegLabels();
+  if(lastMobile){
+    miniEl.innerHTML=miniMonthHTML(miniRef,true);
+  } else {
+    var base=addMonths(new Date(),-1); base=new Date(base.getFullYear(),base.getMonth(),1);
+    var html='';for(var m=0;m<15;m++){html+=miniMonthHTML(addMonths(base,m),false);}
+    miniEl.innerHTML=html;
   }
-  miniEl.innerHTML=html;
-  miniEl.addEventListener('click',function(e){var b=e.target.closest('.mini-day[data-d]');if(!b)return;var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);mode='day';setSeg('day');load();});
-  window.addEventListener('resize',syncMiniHeight);
   MINI_BUILT=true; updateMiniSel();
 }
+window.addEventListener('resize',function(){ if(isMobile()!==lastMobile){buildMini();load();} else syncMiniHeight(); });
 function updateMiniSel(){
   if(!MINI_BUILT)return;
   var prev=miniEl.querySelector('.mini-day.sel'); if(prev)prev.classList.remove('sel');
@@ -388,6 +414,7 @@ function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; m
 /* NALAGANJE */
 function daysForMode(){
   if(mode==='day')return [new Date(cur)];
+  if(isMobile())return [0,1,2].map(function(i){return addDays(cur,i);});
   var mon=mondayOf(cur);
   if(mode==='workweek')return [0,1,2,3,4,5].map(function(i){return addDays(mon,i);}); // pon–sob
   return [0,1,2,3,4,5,6].map(function(i){return addDays(mon,i);});
@@ -398,7 +425,7 @@ function rangeText(days){
   var a=days[0],b=days[days.length-1];return a.getDate()+'. '+MES[a.getMonth()].substring(0,3)+' – '+b.getDate()+'. '+MES[b.getMonth()].substring(0,3)+' '+b.getFullYear();
 }
 function load(){
-  updateMiniSel();
+  if(isMobile()&&MINI_BUILT){buildMini();}else{updateMiniSel();}
   if(mode==='nujni'){loadNujni();return;}
   if(mode==='month'){loadMonth();return;}
   calScroll.classList.remove('hidden');nujniList.classList.add('hidden');
@@ -446,7 +473,7 @@ function loadNujni(){
 function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano','po dogovoru':'podogovoru'};return '<span class="badge '+(m[s]||'nova')+'">'+esc(s||'nova')+'</span>';}
 
 function renderCal(days,bookings,blocks){
-  cache={};blockCache={};var N=days.length;var gc='64px repeat('+N+',1fr)';
+  cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
   days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
