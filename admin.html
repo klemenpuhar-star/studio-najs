@@ -204,9 +204,9 @@ header .who{font-size:.74rem;opacity:.65}
     <button class="btn-ghost" id="newBtn">+ Nova rezervacija</button>
     <button class="btn-ghost" id="blockToggle">&#9210; Blokiraj čas</button>
     <div class="seg">
-      <button data-mode="day">Dan</button>
+      <button data-mode="day" class="active">Dan</button>
       <button data-mode="workweek">Delovni teden</button>
-      <button data-mode="week" class="active">Teden</button>
+      <button data-mode="week">Teden</button>
       <button data-mode="month">Mesec</button>
       <button data-mode="nujni">Nujni</button>
     </div>
@@ -279,7 +279,7 @@ var H0=6,H1=21,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
-var mode='week', cur=new Date(); cur.setHours(0,0,0,0);
+var mode='day', cur=new Date(); cur.setHours(0,0,0,0);
 var miniRef=new Date(cur);
 var cache={},blockCache={},SERVICES=[];
 
