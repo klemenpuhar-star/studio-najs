@@ -143,6 +143,13 @@ header .who{font-size:.74rem;opacity:.65}
 .pop .d-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .pop .d-actions{display:flex;gap:.4rem;flex-wrap:wrap}
 
+.tip{position:fixed;z-index:60;pointer-events:none;background:#fff;border:1px solid rgba(23,57,75,.12);box-shadow:0 8px 28px rgba(23,57,75,.18);border-radius:12px;padding:.65rem .8rem;max-width:250px;font-size:.8rem;line-height:1.45;color:var(--navy)}
+.tip .tip-t{font-family:var(--serif);font-size:1.05rem;font-weight:600}
+.tip .tip-n{font-weight:500}
+.tip .tip-row{opacity:.82}
+.tip .tip-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.4rem}
+.tip .tip-price{font-family:var(--serif);font-weight:600}
+
 .block-form{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1.1rem;margin-bottom:1rem;max-width:560px}
 .block-form .bf-row{display:flex;gap:1rem;flex-wrap:wrap}
 .block-form label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.9rem}
@@ -214,6 +221,7 @@ header .who{font-size:.74rem;opacity:.65}
 <div class="overlay hidden" id="detail">
   <div class="pop"><button class="x" id="detailClose">&times;</button><div id="detailBody"></div></div>
 </div>
+<div id="tip" class="tip hidden"></div>
 
 <script>
 var SB_URL='https://azqtgvxashunmmydkwop.supabase.co';
@@ -229,7 +237,7 @@ var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
 var mode='week', cur=new Date(); cur.setHours(0,0,0,0);
 var miniRef=new Date(cur);
-var cache={};
+var cache={},blockCache={};
 
 function pad(n){return String(n).padStart(2,'0');}
 function isoOf(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -394,7 +402,7 @@ function loadNujni(){
 function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano','po dogovoru':'podogovoru'};return '<span class="badge '+(m[s]||'nova')+'">'+esc(s||'nova')+'</span>';}
 
 function renderCal(days,bookings,blocks){
-  cache={};var N=days.length;var gc='64px repeat('+N+',1fr)';
+  cache={};blockCache={};var N=days.length;var gc='64px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
   days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
@@ -412,14 +420,27 @@ function renderCal(days,bookings,blocks){
       col+='<div class="ev '+cls+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div><div class="ev-n">'+esc(b.customer_name||'—')+'</div><div class="ev-s">'+esc(b.services_text||b.service_name||'')+'</div></div>';
     });
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
+      blockCache[bl.id]=bl;
       var s=toMin(bl.start_time),e=toMin(bl.end_time),top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,18);
       col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">Blokirano</div>'+(bl.note?('<div class="ev-s">'+esc(bl.note)+'</div>'):'')+'</div>';
     });
     col+='</div>';h+=col;
   });
   h+='</div></div>';calScroll.innerHTML=h;
-  calScroll.querySelectorAll('.ev[data-bid]').forEach(function(el){el.addEventListener('click',function(){openDetail(cache[el.getAttribute('data-bid')]);});});
-  calScroll.querySelectorAll('.ev[data-blk]').forEach(function(el){el.addEventListener('click',function(){if(confirm('Odstranim to blokado?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});});
+  calScroll.querySelectorAll('.ev[data-bid]').forEach(function(el){
+    var b=cache[el.getAttribute('data-bid')];
+    el.addEventListener('click',function(){openDetail(b);});
+    el.addEventListener('mouseenter',function(){showTip(tipBooking(b),el);});
+    el.addEventListener('mouseleave',hideTip);
+    el.addEventListener('touchstart',function(){showTip(tipBooking(b),el);},{passive:true});
+  });
+  calScroll.querySelectorAll('.ev[data-blk]').forEach(function(el){
+    var bl=blockCache[el.getAttribute('data-blk')];
+    el.addEventListener('mouseenter',function(){showTip(tipBlock(bl),el);});
+    el.addEventListener('mouseleave',hideTip);
+    el.addEventListener('touchstart',function(){showTip(tipBlock(bl),el);},{passive:true});
+    el.addEventListener('click',function(){hideTip();if(confirm('Odstranim to blokado?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});
+  });
   syncMiniHeight();
 }
 
@@ -436,12 +457,41 @@ function renderMonth(cells,counts){
   syncMiniHeight();
 }
 
+/* PREDOGLED (hover/dotik) */
+var tip=document.getElementById('tip');
+function tipBooking(b){
+  if(!b)return '';
+  var gap=(b.gap_duration_min>0)?'<div class="tip-row">⏳ vmesni prosti čas '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>':'';
+  return '<div class="tip-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div>'
+    +'<div class="tip-n">'+esc(b.customer_name||'—')+'</div>'
+    +(b.customer_phone?'<div class="tip-row">📞 '+esc(b.customer_phone)+'</div>':'')
+    +'<div class="tip-row">'+esc(b.services_text||b.service_name||'')+'</div>'
+    +(b.note?'<div class="tip-row" style="font-style:italic">'+esc(b.note)+'</div>':'')+gap
+    +'<div class="tip-foot"><span class="tip-price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>';
+}
+function tipBlock(bl){
+  if(!bl)return '';
+  return '<div class="tip-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="tip-n" style="color:var(--coral)">⛔ Blokirano</div>'+(bl.note?'<div class="tip-row">'+esc(bl.note)+'</div>':'');
+}
+function showTip(html,el){
+  if(!html)return;
+  tip.innerHTML=html;tip.classList.remove('hidden');
+  var r=el.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight,M=8;
+  var left=r.right+M; if(left+tw>window.innerWidth-M) left=r.left-tw-M; if(left<M) left=M;
+  var top=r.top; if(top+th>window.innerHeight-M) top=window.innerHeight-th-M; if(top<M) top=M;
+  tip.style.left=left+'px';tip.style.top=top+'px';
+}
+function hideTip(){tip.classList.add('hidden');}
+window.addEventListener('scroll',hideTip,true);
+window.addEventListener('touchmove',hideTip);
+
 /* PODROBNOSTI */
 var detail=document.getElementById('detail'),detailBody=document.getElementById('detailBody');
 document.getElementById('detailClose').addEventListener('click',function(){detail.classList.add('hidden');});
 detail.addEventListener('click',function(e){if(e.target===detail)detail.classList.add('hidden');});
 function openDetail(b){
   if(!b)return;
+  hideTip();
   var gap=(b.gap_duration_min>0)?('<div class="d-meta">⏳ vmesni prosti čas: '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>'):'';
   detailBody.innerHTML=''
     +'<div class="d-date">'+(b.booking_date?prettyDate(b.booking_date):'Po dogovoru / nujni')+'</div>'
