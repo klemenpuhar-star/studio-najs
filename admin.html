@@ -31,8 +31,9 @@ a{color:inherit}
 .msg.err{color:#b04a3a}
 
 header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 4%;height:60px;background:rgba(234,215,193,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(23,57,75,.1)}
-header .brand{font-family:var(--serif);font-size:1.35rem;font-weight:300}
-header .brand span{color:var(--coral)}
+header .brand{display:flex;align-items:center;gap:.55rem}
+header .brand .logo-img{height:36px;width:auto;display:block}
+header .brand .brand-tag{font-family:var(--sans);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
 header .right{display:flex;align-items:center;gap:.9rem}
 header .who{font-size:.74rem;opacity:.65}
 .btn-ghost{background:#fff;border:1.5px solid rgba(23,57,75,.2);color:var(--navy);padding:.45rem .9rem;font-size:.74rem;border-radius:999px;cursor:pointer}
@@ -207,7 +208,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand">Najs <span>&#10022;</span> admin</div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
