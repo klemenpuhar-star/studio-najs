@@ -38,7 +38,7 @@ header .who{font-size:.74rem;opacity:.65}
 .btn-ghost{background:#fff;border:1.5px solid rgba(23,57,75,.2);color:var(--navy);padding:.45rem .9rem;font-size:.74rem;border-radius:999px;cursor:pointer}
 .btn-ghost:hover{border-color:var(--coral);color:var(--coral)}
 
-.toolbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:1rem 4% .4rem}
+.toolbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:1rem 1.5rem .4rem}
 .nav-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(23,57,75,.15);background:#fff;cursor:pointer;font-size:1rem;color:var(--navy)}
 .nav-btn:hover{border-color:var(--coral);color:var(--coral)}
 .range{font-family:var(--serif);font-size:1.25rem;margin:0 .4rem;min-width:160px}
@@ -46,7 +46,7 @@ header .who{font-size:.74rem;opacity:.65}
 .seg button{border:none;background:transparent;padding:.45rem .85rem;font-size:.76rem;cursor:pointer;color:var(--navy);font-family:var(--sans)}
 .seg button.active{background:var(--navy);color:#fff}
 
-.wrap{padding:.4rem 4% 3rem}
+.wrap{padding:.4rem 1.5rem 3rem}
 .layout{display:flex;gap:1.2rem;align-items:flex-start}
 .side{width:230px;flex-shrink:0;position:sticky;top:72px}
 .main{flex:1;min-width:0}
@@ -223,7 +223,7 @@ var sb=supabase.createClient(SB_URL,SB_KEY);
 var loginView=document.getElementById('loginView'),appView=document.getElementById('appView');
 var calScroll=document.getElementById('calScroll'),nujniList=document.getElementById('nujniList'),miniEl=document.getElementById('mini');
 
-var H0=8,H1=20,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
+var H0=6,H1=21,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
@@ -238,6 +238,7 @@ function mondayOf(d){var x=new Date(d);var k=(x.getDay()+6)%7;x.setDate(x.getDat
 function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function addMonths(d,n){var x=new Date(d);x.setDate(1);x.setMonth(x.getMonth()+n);return x;}
 function monthGrid(ref){var first=new Date(ref.getFullYear(),ref.getMonth(),1);var s=mondayOf(first);var a=[];for(var i=0;i<42;i++)a.push(addDays(s,i));return a;}
+function compactGrid(ref){var first=new Date(ref.getFullYear(),ref.getMonth(),1);var s=mondayOf(first);var dim=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();var last=new Date(ref.getFullYear(),ref.getMonth(),dim);var end=addDays(mondayOf(last),6);var n=Math.round((end-s)/86400000)+1;var a=[];for(var i=0;i<n;i++)a.push(addDays(s,i));return a;}
 function toMin(t){t=String(t||'').substring(0,5);var p=t.split(':');return (parseInt(p[0])||0)*60+(parseInt(p[1])||0);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function eur(v){return (parseFloat(v)||0).toFixed(2).replace('.',',')+' €';}
@@ -302,7 +303,7 @@ function buildMiniStack(){
   var base=addMonths(new Date(),-1); base=new Date(base.getFullYear(),base.getMonth(),1);
   var N=15, html='';
   for(var m=0;m<N;m++){
-    var ref=addMonths(base,m), cells=monthGrid(ref);
+    var ref=addMonths(base,m), cells=compactGrid(ref);
     html+='<div class="mini"><div class="mini-head"><span>'+cap(MES[ref.getMonth()])+' '+ref.getFullYear()+'</span></div><div class="mini-grid">';
     ['Po','To','Sr','Če','Pe','So','Ne'].forEach(function(d){html+='<div class="mini-dow">'+d+'</div>';});
     cells.forEach(function(d){
@@ -312,7 +313,8 @@ function buildMiniStack(){
     html+='</div></div>';
   }
   miniEl.innerHTML=html;
-  miniEl.addEventListener('click',function(e){var b=e.target.closest('.mini-day[data-d]');if(!b)return;var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);load();});
+  miniEl.addEventListener('click',function(e){var b=e.target.closest('.mini-day[data-d]');if(!b)return;var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);mode='day';setSeg('day');load();});
+  window.addEventListener('resize',syncMiniHeight);
   MINI_BUILT=true; updateMiniSel();
 }
 function updateMiniSel(){
@@ -320,6 +322,16 @@ function updateMiniSel(){
   var prev=miniEl.querySelector('.mini-day.sel'); if(prev)prev.classList.remove('sel');
   var el=miniEl.querySelector('.mini-day[data-d="'+isoOf(cur)+'"]'); if(el)el.classList.add('sel');
 }
+function syncMiniHeight(){
+  if(!MINI_BUILT)return;
+  if(window.innerWidth<=820){ miniEl.style.height=''; miniEl.style.maxHeight='320px'; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); return; }
+  var cal=calScroll.firstElementChild; if(!cal)return;
+  var h=cal.offsetHeight; if(!h)return;
+  miniEl.style.height=h+'px'; miniEl.style.maxHeight=h+'px';
+  var minH=Math.floor((h-2*12)/3);
+  miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight=minH+'px';});
+}
+function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); }
 
 /* NALAGANJE */
 function daysForMode(){
@@ -362,7 +374,7 @@ function loadMonth(){
   });
 }
 function loadNujni(){
-  calScroll.classList.add('hidden');nujniList.classList.remove('hidden');
+  calScroll.classList.add('hidden');nujniList.classList.remove('hidden');resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Nujni / po dogovoru';
   nujniList.innerHTML='<div class="empty">Nalagam …</div>';
   sb.from('bookings').select('*').is('booking_date',null).order('id',{ascending:false}).then(function(res){
@@ -385,11 +397,11 @@ function renderCal(days,bookings,blocks){
   cache={};var N=days.length;var gc='64px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
   days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+DOW[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
-  h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter">';
+  h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
   days.forEach(function(d){
-    var info=dayInfo(d.getDay()),di=isoOf(d),col='<div class="col">';
+    var info=dayInfo(d.getDay()),di=isoOf(d),col='<div class="col" style="height:'+TOTAL+'px">';
     if(info.closed)col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.arrangement)col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.h){if(info.h[0]>H0)col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';if(info.h[1]<H1)col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';}
@@ -408,6 +420,7 @@ function renderCal(days,bookings,blocks){
   h+='</div></div>';calScroll.innerHTML=h;
   calScroll.querySelectorAll('.ev[data-bid]').forEach(function(el){el.addEventListener('click',function(){openDetail(cache[el.getAttribute('data-bid')]);});});
   calScroll.querySelectorAll('.ev[data-blk]').forEach(function(el){el.addEventListener('click',function(){if(confirm('Odstranim to blokado?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});});
+  syncMiniHeight();
 }
 
 function renderMonth(cells,counts){
@@ -420,6 +433,7 @@ function renderMonth(cells,counts){
   });
   h+='</div></div>';calScroll.innerHTML=h;
   calScroll.querySelectorAll('.mcell').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();});});
+  syncMiniHeight();
 }
 
 /* PODROBNOSTI */
