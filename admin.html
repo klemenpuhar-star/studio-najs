@@ -328,7 +328,6 @@ document.getElementById('nextBtn').addEventListener('click',function(){nav(1);})
 function nav(dir){
   if(mode==='day')cur=addDays(cur,dir);
   else if(mode==='month')cur=addMonths(cur,dir);
-  else if(isMobile())cur=addDays(cur,dir*3);
   else cur=addDays(cur,dir*7);
   miniRef=new Date(cur);load();
 }
@@ -378,8 +377,8 @@ function ensureMiniDelegation(){
 }
 function adjustSegLabels(){
   var wk=document.querySelector('.seg button[data-mode="week"]'), ww=document.querySelector('.seg button[data-mode="workweek"]');
-  if(isMobile()){ if(wk)wk.textContent='3 dni'; if(ww)ww.style.display='none'; if(mode==='workweek'){mode='week';setSeg('week');} }
-  else { if(wk)wk.textContent='Teden'; if(ww)ww.style.display=''; }
+  if(isMobile()){ if(wk)wk.style.display='none'; if(ww)ww.style.display='none'; if(mode==='week'||mode==='workweek'){mode='day';setSeg('day');} }
+  else { if(wk){wk.style.display='';wk.textContent='Teden';} if(ww)ww.style.display=''; }
 }
 function buildMini(){
   ensureMiniDelegation();
@@ -414,7 +413,6 @@ function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; m
 /* NALAGANJE */
 function daysForMode(){
   if(mode==='day')return [new Date(cur)];
-  if(isMobile())return [0,1,2].map(function(i){return addDays(cur,i);});
   var mon=mondayOf(cur);
   if(mode==='workweek')return [0,1,2,3,4,5].map(function(i){return addDays(mon,i);}); // pon–sob
   return [0,1,2,3,4,5,6].map(function(i){return addDays(mon,i);});
