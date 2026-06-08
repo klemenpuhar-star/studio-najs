@@ -150,6 +150,24 @@ header .who{font-size:.74rem;opacity:.65}
 .tip .tip-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.4rem}
 .tip .tip-price{font-family:var(--serif);font-weight:600}
 
+.pop-wide{max-width:560px;max-height:90vh;overflow-y:auto}
+.nb-title{font-family:var(--serif);font-weight:300;font-size:1.6rem;margin-bottom:1rem}
+.nb-grid{display:flex;gap:1rem;flex-wrap:wrap}
+.nb-grid label{flex:1;min-width:140px}
+.pop-wide label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.8rem}
+.pop-wide input{display:block;width:100%;margin-top:.3rem;padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy)}
+.pop-wide input:focus{outline:none;border-color:var(--coral)}
+.nb-svc-label{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.4rem}
+.nb-services{max-height:240px;overflow-y:auto;border:1.5px solid rgba(23,57,75,.12);border-radius:12px;padding:.5rem .8rem;margin-bottom:.8rem}
+.nb-cat{font-family:var(--serif);font-size:1.05rem;margin:.7rem 0 .25rem}
+.nb-cat:first-child{margin-top:0}
+.nb-item{display:flex;align-items:center;gap:.6rem;padding:.32rem 0;font-size:.86rem;cursor:pointer;margin:0}
+.nb-item input{width:auto!important;margin:0!important;display:inline-block!important}
+.nb-item .nb-dur{margin-left:auto;opacity:.6;font-size:.78rem;white-space:nowrap}
+.nb-item .nb-price{font-family:var(--serif);font-weight:600;min-width:62px;text-align:right}
+.nb-summary{background:var(--bez2);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem;font-size:.88rem;min-height:1.2em}
+.nb-actions{display:flex;gap:.6rem;align-items:center}
+
 .block-form{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);padding:1.1rem;margin-bottom:1rem;max-width:560px}
 .block-form .bf-row{display:flex;gap:1rem;flex-wrap:wrap}
 .block-form label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.9rem}
@@ -183,6 +201,7 @@ header .who{font-size:.74rem;opacity:.65}
     <button class="nav-btn" id="prevBtn">&#8249;</button>
     <button class="nav-btn" id="nextBtn">&#8250;</button>
     <span class="range" id="rangeLabel"></span>
+    <button class="btn-ghost" id="newBtn">+ Nova rezervacija</button>
     <button class="btn-ghost" id="blockToggle">&#9210; Blokiraj čas</button>
     <div class="seg">
       <button data-mode="day">Dan</button>
@@ -223,6 +242,31 @@ header .who{font-size:.74rem;opacity:.65}
 </div>
 <div id="tip" class="tip hidden"></div>
 
+<div class="overlay hidden" id="newbk">
+  <div class="pop pop-wide">
+    <button class="x" id="newClose">&times;</button>
+    <h2 class="nb-title">Nova rezervacija</h2>
+    <div class="nb-grid">
+      <label>Datum<input type="date" id="nbDate"></label>
+      <label>Ura začetka<input type="time" id="nbTime" step="900"></label>
+    </div>
+    <div class="nb-svc-label">Storitve</div>
+    <div class="nb-services" id="nbServices"></div>
+    <div class="nb-summary" id="nbSummary"></div>
+    <div class="nb-grid">
+      <label>Ime in priimek<input type="text" id="nbName" placeholder="npr. Ana Novak"></label>
+      <label>Telefon<input type="tel" id="nbPhone" placeholder="npr. 031 234 567"></label>
+    </div>
+    <label class="nb-full">E-pošta (neobvezno)<input type="email" id="nbEmail"></label>
+    <label class="nb-full">Opomba (neobvezno)<input type="text" id="nbNote"></label>
+    <p class="msg" id="nbMsg"></p>
+    <div class="nb-actions">
+      <button class="btn btn-main" id="nbSave" style="width:auto;padding:.6rem 1.5rem">Shrani rezervacijo</button>
+      <button class="btn-ghost" id="nbCancel">Prekliči</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var SB_URL='https://azqtgvxashunmmydkwop.supabase.co';
 var SB_KEY='sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
@@ -237,7 +281,7 @@ var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
 var mode='week', cur=new Date(); cur.setHours(0,0,0,0);
 var miniRef=new Date(cur);
-var cache={},blockCache={};
+var cache={},blockCache={},SERVICES=[];
 
 function pad(n){return String(n).padStart(2,'0');}
 function isoOf(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -256,7 +300,7 @@ function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+
 function dayInfo(dow){if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};}
 
 /* AUTH */
-function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMiniStack();load();}
+function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMiniStack();loadServices();load();}
 function showLogin(){appView.classList.add('hidden');loginView.classList.remove('hidden');}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('password').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
@@ -509,6 +553,81 @@ function openDetail(b){
   });});
   detail.classList.remove('hidden');
 }
+
+/* NOVA REZERVACIJA */
+function loadServices(){
+  sb.from('services').select('id,name,price,category,sort_order,duration_min,gap_after_min,gap_duration_min').eq('active',true).order('sort_order',{ascending:true}).then(function(res){
+    if(!res.error)SERVICES=res.data||[];
+  });
+}
+function buildNbServices(){
+  var box=document.getElementById('nbServices');
+  if(!SERVICES.length){box.innerHTML='<div style="opacity:.6;padding:.4rem 0">Nalagam storitve …</div>';return;}
+  var cats=[],byCat={};
+  SERVICES.forEach(function(s){if(!byCat[s.category]){byCat[s.category]=[];cats.push(s.category);}byCat[s.category].push(s);});
+  var html='';
+  cats.forEach(function(c){
+    html+='<div class="nb-cat">'+esc(c)+'</div>';
+    byCat[c].forEach(function(s){
+      html+='<label class="nb-item"><input type="checkbox" value="'+s.id+'"><span>'+esc(s.name)+'</span><span class="nb-dur">'+(s.duration_min||0)+' min</span><span class="nb-price">'+eur(s.price)+'</span></label>';
+    });
+  });
+  box.innerHTML=html;
+  box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',updateNbSummary);});
+}
+function nbSelected(){
+  var ids=[];document.querySelectorAll('#nbServices input:checked').forEach(function(cb){ids.push(cb.value);});
+  return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;});
+}
+function updateNbSummary(){
+  var sel=nbSelected(),sumEl=document.getElementById('nbSummary');
+  if(!sel.length){sumEl.textContent='Izberi vsaj eno storitev.';return;}
+  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
+  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var start=document.getElementById('nbTime').value,endTxt='';
+  if(start&&dur){var sm=toMin(start)+dur;endTxt=pad(Math.floor(sm/60))+':'+pad(sm%60);}
+  sumEl.innerHTML='Skupaj: <strong>'+dur+' min</strong> · <strong>'+eur(price)+'</strong>'+(endTxt?(' · konec ob <strong>'+endTxt+'</strong>'):'');
+}
+function openNew(){
+  document.getElementById('nbDate').value=isoOf(cur);
+  ['nbTime','nbName','nbPhone','nbEmail','nbNote'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('nbMsg').textContent='';document.getElementById('nbMsg').className='msg';
+  buildNbServices();
+  document.getElementById('nbSummary').textContent='Izberi vsaj eno storitev.';
+  document.getElementById('newbk').classList.remove('hidden');
+}
+function saveNew(){
+  var sel=nbSelected(),msg=document.getElementById('nbMsg');msg.className='msg';
+  var date=document.getElementById('nbDate').value,start=document.getElementById('nbTime').value;
+  var name=document.getElementById('nbName').value.trim(),phone=document.getElementById('nbPhone').value.trim();
+  var email=document.getElementById('nbEmail').value.trim(),note=document.getElementById('nbNote').value.trim();
+  if(!sel.length){msg.textContent='Izberi vsaj eno storitev.';msg.className='msg err';return;}
+  if(!date||!start){msg.textContent='Vnesi datum in uro začetka.';msg.className='msg err';return;}
+  if(!name){msg.textContent='Vnesi ime stranke.';msg.className='msg err';return;}
+  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
+  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var em=toMin(start)+dur,end=pad(Math.floor(em/60))+':'+pad(em%60);
+  var gapAfter=0,gapDuration=0,gapSvc=null;
+  sel.forEach(function(s){var gd=parseInt(s.gap_duration_min)||0,ga=parseInt(s.gap_after_min)||0;if(gd>0&&ga>0){if(!gapSvc||gd>(parseInt(gapSvc.gap_duration_min)||0))gapSvc=s;}});
+  if(gapSvc){var ga=parseInt(gapSvc.gap_after_min)||0,gd=parseInt(gapSvc.gap_duration_min)||0;if(ga+gd<=dur){gapAfter=ga;gapDuration=gd;}}
+  var rec={service_id:sel[0].id,service_name:sel[0].name,services_text:sel.map(function(s){return s.name;}).join(' + '),
+    total_price:parseFloat(price.toFixed(2)),total_duration_min:dur,gap_after_min:gapAfter,gap_duration_min:gapDuration,
+    customer_name:name,customer_phone:phone||null,customer_email:email||null,
+    booking_date:date,start_time:start,end_time:end,status:'potrjeno',note:note||null};
+  var btn=document.getElementById('nbSave');btn.disabled=true;btn.textContent='Shranjujem …';
+  sb.from('bookings').insert([rec]).then(function(res){
+    btn.disabled=false;btn.textContent='Shrani rezervacijo';
+    if(res.error){msg.textContent='Napaka: '+res.error.message;msg.className='msg err';return;}
+    document.getElementById('newbk').classList.add('hidden');
+    var p=date.split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();
+  });
+}
+document.getElementById('newBtn').addEventListener('click',openNew);
+document.getElementById('newClose').addEventListener('click',function(){document.getElementById('newbk').classList.add('hidden');});
+document.getElementById('nbCancel').addEventListener('click',function(){document.getElementById('newbk').classList.add('hidden');});
+document.getElementById('newbk').addEventListener('click',function(e){if(e.target.id==='newbk')document.getElementById('newbk').classList.add('hidden');});
+document.getElementById('nbTime').addEventListener('change',updateNbSummary);
+document.getElementById('nbSave').addEventListener('click',saveNew);
 
 sb.auth.getSession().then(function(res){if(res.data&&res.data.session)showApp(res.data.session);else showLogin();});
 </script>
