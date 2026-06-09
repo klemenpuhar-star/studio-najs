@@ -153,6 +153,15 @@ header .who{font-size:.74rem;opacity:.65}
 .pop .d-meta a{color:var(--coral);text-decoration:none}
 .pop .d-note{font-size:.84rem;font-style:italic;opacity:.75;border-left:2px solid var(--coral);padding-left:.5rem;margin-bottom:.6rem}
 .pop .d-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.pop .d-edit{margin:.2rem 0 .9rem;padding:.7rem .8rem;background:rgba(23,57,75,.045);border-radius:12px}
+.pop .d-edit-hd{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);margin-bottom:.5rem}
+.pop .d-edit-row{display:flex;gap:.6rem;margin-bottom:.55rem}
+.pop .d-edit-row label{flex:1;display:flex;flex-direction:column;gap:.22rem;font-size:.72rem;opacity:.7}
+.pop .d-edit-row input{font:inherit;font-size:.9rem;padding:.45rem .5rem;border:1.5px solid rgba(23,57,75,.18);border-radius:8px;background:#fff;color:var(--navy)}
+.act.save{background:var(--navy);color:#fff;border-color:var(--navy)}
+.act.save:hover{background:#22333f;color:#fff;border-color:#22333f}
+.d-edit-msg{font-size:.78rem;margin-top:.35rem;min-height:1em}
+.d-edit-msg.ok{color:#3f8f5b}.d-edit-msg.err{color:#b04a3a}
 .pop .d-actions{display:flex;gap:.4rem;flex-wrap:wrap}
 
 .tip{position:fixed;z-index:60;pointer-events:none;background:#fff;border:1px solid rgba(23,57,75,.12);box-shadow:0 8px 28px rgba(23,57,75,.18);border-radius:12px;padding:.65rem .8rem;max-width:250px;font-size:.8rem;line-height:1.45;color:var(--navy)}
@@ -220,7 +229,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v11-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v12-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -236,7 +245,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v11 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v12 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -827,13 +836,68 @@ function openDetail(b){
     +'<div class="d-meta">👤 '+esc(b.customer_name||'—')+(b.customer_phone?('<br>📞 <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>✉️ '+esc(b.customer_email)):'')+'</div>'
     +(b.note?('<div class="d-note">'+esc(b.note)+'</div>'):'')+gap
     +'<div class="d-row"><span class="price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>'
-    +'<div class="d-actions"><button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button><button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act danger" data-id="'+b.id+'" data-s="preklicano">Prekliči</button></div>';
-  detailBody.querySelectorAll('.act').forEach(function(btn){btn.addEventListener('click',function(){
+    +'<div class="d-edit">'
+      +'<div class="d-edit-hd">Uredi termin in storitve</div>'
+      +'<div class="d-edit-row">'
+        +'<label>Datum<input type="date" id="edDate" value="'+(b.booking_date||'')+'"></label>'
+        +'<label>Ura začetka<input type="time" id="edTime" step="900" value="'+(b.start_time?hm(b.start_time):'')+'"></label>'
+      +'</div>'
+      +'<div class="nb-svc-label" style="margin:.6rem 0 .35rem">Storitve</div>'
+      +'<div class="nb-services" id="edServices"></div>'
+      +'<div class="nb-summary" id="edSummary"></div>'
+      +'<button class="act save" id="edSave">Shrani spremembe</button>'
+      +'<div class="d-edit-msg" id="edMsg"></div>'
+    +'</div>'
+    +'<div class="d-actions"><button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button><button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act" data-id="'+b.id+'" data-s="preklicano">Prekliči</button><button class="act danger" id="edDel">Izbriši</button></div>';
+  buildEdServices(edServiceMatchIds(b));
+  updateEdSummary();
+  var edTimeEl=document.getElementById('edTime'); if(edTimeEl)edTimeEl.addEventListener('change',updateEdSummary);
+  detailBody.querySelectorAll('.act[data-s]').forEach(function(btn){btn.addEventListener('click',function(){
     var id=btn.getAttribute('data-id'),s=btn.getAttribute('data-s');
     if(s==='preklicano'&&!confirm('Prekličem to rezervacijo?'))return;
     btn.textContent='…';
     sb.from('bookings').update({status:s}).eq('id',id).then(function(res){if(res.error)alert('Napaka: '+res.error.message);detail.classList.add('hidden');load();});
   });});
+  var edSave=document.getElementById('edSave');
+  if(edSave)edSave.addEventListener('click',function(){
+    var nd=document.getElementById('edDate').value,nt=document.getElementById('edTime').value,m=document.getElementById('edMsg');
+    m.className='d-edit-msg';
+    var sel=edSelected();
+    if(!nd||!nt){m.textContent='Vnesite datum in uro.';m.className='d-edit-msg err';return;}
+    if(!sel.length){m.textContent='Izberite vsaj eno storitev.';m.className='d-edit-msg err';return;}
+    var origIds=edServiceMatchIds(b).slice().sort().join(',');
+    var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
+    var rec;
+    if(selIds===origIds){
+      var dur0=parseInt(b.total_duration_min)||sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0)||30;
+      var em0=toMin(nt)+dur0,ne0=pad(Math.floor(em0/60))+':'+pad(em0%60);
+      rec={booking_date:nd,start_time:nt,end_time:ne0};
+    } else {
+      var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
+      var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+      var em=toMin(nt)+dur,ne=pad(Math.floor(em/60))+':'+pad(em%60);
+      var gapAfter=0,gapDuration=0,gapSvc=null;
+      sel.forEach(function(s){var gd=parseInt(s.gap_duration_min)||0,ga=parseInt(s.gap_after_min)||0;if(gd>0&&ga>0){if(!gapSvc||gd>(parseInt(gapSvc.gap_duration_min)||0))gapSvc=s;}});
+      if(gapSvc){var ga=parseInt(gapSvc.gap_after_min)||0,gd=parseInt(gapSvc.gap_duration_min)||0;if(ga+gd<=dur){gapAfter=ga;gapDuration=gd;}}
+      rec={booking_date:nd,start_time:nt,end_time:ne,total_duration_min:dur,total_price:parseFloat(price.toFixed(2)),
+        services_text:sel.map(function(s){return s.name;}).join(' + '),service_id:sel[0].id,service_name:sel[0].name,
+        gap_after_min:gapAfter,gap_duration_min:gapDuration};
+    }
+    edSave.disabled=true;edSave.textContent='Shranjujem …';
+    sb.from('bookings').update(rec).eq('id',b.id).then(function(res){
+      if(res.error){m.textContent='Napaka: '+res.error.message;m.className='d-edit-msg err';edSave.disabled=false;edSave.textContent='Shrani spremembe';return;}
+      detail.classList.add('hidden');load();
+    });
+  });
+  var edDel=document.getElementById('edDel');
+  if(edDel)edDel.addEventListener('click',function(){
+    if(!confirm('Trajno izbrišem to rezervacijo? Tega ni mogoče razveljaviti.'))return;
+    edDel.textContent='…';edDel.disabled=true;
+    sb.from('bookings').delete().eq('id',b.id).then(function(res){
+      if(res.error){alert('Napaka pri brisanju: '+res.error.message);edDel.disabled=false;edDel.textContent='Izbriši';return;}
+      detail.classList.add('hidden');load();
+    });
+  });
   detail.classList.remove('hidden');
 }
 
@@ -892,6 +956,56 @@ function updateNbSummary(){
   var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
   var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
   var start=document.getElementById('nbTime').value,endTxt='';
+  if(start&&dur){var sm=toMin(start)+dur;endTxt=pad(Math.floor(sm/60))+':'+pad(sm%60);}
+  sumEl.innerHTML='Skupaj: <strong>'+dur+' min</strong> · <strong>'+eur(price)+'</strong>'+(endTxt?(' · konec ob <strong>'+endTxt+'</strong>'):'');
+}
+function edServiceMatchIds(b){
+  var txt=b.services_text||b.service_name||'',ids=[];
+  txt.split(' + ').forEach(function(tok){
+    tok=tok.replace(/\s*[×x]\s*\d+\s*$/,'').trim(); if(!tok)return;
+    var m=SERVICES.filter(function(s){return (s.name||'').toLowerCase()===tok.toLowerCase();})[0];
+    if(m&&ids.indexOf(String(m.id))<0)ids.push(String(m.id));
+  });
+  if(!ids.length&&b.service_id)ids.push(String(b.service_id));
+  return ids;
+}
+function buildEdServices(preIds){
+  var box=document.getElementById('edServices'); if(!box)return;
+  preIds=preIds||[];
+  if(!SERVICES.length){box.innerHTML='<div style="opacity:.6;padding:.4rem 0">Nalagam storitve …</div>';return;}
+  var cats=[],byCat={};
+  SERVICES.forEach(function(s){if(!byCat[s.category]){byCat[s.category]=[];cats.push(s.category);}byCat[s.category].push(s);});
+  var html='';
+  cats.forEach(function(c){
+    var isNujni=(c||'').toLowerCase().indexOf('nujni')>=0;
+    var anyChecked=byCat[c].some(function(s){return preIds.indexOf(String(s.id))>=0;});
+    html+='<div class="nb-acc-item'+(anyChecked?' open':'')+'" data-cat="'+esc(c)+'">'
+        + '<button class="nb-acc-trigger" type="button"><span class="nb-acc-cat'+(isNujni?' nujni':'')+'">'+esc(c)+'</span><span class="nb-acc-arr" aria-hidden="true">+</span></button>'
+        + '<div class="nb-acc-body"><div class="nb-acc-inner">';
+    byCat[c].forEach(function(s){
+      var chk=preIds.indexOf(String(s.id))>=0?' checked':'';
+      html+='<label class="nb-item"><input type="checkbox" value="'+s.id+'"'+chk+'>'
+          + '<span class="nb-item-main"><span class="nb-item-name">'+esc(s.name)+'</span>'
+          + (s.description?'<span class="nb-item-desc">'+esc(s.description)+'</span>':'')+'</span>'
+          + '<span class="nb-dur">'+(s.duration_min||0)+' min</span>'
+          + '<span class="nb-price">'+eur(s.price)+'</span></label>';
+    });
+    html+='</div></div></div>';
+  });
+  box.innerHTML=html;
+  box.querySelectorAll('.nb-acc-trigger').forEach(function(btn){btn.addEventListener('click',function(){btn.closest('.nb-acc-item').classList.toggle('open');});});
+  box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',updateEdSummary);});
+}
+function edSelected(){
+  var ids=[];document.querySelectorAll('#edServices input:checked').forEach(function(cb){ids.push(cb.value);});
+  return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;});
+}
+function updateEdSummary(){
+  var sel=edSelected(),sumEl=document.getElementById('edSummary'); if(!sumEl)return;
+  if(!sel.length){sumEl.textContent='Izberite vsaj eno storitev.';return;}
+  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
+  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var start=document.getElementById('edTime').value,endTxt='';
   if(start&&dur){var sm=toMin(start)+dur;endTxt=pad(Math.floor(sm/60))+':'+pad(sm%60);}
   sumEl.innerHTML='Skupaj: <strong>'+dur+' min</strong> · <strong>'+eur(price)+'</strong>'+(endTxt?(' · konec ob <strong>'+endTxt+'</strong>'):'');
 }
