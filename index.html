@@ -315,6 +315,7 @@
       color: rgba(255,255,255,.25); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
     }
     .onas-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; display: block; }
+    @media (min-width: 721px) { .onas-grid { grid-template-columns: 1fr 0.66fr; } }
 
     /* ── NAROČANJE ── */
     #narocanje { background: var(--bez2); text-align: center; }
@@ -412,6 +413,20 @@
       line-height: 1.4;
     }
     .bk-dep-inline.show { display: block; }
+    .bk-qty {
+      display: flex; align-items: center; gap: .6rem;
+      margin: .15rem 0 .5rem 1.9rem;
+      font-size: .82rem; color: var(--navy);
+    }
+    .bk-qty-lbl { opacity: .75; }
+    .bk-qty-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 1.5px solid rgba(23,57,75,.2); background: #fff; color: var(--navy);
+      font-size: 1.1rem; line-height: 1; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .bk-qty-btn:hover { border-color: var(--coral); color: var(--coral); }
+    .bk-qty-n { min-width: 1.4rem; text-align: center; font-weight: 600; font-size: .95rem; }
 
     /* Povzetek izbranih */
     .bk-sel-summary {
@@ -751,6 +766,7 @@
   </style>
 </head>
 <body>
+<!-- NAJS-BUILD: v10-2026-06-09 (manjsa slika, vec otrok, rdeca validacija, galerija) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1077,7 +1093,7 @@ var foot    = document.getElementById('bkFoot');
 var stepBar = document.getElementById('bkStepBar');
 
 function openModal(){
-  state = { step:1, totalSteps:4, service:null, date:null, slot:null, customer:{}, isNujni:false, nujniNote:'', selectedIds:{}, selectedServices:[], allServices:[] };
+  state = { step:1, totalSteps:4, service:null, date:null, slot:null, customer:{}, isNujni:false, nujniNote:'', selectedIds:{}, selectedServices:[], allServices:[], qty:{} };
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
   renderStep();
@@ -1188,6 +1204,14 @@ function renderStep1(){
              + '</label>'
              + (sv.requires_base
                ? '<div class="bk-dep-inline" id="'+depId+'">⚠ Te storitve ni mogoče izbrati brez striženja ali fen frizure!</div>'
+               : '')
+             + (isChildSvc(sv)
+               ? '<div class="bk-qty" id="qty-'+sv.id+'" data-qid="'+sv.id+'" style="display:none">'
+                 + '<span class="bk-qty-lbl">Število otrok</span>'
+                 + '<button type="button" class="bk-qty-btn" data-q="dec" aria-label="Manj">−</button>'
+                 + '<span class="bk-qty-n" id="qtyn-'+sv.id+'">1</span>'
+                 + '<button type="button" class="bk-qty-btn" data-q="inc" aria-label="Več">+</button>'
+                 + '</div>'
                : '');
         });
         h += '</div></div></div>';
@@ -1214,10 +1238,34 @@ function renderStep1(){
         cb.addEventListener('change', function(){
           var id = +cb.dataset.id;
           if(cb.checked) state.selectedIds[id] = true;
-          else delete state.selectedIds[id];
+          else { delete state.selectedIds[id]; if(state.qty) delete state.qty[id]; }
+          var qel = document.getElementById('qty-'+id);
+          if(qel){
+            qel.style.display = cb.checked ? '' : 'none';
+            var nn = document.getElementById('qtyn-'+id); if(nn) nn.textContent = qtyOf({id:id});
+          }
           updateSelSummary();
           renderFoot1();
         });
+      });
+
+      body.querySelectorAll('.bk-qty-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var wrap = btn.closest('.bk-qty'); var id = +wrap.dataset.qid;
+          var cur = qtyOf({id:id});
+          var nv = btn.dataset.q==='inc' ? Math.min(cur+1,6) : Math.max(cur-1,1);
+          if(!state.qty) state.qty = {};
+          state.qty[id] = nv;
+          var nn = document.getElementById('qtyn-'+id); if(nn) nn.textContent = nv;
+          updateSelSummary();
+          renderFoot1();
+        });
+      });
+
+      body.querySelectorAll('.bk-qty').forEach(function(q){
+        var id = +q.dataset.qid;
+        q.style.display = state.selectedIds[id] ? '' : 'none';
+        var nn = document.getElementById('qtyn-'+id); if(nn) nn.textContent = qtyOf({id:id});
       });
 
       updateSelSummary();
@@ -1234,10 +1282,10 @@ function updateSelSummary(){
   if(!selList) return;
 
   var sel = services.filter(function(sv){ return state.selectedIds[sv.id]; });
-  selList.textContent = sel.length ? sel.map(function(sv){ return sv.name; }).join(' + ') : '';
+  selList.textContent = sel.length ? sel.map(function(sv){ return svcLabel(sv); }).join(' + ') : '';
 
-  var price = sel.reduce(function(s,sv){ return s+(parseFloat(sv.price)||0); }, 0);
-  var dur   = sel.reduce(function(s,sv){ return s+(parseInt(sv.duration_min)||0); }, 0);
+  var price = sumPrice(sel);
+  var dur   = sumDur(sel);
   if(totPrice) totPrice.textContent = price.toFixed(2).replace('.',',') + ' €';
   if(totDur)   totDur.textContent   = dur + ' min';
 
@@ -1309,11 +1357,16 @@ function getSelArr(){
     ? state.selectedServices
     : (state.service ? [state.service] : []);
 }
+function qtyOf(s){ return (state.qty && state.qty[s.id]) ? state.qty[s.id] : 1; }
+function isChildSvc(s){ return (s.category||'') === 'Otroci'; }
+function svcLabel(s){ var q=qtyOf(s); return s.name + (q>1 ? (' ×'+q) : ''); }
+function sumPrice(arr){ return arr.reduce(function(a,s){ return a+(parseFloat(s.price)||0)*qtyOf(s); }, 0); }
+function sumDur(arr){ return arr.reduce(function(a,s){ return a+(parseInt(s.duration_min)||0)*qtyOf(s); }, 0); }
 function getTotalDur(){
-  return getSelArr().reduce(function(a,s){ return a+(parseInt(s.duration_min)||0); }, 0) || 30;
+  return sumDur(getSelArr()) || 30;
 }
 function getTotalPrice(){
-  return getSelArr().reduce(function(a,s){ return a+(parseFloat(s.price)||0); }, 0);
+  return sumPrice(getSelArr());
 }
 
 function renderSchedView(){
@@ -1643,10 +1696,10 @@ function renderStepCustomer(){
 function renderStepConfirm(){
   var c=state.customer; var sv=state.service;
   var rows='';
-  var allNames = (state.selectedServices&&state.selectedServices.length ? state.selectedServices : [sv]).map(function(s){ return s.name; }).join(' + ');
+  var allNames = (state.selectedServices&&state.selectedServices.length ? state.selectedServices : [sv]).map(function(s){ return svcLabel(s); }).join(' + ');
   rows+='<div class="bk-sum-row"><span class="bk-sum-key">Storitev</span><span class="bk-sum-val">'+esc(allNames)+'</span></div>';
   var selArr2 = (state.selectedServices&&state.selectedServices.length) ? state.selectedServices : [sv];
-  var totalPrice2 = selArr2.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
+  var totalPrice2 = sumPrice(selArr2);
   if(totalPrice2>0) rows+='<div class="bk-sum-row"><span class="bk-sum-key">Cena</span><span class="bk-sum-val">'+totalPrice2.toFixed(2).replace('.',',')+' €</span></div>';
   if(state.isNujni){
     rows+='<div class="bk-sum-row"><span class="bk-sum-key">Termin</span><span class="bk-sum-val">Po dogovoru</span></div>';
@@ -1680,9 +1733,9 @@ function submitBooking(btn){
   var sv=state.service; var c=state.customer;
   var selArr = state.selectedServices && state.selectedServices.length ? state.selectedServices : [sv];
 
-  var servicesText = selArr.map(function(s){ return s.name; }).join(' + ');
-  var totalPrice   = selArr.reduce(function(acc,s){ return acc+(parseFloat(s.price)||0); }, 0);
-  var totalDur     = selArr.reduce(function(acc,s){ return acc+(parseInt(s.duration_min)||0); }, 0);
+  var servicesText = selArr.map(function(s){ return svcLabel(s); }).join(' + ');
+  var totalPrice   = sumPrice(selArr);
+  var totalDur     = sumDur(selArr);
 
   // Vmesni prosti čas (vrzel) – velja tudi za kombinacije (npr. barvanje + striženje/fen)
   var gapAfter = 0, gapDuration = 0;

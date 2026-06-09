@@ -91,7 +91,7 @@ header .who{font-size:.74rem;opacity:.65}
 .col{position:relative;height:624px;border-left:1px solid #f0eee9;background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px)}
 .off-band{position:absolute;left:0;right:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(45deg,rgba(23,57,75,.035),rgba(23,57,75,.035) 7px,rgba(23,57,75,.07) 7px,rgba(23,57,75,.07) 14px)}
 .off-band.arr{background:repeating-linear-gradient(45deg,rgba(206,126,111,.06),rgba(206,126,111,.06) 7px,rgba(206,126,111,.12) 7px,rgba(206,126,111,.12) 14px)}
-.ev{position:absolute;left:3px;right:3px;z-index:2;border-radius:7px;padding:3px 6px;font-size:.7rem;line-height:1.2;cursor:pointer;overflow:hidden;border-left:3px solid var(--coral);background:#f3eee7;color:var(--navy)}
+.ev{position:absolute;left:3px;right:3px;z-index:2;border-radius:7px;padding:3px 7px;font-size:.7rem;line-height:1.2;cursor:pointer;overflow:hidden;border-left:4px solid var(--coral);background:#f3eee7;color:var(--navy)}
 .ev:hover{filter:brightness(.97);box-shadow:0 2px 8px rgba(23,57,75,.15)}
 .ev .ev-t{font-size:.62rem;opacity:.7}
 .ev .ev-n{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -205,6 +205,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
+<!-- NAJS-BUILD: v10-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -220,7 +221,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v10 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -329,20 +330,58 @@ var mode='day', cur=new Date(); cur.setHours(0,0,0,0);
 var miniRef=new Date(cur);
 var cache={},blockCache={},SERVICES=[];
 var CATMAP={};
+var NAMECAT={};
 var CAT_COLOR={
-  'Moško striženje':   {bg:'#dde7f1', bd:'#6486ad'},
-  'Žensko striženje':  {bg:'#f3e1e8', bd:'#c885a0'},
-  'Otroci':            {bg:'#e0eede', bd:'#74a474'},
-  'Barvanje':          {bg:'#efe2d4', bd:'#bd8a63'},
-  'Pramena':           {bg:'#efe9cd', bd:'#bfa658'},
-  'Coloro':            {bg:'#e9dcee', bd:'#a384ad'},
-  'Fen':               {bg:'#d9eae7', bd:'#5fa49b'},
-  'Nega lasišča in las':{bg:'#e7ecd8', bd:'#8fa06a'},
-  'Oblikovanje las':   {bg:'#e1e3ed', bd:'#8385a8'},
-  'Nujni termin':      {bg:'#f7e0db', bd:'#d06666'},
-  '_':                 {bg:'#f3eee7', bd:'#7d93a1'}
+  'Moško striženje':   {bg:'#a9cdf2', bd:'#2f5e92'},
+  'Žensko striženje':  {bg:'#f3b3cd', bd:'#bc3f72'},
+  'Otroci':            {bg:'#aee0a4', bd:'#3c8c3c'},
+  'Barvanje':          {bg:'#f6c79a', bd:'#bd6e28'},
+  'Pramena':           {bg:'#ecd86f', bd:'#9c8418'},
+  'Coloro':            {bg:'#d7a9ec', bd:'#8a3ea6'},
+  'Fen':               {bg:'#93ddd0', bd:'#22897a'},
+  'Nega lasišča in las':{bg:'#cfe086', bd:'#73892a'},
+  'Oblikovanje las':   {bg:'#b3b8f0', bd:'#4d52a3'},
+  'Nujni termin':      {bg:'#f59b8c', bd:'#cc4030'},
+  '_':                 {bg:'#dcdde0', bd:'#7d93a1'}
 };
 function catColor(b){ return CAT_COLOR[CATMAP[b&&b.service_id]] || CAT_COLOR['_']; }
+var KEYCAT=[
+  ['moško','Moško striženje'],['mosko','Moško striženje'],
+  ['žensko','Žensko striženje'],['zensko','Žensko striženje'],
+  ['baby','Otroci'],['otro','Otroci'],['fantov','Otroci'],['dekli','Otroci'],
+  ['coloro','Coloro'],
+  ['balayage','Pramena'],['pramen','Pramena'],['posvetli','Pramena'],['toniranj','Pramena'],['folij','Pramena'],
+  ['preliv','Barvanje'],['barvanj','Barvanje'],['nanos barve','Barvanje'],
+  ['fen','Fen'],['likalnik','Fen'],['kodranj','Fen'],
+  ['oblikovanj','Oblikovanje las'],['trajna','Oblikovanje las'],
+  ['nega','Nega lasišča in las'],
+  ['nujni','Nujni termin']
+];
+function tokenCat(tok){
+  var nm=String(tok).replace(/\s*×\s*\d+\s*$/,'').trim();
+  if(NAMECAT[nm]) return NAMECAT[nm];
+  for(var name in NAMECAT){ if(NAMECAT.hasOwnProperty(name) && name.length>4 && nm.indexOf(name)===0) return NAMECAT[name]; }
+  var low=nm.toLowerCase();
+  for(var i=0;i<KEYCAT.length;i++){ if(low.indexOf(KEYCAT[i][0])>=0) return KEYCAT[i][1]; }
+  return null;
+}
+function catsOf(b){
+  var out=[], txt=(b&&b.services_text)?String(b.services_text):'';
+  if(txt){ txt.split(' + ').forEach(function(part){
+    var c=tokenCat(part);
+    if(c && out.indexOf(c)<0) out.push(c);
+  }); }
+  if(!out.length){ var c2=CATMAP[b&&b.service_id]; if(c2) out.push(c2); }
+  return out;
+}
+function evStyle(b){
+  var cats=catsOf(b); if(!cats.length) cats=['_'];
+  var cols=cats.map(function(c){return CAT_COLOR[c]||CAT_COLOR['_'];});
+  if(cols.length===1) return {bg:cols[0].bg, bd:cols[0].bd};
+  var n=Math.min(cols.length,3), st=[];
+  for(var i=0;i<n;i++){ st.push(cols[i].bg+' '+Math.round(i*100/n)+'% '+Math.round((i+1)*100/n)+'%'); }
+  return {bg:'linear-gradient(135deg,'+st.join(',')+')', bd:cols[0].bd};
+}
 function stKey(s){ return 'st-'+String(s||'nova').replace(/\s+/g,''); }
 
 function pad(n){return String(n).padStart(2,'0');}
@@ -554,9 +593,13 @@ function loadMonth(){
   document.getElementById('rangeLabel').textContent=rangeText();
   var cells=monthGrid(cur);
   calScroll.innerHTML='<div class="empty">Nalagam …</div>';
-  sb.from('bookings').select('booking_date,status,service_id').gte('booking_date',isoOf(cells[0])).lte('booking_date',isoOf(cells[41])).then(function(res){
+  sb.from('bookings').select('booking_date,status,service_id,services_text').gte('booking_date',isoOf(cells[0])).lte('booking_date',isoOf(cells[41])).then(function(res){
     var counts={},dcats={};
-    if(!res.error)(res.data||[]).forEach(function(b){if(b.status!=='preklicano'){counts[b.booking_date]=(counts[b.booking_date]||0)+1;(dcats[b.booking_date]=dcats[b.booking_date]||[]).push(catColor(b).bd);}});
+    if(!res.error)(res.data||[]).forEach(function(b){if(b.status!=='preklicano'){
+      counts[b.booking_date]=(counts[b.booking_date]||0)+1;
+      var cs=catsOf(b); if(!cs.length)cs=['_'];
+      cs.forEach(function(c){(dcats[b.booking_date]=dcats[b.booking_date]||[]).push((CAT_COLOR[c]||CAT_COLOR['_']).bd);});
+    }});
     renderMonth(cells,counts,dcats);
   });
 }
@@ -673,7 +716,7 @@ function renderCal(days,bookings,blocks){
       cache[b.id]=b;var s=toMin(b.start_time),e=toMin(b.end_time)||(s+(b.total_duration_min||30));
       var top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,20);
       var cls=({'potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano'})[b.status]||'';
-      var cc=catColor(b);
+      var cc=evStyle(b);
       col+='<div class="ev '+cls+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px;background:'+cc.bg+';border-left-color:'+cc.bd+'"><span class="ev-st '+stKey(b.status)+'"></span><div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div><div class="ev-n">'+esc(b.customer_name||'—')+'</div><div class="ev-s">'+esc(b.services_text||b.service_name||'')+'</div></div>';
     });
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
@@ -783,8 +826,8 @@ function openDetail(b){
 function loadServices(cb){
   sb.from('services').select('id,name,price,category,sort_order,duration_min,gap_after_min,gap_duration_min').eq('active',true).order('sort_order',{ascending:true}).then(function(res){
     if(!res.error)SERVICES=res.data||[];
-    sb.from('services').select('id,category').then(function(r2){
-      if(!r2.error)(r2.data||[]).forEach(function(s){CATMAP[s.id]=s.category;});
+    sb.from('services').select('id,name,category').then(function(r2){
+      if(!r2.error)(r2.data||[]).forEach(function(s){CATMAP[s.id]=s.category;NAMECAT[s.name]=s.category;});
       buildLegend();
       if(cb)cb();
     });
@@ -796,6 +839,7 @@ function buildLegend(){
   for(var k in CAT_COLOR){ if(k==='_'||!CAT_COLOR.hasOwnProperty(k))continue;
     html+='<span class="lg"><span class="sw" style="background:'+CAT_COLOR[k].bg+';border:1px solid '+CAT_COLOR[k].bd+'"></span>'+k+'</span>';
   }
+  html+='<span class="lg"><span class="sw" style="background:linear-gradient(#c25e84 0 50%,#c47a44 50% 100%);border:1px solid rgba(0,0,0,.15)"></span>kombinacija (več storitev)</span>';
   el.innerHTML=html;
 }
 function buildNbServices(){
