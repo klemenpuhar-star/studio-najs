@@ -274,10 +274,12 @@
     #galerija { background: var(--bez); }
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
+      max-width: 760px;
+      margin: 0 auto;
     }
-    @media (max-width: 640px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .gallery-grid { gap: .7rem; } }
     .gal-item {
       aspect-ratio: 4/5; border-radius: 14px; overflow: hidden;
       background: rgba(23,57,75,.07);
@@ -286,6 +288,16 @@
       cursor: pointer;
     }
     .gal-item:hover { transform: scale(1.03); box-shadow: 0 14px 32px rgba(23,57,75,.13); }
+    .gal-item img, .gal-item video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gal-video { position: relative; background: #000; }
+    .gal-sound {
+      position: absolute; bottom: 10px; right: 10px; z-index: 2;
+      width: 38px; height: 38px; border: none; border-radius: 50%;
+      background: rgba(23,57,75,.6); color: #fff; font-size: 1rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background .25s ease;
+    }
+    .gal-sound:hover { background: rgba(208,102,102,.85); }
     .gal-ph { text-align: center; color: rgba(23,57,75,.3); }
     .gal-ph-icon { font-size: 2.2rem; display: block; margin-bottom: 6px; }
     .gal-ph-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -803,12 +815,13 @@
     <h2 class="sec-title">Galerija</h2>
   </div>
   <div class="gallery-grid">
-    <div class="gal-item reveal"><div class="gal-ph"><span class="gal-ph-icon">✂</span><span class="gal-ph-label">Fotografija kmalu</span></div></div>
-    <div class="gal-item reveal" style="transition-delay:.06s"><div class="gal-ph"><span class="gal-ph-icon">✦</span><span class="gal-ph-label">Fotografija kmalu</span></div></div>
-    <div class="gal-item reveal" style="transition-delay:.12s"><div class="gal-ph"><span class="gal-ph-icon">✂</span><span class="gal-ph-label">Fotografija kmalu</span></div></div>
-    <div class="gal-item reveal" style="transition-delay:.18s"><div class="gal-ph"><span class="gal-ph-icon">✦</span><span class="gal-ph-label">Fotografija kmalu</span></div></div>
-    <div class="gal-item reveal" style="transition-delay:.24s"><div class="gal-ph"><span class="gal-ph-icon">✂</span><span class="gal-ph-label">Fotografija kmalu</span></div></div>
-    <div class="gal-item reveal" style="transition-delay:.30s"><div class="gal-ph"><span class="gal-ph-icon">✦</span><span class="gal-ph-label">Fotografija kmalu</span></div></div>
+    <div class="gal-item reveal"><img src="gal-1.jpg" alt="Blond prameni – delo studia Najs" loading="lazy"></div>
+    <div class="gal-item reveal" style="transition-delay:.06s"><img src="gal-2.jpg" alt="Bob pričeska v bakreni barvi" loading="lazy"></div>
+    <div class="gal-item reveal" style="transition-delay:.12s"><img src="gal-3.jpg" alt="Dolgi blond lasje z balayage" loading="lazy"></div>
+    <div class="gal-item gal-video reveal" style="transition-delay:.18s">
+      <video src="gal-video.mp4" poster="gal-video-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <button class="gal-sound" type="button" aria-label="Vklopi zvok" onclick="var v=this.parentNode.querySelector('video'); v.muted=!v.muted; this.textContent=v.muted?'🔇':'🔊'; if(!v.muted){v.play();}">🔇</button>
+    </div>
   </div>
 </section>
 
