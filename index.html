@@ -675,7 +675,7 @@
     }
     .bk-input:focus, .bk-textarea:focus { border-color: var(--navy); }
     .bk-textarea { resize: vertical; min-height: 70px; }
-    .bk-input.err { border-color: var(--roza); }
+    .bk-input.err, .bk-textarea.err { border-color: #d64545; box-shadow: 0 0 0 2px rgba(214,69,69,.15); }
 
     /* Summary */
     .bk-summary {
@@ -1610,9 +1610,9 @@ function renderStepCustomer(){
   body.innerHTML='<div class="bk-step-label">Korak '+(state.isNujni?3:4)+'</div><div class="bk-step-title">Vaši podatki</div>'
     +'<div id="bkErr" class="bk-error"></div>'
     +'<div class="bk-field"><label class="bk-label">Ime in priimek *</label>'
-    +'<input class="bk-input" id="fName" type="text" placeholder="Maja Novak" value="'+esc(c.name||'')+'"></div>'
+    +'<input class="bk-input" id="fName" type="text" placeholder="Maja Novak" oninput="this.classList.remove(\'err\')" value="'+esc(c.name||'')+'"></div>'
     +'<div class="bk-field"><label class="bk-label">Telefon *</label>'
-    +'<input class="bk-input" id="fPhone" type="tel" placeholder="+386 31 000 000" value="'+esc(c.phone||'')+'"></div>'
+    +'<input class="bk-input" id="fPhone" type="tel" placeholder="+386 31 000 000" oninput="this.classList.remove(\'err\')" value="'+esc(c.phone||'')+'"></div>'
     +'<div class="bk-field"><label class="bk-label">E-pošta</label>'
     +'<input class="bk-input" id="fEmail" type="email" placeholder="maja@email.si" value="'+esc(c.email||'')+'"></div>'
     +'<div class="bk-field"><label class="bk-label">Opomba</label>'

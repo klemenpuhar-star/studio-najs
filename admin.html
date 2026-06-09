@@ -32,6 +32,7 @@ a{color:inherit}
 .msg.err{color:#b04a3a}
 .msg.ok{color:#2f6b43}
 .link-btn{background:none;border:none;color:var(--coral);font-size:.78rem;cursor:pointer;margin-top:.8rem;text-decoration:underline;font-family:var(--sans);padding:0}
+#newbk input.err,#nbServices.err{border-color:#d64545 !important;box-shadow:0 0 0 2px rgba(214,69,69,.15)}
 
 header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 4%;height:60px;background:rgba(234,215,193,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(23,57,75,.1)}
 header .brand{display:flex;align-items:center;gap:.55rem}
@@ -818,6 +819,7 @@ function nbSelected(){
 }
 function updateNbSummary(){
   var sel=nbSelected(),sumEl=document.getElementById('nbSummary');
+  var sbx=document.getElementById('nbServices'); if(sbx&&sel.length)sbx.classList.remove('err');
   if(!sel.length){sumEl.textContent='Izberi vsaj eno storitev.';return;}
   var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
   var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
@@ -841,12 +843,18 @@ function openNewAt(dateISO,timeStr){
 }
 function saveNew(){
   var sel=nbSelected(),msg=document.getElementById('nbMsg');msg.className='msg';
-  var date=document.getElementById('nbDate').value,start=document.getElementById('nbTime').value;
-  var name=document.getElementById('nbName').value.trim(),phone=document.getElementById('nbPhone').value.trim();
+  var dateEl=document.getElementById('nbDate'),timeEl=document.getElementById('nbTime'),nameEl=document.getElementById('nbName'),phoneEl=document.getElementById('nbPhone'),svcBox=document.getElementById('nbServices');
+  var date=dateEl.value,start=timeEl.value;
+  var name=nameEl.value.trim(),phone=phoneEl.value.trim();
   var email=document.getElementById('nbEmail').value.trim(),note=document.getElementById('nbNote').value.trim();
-  if(!sel.length){msg.textContent='Izberi vsaj eno storitev.';msg.className='msg err';return;}
-  if(!date||!start){msg.textContent='Vnesi datum in uro začetka.';msg.className='msg err';return;}
-  if(!name){msg.textContent='Vnesi ime stranke.';msg.className='msg err';return;}
+  [svcBox,dateEl,timeEl,nameEl,phoneEl].forEach(function(el){if(el)el.classList.remove('err');});
+  var bad=false;
+  if(!sel.length){svcBox.classList.add('err');bad=true;}
+  if(!date){dateEl.classList.add('err');bad=true;}
+  if(!start){timeEl.classList.add('err');bad=true;}
+  if(!name){nameEl.classList.add('err');bad=true;}
+  if(!phone){phoneEl.classList.add('err');bad=true;}
+  if(bad){msg.textContent='Prosimo, izpolnite vsa obvezna polja.';msg.className='msg err';return;}
   var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
   var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
   var em=toMin(start)+dur,end=pad(Math.floor(em/60))+':'+pad(em%60);
@@ -870,6 +878,7 @@ document.getElementById('newClose').addEventListener('click',function(){document
 document.getElementById('nbCancel').addEventListener('click',function(){document.getElementById('newbk').classList.add('hidden');});
 document.getElementById('newbk').addEventListener('click',function(e){if(e.target.id==='newbk')document.getElementById('newbk').classList.add('hidden');});
 document.getElementById('nbTime').addEventListener('change',updateNbSummary);
+['nbDate','nbTime','nbName','nbPhone'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('err');});});
 document.getElementById('nbName').addEventListener('change',fillFromCustomer);
 document.getElementById('nbSave').addEventListener('click',saveNew);
 
