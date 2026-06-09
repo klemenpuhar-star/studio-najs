@@ -510,7 +510,7 @@
     }
     .bk-slot-row {
       display: flex; flex-direction: row;
-      align-items: center; justify-content: space-between; gap: .35rem;
+      align-items: center; justify-content: center; gap: .35rem;
       min-height: 52px; padding: .6rem .9rem;
       border-radius: 12px; border: 1.5px solid rgba(23,57,75,.12);
       cursor: pointer; background: #fff; text-align: left;
@@ -766,7 +766,7 @@
   </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v11-2026-06-09 (manjsa slika, vec otrok, rdeca validacija, galerija) -->
+<!-- NAJS-BUILD: v12-2026-06-09 (manjsa slika, vec otrok, rdeca validacija, galerija) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1577,9 +1577,7 @@ function loadSlotList(){
       var ts=minToTime(t);
       var sel=state.slot&&state.slot.start===ts;
       h+='<div class="bk-slot-row'+(sel?' selected':'')+'" data-s="'+ts+'" data-e="'+minToTime(t+dur)+'">'
-        +'<span class="bk-slot-time">'+ts
-        +'</span>'
-        +(priceStr?'<span class="bk-slot-price">'+priceStr+'</span>':'')
+        +'<span class="bk-slot-time">'+ts+'</span>'
         +'</div>';
       first=false;
     });
