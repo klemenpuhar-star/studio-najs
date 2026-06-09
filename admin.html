@@ -170,13 +170,28 @@ header .who{font-size:.74rem;opacity:.65}
 .pop-wide input{display:block;width:100%;margin-top:.3rem;padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy)}
 .pop-wide input:focus{outline:none;border-color:var(--coral)}
 .nb-svc-label{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.4rem}
-.nb-services{max-height:240px;overflow-y:auto;border:1.5px solid rgba(23,57,75,.12);border-radius:12px;padding:.5rem .8rem;margin-bottom:.8rem}
+.nb-services{max-height:320px;overflow-y:auto;border:1.5px solid rgba(23,57,75,.12);border-radius:12px;padding:.55rem;margin-bottom:.8rem;background:rgba(23,57,75,.02)}
 .nb-cat{font-family:var(--serif);font-size:1.05rem;margin:.7rem 0 .25rem}
 .nb-cat:first-child{margin-top:0}
-.nb-item{display:flex;align-items:center;gap:.6rem;padding:.32rem 0;font-size:.86rem;cursor:pointer;margin:0}
-.nb-item input{width:auto!important;margin:0!important;display:inline-block!important}
-.nb-item .nb-dur{margin-left:auto;opacity:.6;font-size:.78rem;white-space:nowrap}
-.nb-item .nb-price{font-family:var(--serif);font-weight:600;min-width:62px;text-align:right}
+.nb-acc-item{background:#fff;border:1px solid rgba(23,57,75,.1);border-radius:10px;margin-bottom:.45rem;overflow:hidden}
+.nb-acc-item:last-child{margin-bottom:0}
+.nb-acc-trigger{width:100%;text-align:left;border:none;background:none;padding:.6rem .85rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:.6rem;font-family:var(--sans)}
+.nb-acc-trigger:hover{background:rgba(23,57,75,.03)}
+.nb-acc-cat{font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--navy)}
+.nb-acc-cat.nujni{color:var(--coral)}
+.nb-acc-arr{font-size:1.05rem;color:var(--coral);flex-shrink:0;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.nb-acc-item.open .nb-acc-arr{transform:rotate(45deg)}
+.nb-acc-body{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.22,1,.36,1)}
+.nb-acc-item.open .nb-acc-body{max-height:1400px}
+.nb-acc-inner{padding:.1rem .85rem .6rem}
+.nb-item{display:flex;align-items:center;gap:.6rem;padding:.34rem 0;font-size:.86rem;cursor:pointer;margin:0;border-top:1px solid rgba(23,57,75,.06)}
+.nb-acc-inner .nb-item:first-child{border-top:none}
+.nb-item input{width:auto!important;margin:0!important;display:inline-block!important;flex-shrink:0}
+.nb-item-main{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
+.nb-item-name{line-height:1.25}
+.nb-item-desc{font-size:.74rem;color:var(--coral);opacity:.85;line-height:1.3}
+.nb-item .nb-dur{opacity:.6;font-size:.78rem;white-space:nowrap;flex-shrink:0}
+.nb-item .nb-price{font-family:var(--serif);font-weight:600;min-width:58px;text-align:right;flex-shrink:0}
 .nb-summary{background:var(--bez2);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem;font-size:.88rem;min-height:1.2em}
 .nb-actions{display:flex;gap:.6rem;align-items:center}
 
@@ -205,7 +220,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v10-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v11-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -221,7 +236,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v10 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v11 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -824,7 +839,7 @@ function openDetail(b){
 
 /* NOVA REZERVACIJA */
 function loadServices(cb){
-  sb.from('services').select('id,name,price,category,sort_order,duration_min,gap_after_min,gap_duration_min').eq('active',true).order('sort_order',{ascending:true}).then(function(res){
+  sb.from('services').select('id,name,description,price,category,sort_order,duration_min,gap_after_min,gap_duration_min').eq('active',true).order('sort_order',{ascending:true}).then(function(res){
     if(!res.error)SERVICES=res.data||[];
     sb.from('services').select('id,name,category').then(function(r2){
       if(!r2.error)(r2.data||[]).forEach(function(s){CATMAP[s.id]=s.category;NAMECAT[s.name]=s.category;});
@@ -849,12 +864,21 @@ function buildNbServices(){
   SERVICES.forEach(function(s){if(!byCat[s.category]){byCat[s.category]=[];cats.push(s.category);}byCat[s.category].push(s);});
   var html='';
   cats.forEach(function(c){
-    html+='<div class="nb-cat">'+esc(c)+'</div>';
+    var isNujni=(c||'').toLowerCase().indexOf('nujni')>=0;
+    html+='<div class="nb-acc-item" data-cat="'+esc(c)+'">'
+        + '<button class="nb-acc-trigger" type="button"><span class="nb-acc-cat'+(isNujni?' nujni':'')+'">'+esc(c)+'</span><span class="nb-acc-arr" aria-hidden="true">+</span></button>'
+        + '<div class="nb-acc-body"><div class="nb-acc-inner">';
     byCat[c].forEach(function(s){
-      html+='<label class="nb-item"><input type="checkbox" value="'+s.id+'"><span>'+esc(s.name)+'</span><span class="nb-dur">'+(s.duration_min||0)+' min</span><span class="nb-price">'+eur(s.price)+'</span></label>';
+      html+='<label class="nb-item"><input type="checkbox" value="'+s.id+'">'
+          + '<span class="nb-item-main"><span class="nb-item-name">'+esc(s.name)+'</span>'
+          + (s.description?'<span class="nb-item-desc">'+esc(s.description)+'</span>':'')+'</span>'
+          + '<span class="nb-dur">'+(s.duration_min||0)+' min</span>'
+          + '<span class="nb-price">'+eur(s.price)+'</span></label>';
     });
+    html+='</div></div></div>';
   });
   box.innerHTML=html;
+  box.querySelectorAll('.nb-acc-trigger').forEach(function(btn){btn.addEventListener('click',function(){btn.closest('.nb-acc-item').classList.toggle('open');});});
   box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',updateNbSummary);});
 }
 function nbSelected(){
