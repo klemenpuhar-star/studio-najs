@@ -30,6 +30,8 @@ a{color:inherit}
 .btn-main:disabled{opacity:.6}
 .msg{font-size:.82rem;margin-top:.9rem;min-height:1em}
 .msg.err{color:#b04a3a}
+.msg.ok{color:#2f6b43}
+.link-btn{background:none;border:none;color:var(--coral);font-size:.78rem;cursor:pointer;margin-top:.8rem;text-decoration:underline;font-family:var(--sans);padding:0}
 
 header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 4%;height:60px;background:rgba(234,215,193,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(23,57,75,.1)}
 header .brand{display:flex;align-items:center;gap:.55rem}
@@ -97,6 +99,13 @@ header .who{font-size:.74rem;opacity:.65}
 .ev.opravljeno{background:#e4e9ec;border-left-color:var(--navy);opacity:.85}
 .ev.preklicano{background:#f2e3e0;border-left-color:#b04a3a;opacity:.5;text-decoration:line-through}
 .ev.block{background:repeating-linear-gradient(45deg,#fff,#fff 7px,rgba(206,126,111,.14) 7px,rgba(206,126,111,.14) 14px);border-left:3px dashed var(--coral);color:var(--coral)}
+.ev .ev-st{position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(255,255,255,.6);z-index:3}
+.st-nova{background:#e0a23c}.st-potrjeno{background:#3f8f5b}.st-opravljeno{background:#8a97a0}.st-preklicano{background:#b04a3a}.st-podogovoru{background:#d06666}
+.cat-legend{display:flex;flex-wrap:wrap;gap:.35rem .8rem;align-items:center;padding:.55rem 4% .2rem}
+.cat-legend .lg{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--navy);opacity:.85}
+.cat-legend .sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+.mcell .mdots{display:flex;flex-wrap:wrap;gap:2px;margin-top:3px;padding-right:1.3rem}
+.mcell .mdot{width:6px;height:6px;border-radius:50%}
 
 /* Mesečni pregled */
 .month{background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(23,57,75,.08);padding:1rem}
@@ -203,6 +212,7 @@ header .who{font-size:.74rem;opacity:.65}
     <div class="field"><label>E-pošta</label><input type="email" id="email" autocomplete="username" placeholder="vasa@posta.si" /></div>
     <div class="field"><label>Geslo</label><input type="password" id="password" autocomplete="current-password" placeholder="********" /></div>
     <button class="btn btn-main" id="loginBtn">Prijava</button>
+    <br><button type="button" class="link-btn" id="forgotBtn">Pozabljeno geslo?</button>
     <p class="msg" id="loginMsg"></p>
   </div>
 </div>
@@ -210,7 +220,7 @@ header .who{font-size:.74rem;opacity:.65}
 <div id="appView" class="hidden">
   <header>
     <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span></div>
-    <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
+    <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
   <div class="toolbar">
@@ -229,6 +239,8 @@ header .who{font-size:.74rem;opacity:.65}
       <button data-mode="stranke">Stranke</button>
     </div>
   </div>
+
+  <div class="cat-legend" id="catLegend"></div>
 
   <div class="wrap">
     <div class="block-form hidden" id="blockForm">
@@ -287,6 +299,18 @@ header .who{font-size:.74rem;opacity:.65}
   </div>
 </div>
 
+<div class="overlay hidden" id="pwdOverlay">
+  <div class="pop">
+    <button class="x" id="pwdClose">&times;</button>
+    <div class="d-time" id="pwdTitle" style="font-size:1.25rem;margin-bottom:.2rem">Spremeni geslo</div>
+    <p id="pwdHint" style="font-size:.84rem;opacity:.75;margin:0 0 1rem"></p>
+    <div class="field"><label>Novo geslo</label><input type="password" id="pwdNew" autocomplete="new-password" placeholder="vsaj 6 znakov"></div>
+    <div class="field"><label>Ponovi novo geslo</label><input type="password" id="pwdNew2" autocomplete="new-password"></div>
+    <button class="btn btn-main" id="pwdSave">Shrani geslo</button>
+    <p class="msg" id="pwdMsg"></p>
+  </div>
+</div>
+
 <script>
 var SB_URL='https://azqtgvxashunmmydkwop.supabase.co';
 var SB_KEY='sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
@@ -303,6 +327,22 @@ var MES=['januar','februar','marec','april','maj','junij','julij','avgust','sept
 var mode='day', cur=new Date(); cur.setHours(0,0,0,0);
 var miniRef=new Date(cur);
 var cache={},blockCache={},SERVICES=[];
+var CATMAP={};
+var CAT_COLOR={
+  'Moško striženje':   {bg:'#dde7f1', bd:'#6486ad'},
+  'Žensko striženje':  {bg:'#f3e1e8', bd:'#c885a0'},
+  'Otroci':            {bg:'#e0eede', bd:'#74a474'},
+  'Barvanje':          {bg:'#efe2d4', bd:'#bd8a63'},
+  'Pramena':           {bg:'#efe9cd', bd:'#bfa658'},
+  'Coloro':            {bg:'#e9dcee', bd:'#a384ad'},
+  'Fen':               {bg:'#d9eae7', bd:'#5fa49b'},
+  'Nega lasišča in las':{bg:'#e7ecd8', bd:'#8fa06a'},
+  'Oblikovanje las':   {bg:'#e1e3ed', bd:'#8385a8'},
+  'Nujni termin':      {bg:'#f7e0db', bd:'#d06666'},
+  '_':                 {bg:'#f3eee7', bd:'#7d93a1'}
+};
+function catColor(b){ return CAT_COLOR[CATMAP[b&&b.service_id]] || CAT_COLOR['_']; }
+function stKey(s){ return 'st-'+String(s||'nova').replace(/\s+/g,''); }
 
 function pad(n){return String(n).padStart(2,'0');}
 function isoOf(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -322,7 +362,7 @@ function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+
 function dayInfo(dow){if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};}
 
 /* AUTH */
-function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMini();loadServices();load();}
+function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMini();loadServices(load);}
 function showLogin(){appView.classList.add('hidden');loginView.classList.remove('hidden');}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('password').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
@@ -339,6 +379,46 @@ function doLogin(){
   });
 }
 document.getElementById('logoutBtn').addEventListener('click',function(){sb.auth.signOut().then(showLogin);});
+
+/* GESLO: sprememba (prijavljen) + pozabljeno (ponastavitev) */
+var pwdRecovery=false, pwdOverlay=document.getElementById('pwdOverlay');
+function openPwd(recovery){
+  pwdRecovery=!!recovery;
+  document.getElementById('pwdTitle').textContent=recovery?'Nastavi novo geslo':'Spremeni geslo';
+  document.getElementById('pwdHint').textContent=recovery?'Vpiši novo geslo za prijavo v administracijo.':'Vpiši novo geslo. Po shranjevanju ostaneš prijavljen/a.';
+  document.getElementById('pwdNew').value='';document.getElementById('pwdNew2').value='';
+  var m=document.getElementById('pwdMsg');m.textContent='';m.className='msg';
+  pwdOverlay.classList.remove('hidden');
+  setTimeout(function(){document.getElementById('pwdNew').focus();},50);
+}
+function closePwd(){pwdOverlay.classList.add('hidden');}
+function doPwdSave(){
+  var p1=document.getElementById('pwdNew').value,p2=document.getElementById('pwdNew2').value;
+  var m=document.getElementById('pwdMsg');m.className='msg';
+  if(p1.length<6){m.textContent='Geslo naj ima vsaj 6 znakov.';m.className='msg err';return;}
+  if(p1!==p2){m.textContent='Gesli se ne ujemata.';m.className='msg err';return;}
+  var btn=document.getElementById('pwdSave');btn.disabled=true;btn.textContent='Shranjujem …';
+  sb.auth.updateUser({password:p1}).then(function(res){
+    btn.disabled=false;btn.textContent='Shrani geslo';
+    if(res.error){m.textContent='Napaka: '+res.error.message;m.className='msg err';return;}
+    m.textContent='Geslo je spremenjeno.';m.className='msg ok';
+    setTimeout(function(){closePwd();if(pwdRecovery){sb.auth.getSession().then(function(r){if(r.data&&r.data.session)showApp(r.data.session);});}},1200);
+  });
+}
+document.getElementById('pwdBtn').addEventListener('click',function(){openPwd(false);});
+document.getElementById('pwdClose').addEventListener('click',closePwd);
+pwdOverlay.addEventListener('click',function(e){if(e.target===pwdOverlay)closePwd();});
+document.getElementById('pwdSave').addEventListener('click',doPwdSave);
+document.getElementById('pwdNew2').addEventListener('keydown',function(e){if(e.key==='Enter')doPwdSave();});
+document.getElementById('forgotBtn').addEventListener('click',function(){
+  var email=document.getElementById('email').value.trim(), msg=document.getElementById('loginMsg');msg.className='msg';
+  if(!email){msg.textContent='Najprej vpiši svojo e-pošto, nato klikni Pozabljeno geslo.';msg.className='msg err';return;}
+  sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}).then(function(res){
+    if(res.error){msg.textContent='Napaka: '+res.error.message;msg.className='msg err';return;}
+    msg.textContent='Na e-pošto smo poslali povezavo za ponastavitev gesla. Preveri tudi neželeno pošto.';msg.className='msg ok';
+  });
+});
+sb.auth.onAuthStateChange(function(event){ if(event==='PASSWORD_RECOVERY'){ openPwd(true); } });
 
 /* SEGMENT + NAV */
 function setSeg(m){document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-mode')===m);});}
@@ -450,6 +530,7 @@ function rangeText(days){
   var a=days[0],b=days[days.length-1];return a.getDate()+'. '+MES[a.getMonth()].substring(0,3)+' – '+b.getDate()+'. '+MES[b.getMonth()].substring(0,3)+' '+b.getFullYear();
 }
 function load(){
+  var lg=document.getElementById('catLegend'); if(lg)lg.style.display=(mode==='stranke')?'none':'flex';
   if(isMobile()&&MINI_BUILT){buildMini();}else{updateMiniSel();}
   if(mode==='nujni'){loadNujni();return;}
   if(mode==='stranke'){loadStranke();return;}
@@ -472,10 +553,10 @@ function loadMonth(){
   document.getElementById('rangeLabel').textContent=rangeText();
   var cells=monthGrid(cur);
   calScroll.innerHTML='<div class="empty">Nalagam …</div>';
-  sb.from('bookings').select('booking_date,status').gte('booking_date',isoOf(cells[0])).lte('booking_date',isoOf(cells[41])).then(function(res){
-    var counts={};
-    if(!res.error)(res.data||[]).forEach(function(b){if(b.status!=='preklicano'){counts[b.booking_date]=(counts[b.booking_date]||0)+1;}});
-    renderMonth(cells,counts);
+  sb.from('bookings').select('booking_date,status,service_id').gte('booking_date',isoOf(cells[0])).lte('booking_date',isoOf(cells[41])).then(function(res){
+    var counts={},dcats={};
+    if(!res.error)(res.data||[]).forEach(function(b){if(b.status!=='preklicano'){counts[b.booking_date]=(counts[b.booking_date]||0)+1;(dcats[b.booking_date]=dcats[b.booking_date]||[]).push(catColor(b).bd);}});
+    renderMonth(cells,counts,dcats);
   });
 }
 function loadNujni(){
@@ -487,7 +568,7 @@ function loadNujni(){
     var rows=res.data||[];cache={};
     if(!rows.length){nujniList.innerHTML='<div class="empty">Ni nujnih rezervacij.</div>';return;}
     nujniList.innerHTML=rows.map(function(b){cache[b.id]=b;return ''
-      +'<div class="card"><div class="body"><div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
+      +'<div class="card" style="border-left:5px solid '+catColor(b).bd+'"><div class="body"><div class="svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
       +'<div class="meta">'+esc(b.customer_name||'—')+(b.customer_phone?(' · <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>'+esc(b.customer_email)):'')+'</div>'
       +(b.note?('<div class="meta" style="font-style:italic">'+esc(b.note)+'</div>'):'')+'</div>'
       +'<div class="side2"><div class="price">'+eur(b.total_price)+'</div>'+badge(b.status)+'<button class="act" data-open="'+b.id+'">Podrobnosti</button></div></div>';
@@ -591,7 +672,8 @@ function renderCal(days,bookings,blocks){
       cache[b.id]=b;var s=toMin(b.start_time),e=toMin(b.end_time)||(s+(b.total_duration_min||30));
       var top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,20);
       var cls=({'potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano'})[b.status]||'';
-      col+='<div class="ev '+cls+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div><div class="ev-n">'+esc(b.customer_name||'—')+'</div><div class="ev-s">'+esc(b.services_text||b.service_name||'')+'</div></div>';
+      var cc=catColor(b);
+      col+='<div class="ev '+cls+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px;background:'+cc.bg+';border-left-color:'+cc.bd+'"><span class="ev-st '+stKey(b.status)+'"></span><div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div><div class="ev-n">'+esc(b.customer_name||'—')+'</div><div class="ev-s">'+esc(b.services_text||b.service_name||'')+'</div></div>';
     });
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
       blockCache[bl.id]=bl;
@@ -628,13 +710,15 @@ function renderCal(days,bookings,blocks){
   syncMiniHeight();
 }
 
-function renderMonth(cells,counts){
+function renderMonth(cells,counts,dcats){
+  dcats=dcats||{};
   var h='<div class="month"><div class="mhead">';
   DOW.forEach(function(d){h+='<div>'+d+'</div>';});
   h+='</div><div class="mgrid">';
   cells.forEach(function(d){
     var iso=isoOf(d),out=d.getMonth()!==cur.getMonth(),c=counts[iso]||0,off=(d.getDay()===0);
-    h+='<button class="mcell'+(out?' out':'')+(iso===isoToday()?' today':'')+(off?' off':'')+'" data-d="'+iso+'"><span class="mnum">'+d.getDate()+'</span>'+(c?'<span class="mcount">'+c+'</span>':'')+'</button>';
+    var dd=(dcats[iso]||[]).slice(0,12).map(function(col){return '<span class="mdot" style="background:'+col+'"></span>';}).join('');
+    h+='<button class="mcell'+(out?' out':'')+(iso===isoToday()?' today':'')+(off?' off':'')+'" data-d="'+iso+'"><span class="mnum">'+d.getDate()+'</span>'+(dd?'<div class="mdots">'+dd+'</div>':'')+(c?'<span class="mcount">'+c+'</span>':'')+'</button>';
   });
   h+='</div></div>';calScroll.innerHTML=h;
   calScroll.querySelectorAll('.mcell').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();});});
@@ -695,10 +779,23 @@ function openDetail(b){
 }
 
 /* NOVA REZERVACIJA */
-function loadServices(){
+function loadServices(cb){
   sb.from('services').select('id,name,price,category,sort_order,duration_min,gap_after_min,gap_duration_min').eq('active',true).order('sort_order',{ascending:true}).then(function(res){
     if(!res.error)SERVICES=res.data||[];
+    sb.from('services').select('id,category').then(function(r2){
+      if(!r2.error)(r2.data||[]).forEach(function(s){CATMAP[s.id]=s.category;});
+      buildLegend();
+      if(cb)cb();
+    });
   });
+}
+function buildLegend(){
+  var el=document.getElementById('catLegend'); if(!el)return;
+  var html='';
+  for(var k in CAT_COLOR){ if(k==='_'||!CAT_COLOR.hasOwnProperty(k))continue;
+    html+='<span class="lg"><span class="sw" style="background:'+CAT_COLOR[k].bg+';border:1px solid '+CAT_COLOR[k].bd+'"></span>'+k+'</span>';
+  }
+  el.innerHTML=html;
 }
 function buildNbServices(){
   var box=document.getElementById('nbServices');
