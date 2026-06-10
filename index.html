@@ -766,7 +766,7 @@
   </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v13-2026-06-10 (min. cas vnaprej 4 ure za narocanje) -->
+<!-- NAJS-BUILD: v14-2026-06-10 (povezava do urejanja narocila stranki) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1761,7 +1761,9 @@ function submitBooking(btn){
     if((gsa + gsd) <= totalDur){ gapAfter = gsa; gapDuration = gsd; }
   }
 
+  var mtoken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
   var rec = {
+    manage_token:       mtoken,
     service_id:         sv.id,
     service_name:       sv.name,
     services_text:      servicesText,
@@ -1789,12 +1791,19 @@ function submitBooking(btn){
       return;
     }
     foot.innerHTML = '';
+    var mbase = location.origin + location.pathname.replace(/[^/]*$/, '');
+    var mlink = mbase + 'narocilo.html?id=' + mtoken;
     body.innerHTML = '<div class="bk-success">'
       + '<div class="bk-success-icon">✶</div>'
       + '<div class="bk-success-title">Naročeni ste!</div>'
       + '<p class="bk-success-sub">'+(state.isNujni
           ? 'Vaša zahteva je bila sprejeta. Pokličemo vas za potrditev termina.'
           : 'Vaše naročilo je potrjeno. Vidimo se '+fmtDate(state.date)+' ob '+state.slot.start+'.')+'</p>'
+      + (state.isNujni ? '' :
+          '<div style="margin-top:16px;padding:13px 15px;background:#faf7f3;border:1px solid #e7e0d8;border-radius:12px;text-align:left">'
+          + '<p class="bk-success-sub" style="font-size:.82rem;margin:0 0 8px">Za morebitno <strong>spremembo ali preklic</strong> termina shranite to povezavo:</p>'
+          + '<a href="'+mlink+'" style="display:inline-block;font-weight:600;color:var(--coral);word-break:break-all;font-size:.82rem">'+mlink+'</a>'
+          + '</div>')
       + '<br/><p class="bk-success-sub" style="font-size:.8rem">V primeru vprašanj pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>'
       + '</div>';
     var cl = document.createElement('button');
