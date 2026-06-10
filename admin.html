@@ -230,7 +230,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v18-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v19-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -246,7 +246,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v18 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v19 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -277,7 +277,7 @@ header .who{font-size:.74rem;opacity:.65}
         <label>Od<input type="time" id="blkFrom" step="900"></label>
         <label>Do<input type="time" id="blkTo" step="900"></label>
       </div>
-      <button class="btn-ghost" id="blkAllDay" style="font-size:.8rem;padding:.35rem .9rem;margin-bottom:.55rem">&#9203; Cel delovni dan</button>
+      <button class="btn-ghost" id="blkAllDay" title="Zasede samo proste ure dneva – rezervacij ne prekrije" style="font-size:.8rem;padding:.35rem .9rem;margin-bottom:.55rem">&#9203; Cel delovni dan</button>
       <label>Opomba (neobvezno)<input type="text" id="blkNote" placeholder="npr. malica, dopust, opravek"></label>
       <div class="bf-actions">
         <button class="btn btn-main" id="blkSave" style="width:auto;padding:.55rem 1.3rem">Shrani opravek</button>
@@ -507,11 +507,37 @@ document.getElementById('blockToggle').addEventListener('click',function(){block
 document.getElementById('blkCancel').addEventListener('click',function(){blockForm.classList.add('hidden');document.getElementById('blkMsg').textContent='';});
 document.getElementById('blkAllDay').addEventListener('click',function(){
   var dEl=document.getElementById('blkDate'); if(!dEl.value)dEl.value=isoOf(cur);
-  var p=dEl.value.split('-'); var wd=new Date(+p[0],+p[1]-1,+p[2]).getDay();
+  var date=dEl.value;
+  var p=date.split('-'); var wd=new Date(+p[0],+p[1]-1,+p[2]).getDay();
   var info=dayInfo(wd); var h=(info&&info.h)?info.h:[8,20];
-  document.getElementById('blkFrom').value=pad(h[0])+':00';
-  document.getElementById('blkTo').value=pad(h[1])+':00';
-  document.getElementById('blkMsg').textContent='';
+  var wStart=h[0]*60, wEnd=h[1]*60;
+  var note=document.getElementById('blkNote').value.trim();
+  var msg=document.getElementById('blkMsg'); msg.className='msg';
+  var btn=this, old=btn.innerHTML; btn.disabled=true; btn.textContent='Računam …';
+  Promise.all([
+    sb.from('bookings').select('start_time,end_time,status').eq('booking_date',date),
+    sb.from('blocks').select('start_time,end_time').eq('block_date',date)
+  ]).then(function(r){
+    btn.disabled=false; btn.innerHTML=old;
+    if(r[0].error||r[1].error){msg.textContent='Napaka pri branju termina.';msg.className='msg err';return;}
+    var busy=[];
+    (r[0].data||[]).forEach(function(b){ if(b.status==='preklicano')return; busy.push([toMin(b.start_time),toMin(b.end_time)]); });
+    (r[1].data||[]).forEach(function(b){ busy.push([toMin(b.start_time),toMin(b.end_time)]); });
+    busy.sort(function(a,b){return a[0]-b[0];});
+    var merged=[]; busy.forEach(function(iv){ if(merged.length&&iv[0]<=merged[merged.length-1][1]) merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],iv[1]); else merged.push([iv[0],iv[1]]); });
+    var free=[], cursor=wStart;
+    merged.forEach(function(iv){ var s=Math.max(iv[0],wStart), e=Math.min(iv[1],wEnd); if(e<=wStart||s>=wEnd)return; if(s>cursor)free.push([cursor,s]); cursor=Math.max(cursor,e); });
+    if(cursor<wEnd)free.push([cursor,wEnd]);
+    free=free.filter(function(iv){return iv[1]-iv[0]>=5;});
+    if(!free.length){msg.textContent='Ni prostih ur za zasedbo na ta dan.';msg.className='msg err';return;}
+    var rows=free.map(function(iv){return {block_date:date,start_time:pad(Math.floor(iv[0]/60))+':'+pad(iv[0]%60),end_time:pad(Math.floor(iv[1]/60))+':'+pad(iv[1]%60),note:note||'Opravek'};});
+    btn.disabled=true; var sBtn=document.getElementById('blkSave'); sBtn.disabled=true;
+    sb.from('blocks').insert(rows).then(function(res){
+      btn.disabled=false; sBtn.disabled=false;
+      if(res.error){msg.textContent='Napaka: '+res.error.message;msg.className='msg err';return;}
+      blockForm.classList.add('hidden'); document.getElementById('blkNote').value=''; load();
+    });
+  });
 });
 document.getElementById('blkSave').addEventListener('click',function(){
   var date=document.getElementById('blkDate').value,from=document.getElementById('blkFrom').value,to=document.getElementById('blkTo').value,note=document.getElementById('blkNote').value.trim();
