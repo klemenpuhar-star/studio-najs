@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v2-2026-06-10 (pregled, popravek storitev/termina, preklic) -->
+<!-- NAJS-NAROCILO: v3-2026-06-10 (rok z natancnim datumom) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -90,6 +90,7 @@ var sb=supabase.createClient(SB_URL,SB_KEY);
 var SLOT_STEP=15, MIN_LEAD_MIN=240;
 var DC={1:{start:'14:00',end:'20:00'},2:{start:'08:00',end:'15:00'},3:{start:'14:00',end:'20:00'},4:{start:'14:00',end:'20:00'},5:{start:'08:00',end:'15:00'},6:'dogovor',0:'zaprto'};
 var DOW_SI=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
+var DOW_GEN=['nedelje','ponedeljka','torka','srede','četrtka','petka','sobote'];
 var MON_SI=['januarja','februarja','marca','aprila','maja','junija','julija','avgusta','septembra','oktobra','novembra','decembra'];
 
 function pad(n){ return (n<10?'0':'')+n; }
@@ -98,6 +99,7 @@ function minToTime(m){ return pad(Math.floor(m/60))+':'+pad(m%60); }
 function isoDate(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function parseISO(s){ var p=String(s).split('-'); return new Date(+p[0],(+p[1])-1,+p[2]); }
 function fmtDateSI(iso){ if(!iso) return '—'; var d=parseISO(iso); return DOW_SI[d.getDay()]+', '+d.getDate()+'. '+MON_SI[d.getMonth()]+' '+d.getFullYear(); }
+function fmtRokSI(rok){ if(!rok) return 'polnoči dneva pred terminom'; var d=new Date(rok); return DOW_GEN[d.getDay()]+', '+d.getDate()+'. '+MON_SI[d.getMonth()]+' '+d.getFullYear()+', ob 00:00'; }
 function fmtTime(t){ return String(t).substring(0,5); }
 function eur(n){ if(n==null||isNaN(n)) return ''; return Number(n).toFixed(2).replace('.',',')+' €'; }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -182,9 +184,9 @@ function renderView(){
   } else if(b.status==='opravljeno'){
     h+='<div class="note note-ok">Ta termin je zaključen. Hvala za obisk! 💛</div>';
   } else if(!b.je_urejanje_mozno){
-    h+='<div class="note note-warn">Rok za spremembe in preklic je <strong>potekel</strong> (možno do polnoči dan pred terminom). Za spremembe nas pokličite na <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>';
+    h+='<div class="note note-warn">Rok za spremembe in preklic je <strong>potekel</strong> (bil je do '+fmtRokSI(b.rok)+'). Za spremembe nas pokličite na <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>';
   } else {
-    h+='<div class="note note-info">Termin lahko spremenite ali prekličete <strong>do polnoči (00:00) dneva pred terminom</strong>.</div>';
+    h+='<div class="note note-info">Termin lahko spremenite ali prekličete do <strong>'+fmtRokSI(b.rok)+'</strong>.</div>';
     h+='<div class="actions">'
       +'<button class="btn btn-primary" id="btnEdit">Spremeni naročilo</button>'
       +'<button class="btn btn-danger" id="btnCancel">Prekliči termin</button>'
