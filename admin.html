@@ -83,6 +83,7 @@ header .who{font-size:.74rem;opacity:.65}
 .dayhead{padding:.6rem .3rem;text-align:center;border-left:1px solid #f0eee9}
 .dayhead .dow{font-size:.64rem;letter-spacing:.1em;opacity:.55;text-transform:uppercase}
 .dayhead .dnum{font-family:var(--serif);font-size:1.3rem;line-height:1}
+.dayhead .dfull{font-size:.62rem;opacity:.6;margin-top:.2rem;letter-spacing:.02em}
 .dayhead.today .dnum{color:var(--coral)}
 .dayhead.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
 .dayhead.arr{background:rgba(206,126,111,.08)}
@@ -155,8 +156,8 @@ header .who{font-size:.74rem;opacity:.65}
 .pop .d-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .pop .d-edit{margin:.2rem 0 .9rem;padding:.7rem .8rem;background:rgba(23,57,75,.045);border-radius:12px}
 .pop .d-edit-hd{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);margin-bottom:.5rem}
-.pop .d-edit-row{display:flex;gap:.6rem;margin-bottom:.55rem}
-.pop .d-edit-row label{flex:1;display:flex;flex-direction:column;gap:.22rem;font-size:.72rem;opacity:.7}
+.pop .d-edit-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.55rem}
+.pop .d-edit-row label{flex:1 1 90px;display:flex;flex-direction:column;gap:.22rem;font-size:.72rem;opacity:.7}
 .pop .d-edit-row input{font:inherit;font-size:.9rem;padding:.45rem .5rem;border:1.5px solid rgba(23,57,75,.18);border-radius:8px;background:#fff;color:var(--navy)}
 .act.save{background:var(--navy);color:#fff;border-color:var(--navy)}
 .act.save:hover{background:#22333f;color:#fff;border-color:#22333f}
@@ -229,7 +230,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v15-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v16-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -245,7 +246,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v15 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v16 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -352,6 +353,7 @@ var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
 var MES=['januar','februar','marec','april','maj','junij','julij','avgust','september','oktober','november','december'];
 var mode='day', cur=new Date(); cur.setHours(0,0,0,0);
 var miniRef=new Date(cur);
+var EDBK=null;
 var cache={},blockCache={},SERVICES=[];
 var CATMAP={};
 var NAMECAT={};
@@ -724,7 +726,7 @@ function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'oprav
 function renderCal(days,bookings,blocks){
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
-  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div></div>';});
+  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div><div class="dfull">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
@@ -824,6 +826,7 @@ document.getElementById('detailClose').addEventListener('click',function(){detai
 detail.addEventListener('click',function(e){if(e.target===detail)detail.classList.add('hidden');});
 function openDetail(b){
   if(!b)return;
+  EDBK=b;
   hideTip();
   var gap=(b.gap_duration_min>0)?('<div class="d-meta">⏳ vmesni prosti čas: '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>'):'';
   detailBody.innerHTML=''
@@ -837,7 +840,8 @@ function openDetail(b){
       +'<div class="d-edit-hd">Uredi termin in storitve</div>'
       +'<div class="d-edit-row">'
         +'<label>Datum<input type="date" id="edDate" value="'+(b.booking_date||'')+'"></label>'
-        +'<label>Ura začetka<input type="time" id="edTime" step="900" value="'+(b.start_time?hm(b.start_time):'')+'"></label>'
+        +'<label>Začetek<input type="time" id="edTime" step="900" value="'+(b.start_time?hm(b.start_time):'')+'"></label>'
+        +'<label>Konec<input type="time" id="edEnd" step="300" value="'+(b.end_time?hm(b.end_time):'')+'"></label>'
       +'</div>'
       +'<div class="nb-svc-label" style="margin:.6rem 0 .35rem">Storitve</div>'
       +'<div class="nb-services" id="edServices"></div>'
@@ -848,7 +852,8 @@ function openDetail(b){
     +'<div class="d-actions"><button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button><button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act" data-id="'+b.id+'" data-s="preklicano">Prekliči</button><button class="act danger" id="edDel">Izbriši</button></div>';
   buildEdServices(edServiceMatchIds(b));
   updateEdSummary();
-  var edTimeEl=document.getElementById('edTime'); if(edTimeEl)edTimeEl.addEventListener('change',updateEdSummary);
+  var edTimeEl=document.getElementById('edTime'); if(edTimeEl)edTimeEl.addEventListener('change',edSyncEnd);
+  var edEndEl=document.getElementById('edEnd'); if(edEndEl)edEndEl.addEventListener('change',updateEdSummary);
   detailBody.querySelectorAll('.act[data-s]').forEach(function(btn){btn.addEventListener('click',function(){
     var id=btn.getAttribute('data-id'),s=btn.getAttribute('data-s');
     if(s==='preklicano'&&!confirm('Prekličem to rezervacijo?'))return;
@@ -857,29 +862,27 @@ function openDetail(b){
   });});
   var edSave=document.getElementById('edSave');
   if(edSave)edSave.addEventListener('click',function(){
-    var nd=document.getElementById('edDate').value,nt=document.getElementById('edTime').value,m=document.getElementById('edMsg');
+    var nd=document.getElementById('edDate').value,nt=document.getElementById('edTime').value,ne=document.getElementById('edEnd').value,m=document.getElementById('edMsg');
     m.className='d-edit-msg';
     var sel=edSelected();
-    if(!nd||!nt){m.textContent='Vnesite datum in uro.';m.className='d-edit-msg err';return;}
+    if(!nd||!nt||!ne){m.textContent='Vnesite datum, začetek in konec.';m.className='d-edit-msg err';return;}
     if(!sel.length){m.textContent='Izberite vsaj eno storitev.';m.className='d-edit-msg err';return;}
+    var dur=toMin(ne)-toMin(nt);
+    if(dur<=0){m.textContent='Konec mora biti po začetku.';m.className='d-edit-msg err';return;}
     var origIds=edServiceMatchIds(b).slice().sort().join(',');
     var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
-    var rec;
+    var price,stext,sid,sname;
     if(selIds===origIds){
-      var dur0=parseInt(b.total_duration_min)||sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0)||30;
-      var em0=toMin(nt)+dur0,ne0=pad(Math.floor(em0/60))+':'+pad(em0%60);
-      rec={booking_date:nd,start_time:nt,end_time:ne0};
+      price=parseFloat(b.total_price)||0; stext=b.services_text||b.service_name; sid=b.service_id; sname=b.service_name;
     } else {
-      var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
-      var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
-      var em=toMin(nt)+dur,ne=pad(Math.floor(em/60))+':'+pad(em%60);
-      var gapAfter=0,gapDuration=0,gapSvc=null;
-      sel.forEach(function(s){var gd=parseInt(s.gap_duration_min)||0,ga=parseInt(s.gap_after_min)||0;if(gd>0&&ga>0){if(!gapSvc||gd>(parseInt(gapSvc.gap_duration_min)||0))gapSvc=s;}});
-      if(gapSvc){var ga=parseInt(gapSvc.gap_after_min)||0,gd=parseInt(gapSvc.gap_duration_min)||0;if(ga+gd<=dur){gapAfter=ga;gapDuration=gd;}}
-      rec={booking_date:nd,start_time:nt,end_time:ne,total_duration_min:dur,total_price:parseFloat(price.toFixed(2)),
-        services_text:sel.map(function(s){return s.name;}).join(' + '),service_id:sel[0].id,service_name:sel[0].name,
-        gap_after_min:gapAfter,gap_duration_min:gapDuration};
+      price=parseFloat(sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0).toFixed(2));
+      stext=sel.map(function(s){return s.name;}).join(' + '); sid=sel[0].id; sname=sel[0].name;
     }
+    var gapAfter=0,gapDuration=0,gapSvc=null;
+    sel.forEach(function(s){var gd=parseInt(s.gap_duration_min)||0,ga=parseInt(s.gap_after_min)||0;if(gd>0&&ga>0){if(!gapSvc||gd>(parseInt(gapSvc.gap_duration_min)||0))gapSvc=s;}});
+    if(gapSvc){var ga=parseInt(gapSvc.gap_after_min)||0,gd=parseInt(gapSvc.gap_duration_min)||0;if(ga+gd<=dur){gapAfter=ga;gapDuration=gd;}}
+    var rec={booking_date:nd,start_time:nt,end_time:ne,total_duration_min:dur,total_price:price,
+      services_text:stext,service_id:sid,service_name:sname,gap_after_min:gapAfter,gap_duration_min:gapDuration};
     edSave.disabled=true;edSave.textContent='Shranjujem …';
     sb.from('bookings').update(rec).eq('id',b.id).then(function(res){
       if(res.error){m.textContent='Napaka: '+res.error.message;m.className='d-edit-msg err';edSave.disabled=false;edSave.textContent='Shrani spremembe';return;}
@@ -991,20 +994,31 @@ function buildEdServices(preIds){
   });
   box.innerHTML=html;
   box.querySelectorAll('.nb-acc-trigger').forEach(function(btn){btn.addEventListener('click',function(){btn.closest('.nb-acc-item').classList.toggle('open');});});
-  box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',updateEdSummary);});
+  box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',edSyncEnd);});
 }
 function edSelected(){
   var ids=[];document.querySelectorAll('#edServices input:checked').forEach(function(cb){ids.push(cb.value);});
   return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;});
 }
+function edSyncEnd(){
+  var stEl=document.getElementById('edTime'),endEl=document.getElementById('edEnd'); if(!stEl||!endEl)return;
+  var st=stEl.value,sel=edSelected(),dur;
+  var origIds=EDBK?edServiceMatchIds(EDBK).slice().sort().join(','):'';
+  var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
+  if(EDBK&&selIds===origIds&&parseInt(EDBK.total_duration_min)) dur=parseInt(EDBK.total_duration_min);
+  else dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
+  if(st&&dur>0){var sm=toMin(st)+dur;endEl.value=pad(Math.floor(sm/60))+':'+pad(sm%60);}
+  updateEdSummary();
+}
 function updateEdSummary(){
   var sel=edSelected(),sumEl=document.getElementById('edSummary'); if(!sumEl)return;
   if(!sel.length){sumEl.textContent='Izberite vsaj eno storitev.';return;}
-  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
-  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
-  var start=document.getElementById('edTime').value,endTxt='';
-  if(start&&dur){var sm=toMin(start)+dur;endTxt=pad(Math.floor(sm/60))+':'+pad(sm%60);}
-  sumEl.innerHTML='Skupaj: <strong>'+dur+' min</strong> · <strong>'+eur(price)+'</strong>'+(endTxt?(' · konec ob <strong>'+endTxt+'</strong>'):'');
+  var st=document.getElementById('edTime').value,en=document.getElementById('edEnd').value;
+  var origIds=EDBK?edServiceMatchIds(EDBK).slice().sort().join(','):'';
+  var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
+  var price=(EDBK&&selIds===origIds)?(parseFloat(EDBK.total_price)||0):sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var dur=(st&&en)?(toMin(en)-toMin(st)):0;
+  sumEl.innerHTML='Skupaj: <strong>'+(dur>0?dur:0)+' min</strong> · <strong>'+eur(price)+'</strong>'+(en?(' · konec ob <strong>'+en+'</strong>'):'');
 }
 function openNew(){
   document.getElementById('nbDate').value=isoOf(cur);
