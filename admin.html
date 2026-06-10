@@ -230,7 +230,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v17-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v18-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -246,7 +246,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v17 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v18 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -256,7 +256,7 @@ header .who{font-size:.74rem;opacity:.65}
     <button class="nav-btn" id="nextBtn">&#8250;</button>
     <span class="range" id="rangeLabel"></span>
     <button class="btn-ghost" id="newBtn">+ Nova rezervacija</button>
-    <button class="btn-ghost" id="blockToggle">&#9210; Blokiraj čas</button>
+    <button class="btn-ghost" id="blockToggle">&#128197; Opravek</button>
     <div class="seg">
       <button data-mode="day" class="active">Dan</button>
       <button data-mode="workweek">Delovni teden</button>
@@ -271,14 +271,16 @@ header .who{font-size:.74rem;opacity:.65}
 
   <div class="wrap">
     <div class="block-form hidden" id="blockForm">
+      <div class="d-edit-hd" style="margin-bottom:.5rem">Opravek / odsotnost</div>
       <div class="bf-row">
         <label>Datum<input type="date" id="blkDate"></label>
         <label>Od<input type="time" id="blkFrom" step="900"></label>
         <label>Do<input type="time" id="blkTo" step="900"></label>
       </div>
-      <label>Opomba (neobvezno)<input type="text" id="blkNote" placeholder="npr. malica, dopust"></label>
+      <button class="btn-ghost" id="blkAllDay" style="font-size:.8rem;padding:.35rem .9rem;margin-bottom:.55rem">&#9203; Cel delovni dan</button>
+      <label>Opomba (neobvezno)<input type="text" id="blkNote" placeholder="npr. malica, dopust, opravek"></label>
       <div class="bf-actions">
-        <button class="btn btn-main" id="blkSave" style="width:auto;padding:.55rem 1.3rem">Shrani blokado</button>
+        <button class="btn btn-main" id="blkSave" style="width:auto;padding:.55rem 1.3rem">Shrani opravek</button>
         <button class="btn-ghost" id="blkCancel">Prekliči</button>
       </div>
       <p class="msg" id="blkMsg"></p>
@@ -503,6 +505,14 @@ function nav(dir){
 var blockForm=document.getElementById('blockForm');
 document.getElementById('blockToggle').addEventListener('click',function(){blockForm.classList.toggle('hidden');if(!blockForm.classList.contains('hidden'))document.getElementById('blkDate').value=isoOf(cur);});
 document.getElementById('blkCancel').addEventListener('click',function(){blockForm.classList.add('hidden');document.getElementById('blkMsg').textContent='';});
+document.getElementById('blkAllDay').addEventListener('click',function(){
+  var dEl=document.getElementById('blkDate'); if(!dEl.value)dEl.value=isoOf(cur);
+  var p=dEl.value.split('-'); var wd=new Date(+p[0],+p[1]-1,+p[2]).getDay();
+  var info=dayInfo(wd); var h=(info&&info.h)?info.h:[8,20];
+  document.getElementById('blkFrom').value=pad(h[0])+':00';
+  document.getElementById('blkTo').value=pad(h[1])+':00';
+  document.getElementById('blkMsg').textContent='';
+});
 document.getElementById('blkSave').addEventListener('click',function(){
   var date=document.getElementById('blkDate').value,from=document.getElementById('blkFrom').value,to=document.getElementById('blkTo').value,note=document.getElementById('blkNote').value.trim();
   var msg=document.getElementById('blkMsg');msg.className='msg';
@@ -510,7 +520,7 @@ document.getElementById('blkSave').addEventListener('click',function(){
   if(to<=from){msg.textContent='Konec mora biti za začetkom.';msg.className='msg err';return;}
   var btn=document.getElementById('blkSave');btn.disabled=true;btn.textContent='Shranjujem …';
   sb.from('blocks').insert([{block_date:date,start_time:from,end_time:to,note:note||null}]).then(function(res){
-    btn.disabled=false;btn.textContent='Shrani blokado';
+    btn.disabled=false;btn.textContent='Shrani opravek';
     if(res.error){msg.textContent='Napaka: '+res.error.message;msg.className='msg err';return;}
     document.getElementById('blkFrom').value='';document.getElementById('blkTo').value='';document.getElementById('blkNote').value='';
     blockForm.classList.add('hidden');load();
@@ -745,7 +755,7 @@ function renderCal(days,bookings,blocks){
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
       blockCache[bl.id]=bl;
       var s=toMin(bl.start_time),e=toMin(bl.end_time),top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,18);
-      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">Blokirano</div>'+(bl.note?('<div class="ev-s">'+esc(bl.note)+'</div>'):'')+'</div>';
+      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">Opravek</div>'+(bl.note?('<div class="ev-s">'+esc(bl.note)+'</div>'):'')+'</div>';
     });
     col+='</div>';h+=col;
   });
@@ -762,7 +772,7 @@ function renderCal(days,bookings,blocks){
     el.addEventListener('mouseenter',function(){showTip(tipBlock(bl),el);});
     el.addEventListener('mouseleave',hideTip);
     el.addEventListener('touchstart',function(){showTip(tipBlock(bl),el);},{passive:true});
-    el.addEventListener('click',function(){hideTip();if(confirm('Odstranim to blokado?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});
+    el.addEventListener('click',function(){hideTip();if(confirm('Odstranim ta opravek?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});
   });
   calScroll.querySelectorAll('.col').forEach(function(colEl){
     colEl.addEventListener('dblclick',function(e){
@@ -806,7 +816,7 @@ function tipBooking(b){
 }
 function tipBlock(bl){
   if(!bl)return '';
-  return '<div class="tip-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="tip-n" style="color:var(--coral)">⛔ Blokirano</div>'+(bl.note?'<div class="tip-row">'+esc(bl.note)+'</div>':'');
+  return '<div class="tip-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="tip-n" style="color:var(--coral)">Opravek / odsotnost</div>'+(bl.note?'<div class="tip-row">'+esc(bl.note)+'</div>':'');
 }
 function showTip(html,el){
   if(!html)return;
