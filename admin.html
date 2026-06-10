@@ -229,7 +229,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v12-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v13-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -245,7 +245,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v12 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v13 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -558,8 +558,8 @@ function buildMini(){
   if(lastMobile){
     miniEl.innerHTML=miniMonthHTML(miniRef,true);
   } else {
-    var base=addMonths(new Date(),-1); base=new Date(base.getFullYear(),base.getMonth(),1);
-    var html='';for(var m=0;m<15;m++){html+=miniMonthHTML(addMonths(base,m),false);}
+    var base=new Date(cur.getFullYear(),cur.getMonth(),1);
+    var html='';for(var m=0;m<12;m++){html+=miniMonthHTML(addMonths(base,m),false);}
     miniEl.innerHTML=html;
   }
   MINI_BUILT=true; updateMiniSel();
@@ -573,11 +573,8 @@ function updateMiniSel(){
 function syncMiniHeight(){
   if(!MINI_BUILT)return;
   if(window.innerWidth<=820){ miniEl.style.height=''; miniEl.style.maxHeight='320px'; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); return; }
-  var cal=calScroll.firstElementChild; if(!cal)return;
-  var h=cal.offsetHeight; if(!h)return;
-  miniEl.style.height=h+'px'; miniEl.style.maxHeight=h+'px';
-  var minH=Math.floor((h-2*12)/3);
-  miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight=minH+'px';});
+  miniEl.style.height=''; miniEl.style.maxHeight='';
+  miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';});
 }
 function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); }
 
