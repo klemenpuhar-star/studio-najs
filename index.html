@@ -766,7 +766,7 @@
   </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v12-2026-06-09 (manjsa slika, vec otrok, rdeca validacija, galerija) -->
+<!-- NAJS-BUILD: v13-2026-06-10 (min. cas vnaprej 4 ure za narocanje) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1339,6 +1339,7 @@ var DC = {
   6: 'dogovor'
 };
 var SLOT_STEP = 15; // minutni raaster za generiranje
+var MIN_LEAD_MIN = 240; // najmanjsi cas vnaprej za narocanje (v minutah); 240 = 4 ure
 function daysPerView(){ return window.innerWidth <= 600 ? 3 : 8; }
 var stripOffset = 0; // offset v dnevih (0 = danes)
 
@@ -1512,13 +1513,22 @@ function calcFreeSlots(ds, dow, busyRaw, dur){
   busy = busy.filter(function(b){ return b.e>wS && b.s<wE; });
   busy.sort(function(a,b){ return a.s-b.s; });
 
-  // Za danes: izloči pretekle
-  var nowMin = 0;
-  var todayStr = isoDate(new Date());
-  if(ds===todayStr){ var n=new Date(); nowMin=n.getHours()*60+n.getMinutes(); }
+  // Minimalni cas vnaprej: stranka se ne more narociti prej kot cez MIN_LEAD_MIN minut.
+  // Prag racunamo kot absolutni cas (zdaj + MIN_LEAD_MIN), pretvorjen v minuto izbranega dne.
+  var minStart = wS;
+  var leadTs = new Date().getTime() + MIN_LEAD_MIN*60000;
+  var dp = ds.split('-');
+  var dayStartTs = new Date(+dp[0], (+dp[1])-1, +dp[2], 0, 0, 0, 0).getTime();
+  var leadMinOfDay = Math.ceil((leadTs - dayStartTs)/60000);
+  if(leadMinOfDay > minStart) minStart = leadMinOfDay;
+  // Poravnaj prvi mozni termin na SLOT_STEP mrezo glede na zacetek delovnega casa
+  if(minStart > wS){
+    var rem = (minStart - wS) % SLOT_STEP;
+    if(rem !== 0) minStart += (SLOT_STEP - rem);
+  }
 
   var slots=[];
-  for(var t=Math.max(wS,nowMin); t+dur<=wE; t+=SLOT_STEP){
+  for(var t=minStart; t+dur<=wE; t+=SLOT_STEP){
     var ok=true;
     for(var i=0;i<busy.length;i++){
       if(busy[i].s < t+dur && busy[i].e > t){ ok=false; break; }
