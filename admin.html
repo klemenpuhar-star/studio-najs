@@ -82,9 +82,9 @@ header .who{font-size:.74rem;opacity:.65}
 .cal-body{display:grid}
 .dayhead{padding:.6rem .3rem;text-align:center;border-left:1px solid #f0eee9}
 .dayhead .dow{font-size:.64rem;letter-spacing:.1em;opacity:.55;text-transform:uppercase}
-.dayhead .dnum{font-family:var(--serif);font-size:1.3rem;line-height:1}
-.dayhead .dfull{font-size:.62rem;opacity:.6;margin-top:.2rem;letter-spacing:.02em}
+.dayhead .dnum{font-family:var(--serif);font-size:1.3rem;line-height:1.05;white-space:nowrap}
 .dayhead.today .dnum{color:var(--coral)}
+@media(max-width:820px){.dayhead .dnum{font-size:.82rem}}
 .dayhead.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
 .dayhead.arr{background:rgba(206,126,111,.08)}
 .gutter{position:relative;height:624px}
@@ -230,7 +230,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v16-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v17-2026-06-09 (barve+trak, geslo, validacija) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -246,7 +246,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v16 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v17 · 9.6.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -726,7 +726,7 @@ function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'oprav
 function renderCal(days,bookings,blocks){
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
-  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+d.getDate()+'</div><div class="dfull">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
+  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
