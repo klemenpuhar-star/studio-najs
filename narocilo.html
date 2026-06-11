@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v3-2026-06-10 (rok z natancnim datumom) -->
+<!-- NAJS-NAROCILO: v4-2026-06-10 (rok 'do 00:00', brez vrstice status) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -99,7 +99,7 @@ function minToTime(m){ return pad(Math.floor(m/60))+':'+pad(m%60); }
 function isoDate(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function parseISO(s){ var p=String(s).split('-'); return new Date(+p[0],(+p[1])-1,+p[2]); }
 function fmtDateSI(iso){ if(!iso) return '—'; var d=parseISO(iso); return DOW_SI[d.getDay()]+', '+d.getDate()+'. '+MON_SI[d.getMonth()]+' '+d.getFullYear(); }
-function fmtRokSI(rok){ if(!rok) return 'polnoči dneva pred terminom'; var d=new Date(rok); return DOW_GEN[d.getDay()]+', '+d.getDate()+'. '+MON_SI[d.getMonth()]+' '+d.getFullYear()+', ob 00:00'; }
+function fmtRokSI(rok){ if(!rok) return 'polnoči dneva pred terminom'; var d=new Date(rok); return DOW_GEN[d.getDay()]+', '+d.getDate()+'. '+MON_SI[d.getMonth()]+' '+d.getFullYear()+', do 00:00'; }
 function fmtTime(t){ return String(t).substring(0,5); }
 function eur(n){ if(n==null||isNaN(n)) return ''; return Number(n).toFixed(2).replace('.',',')+' €'; }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -177,7 +177,6 @@ function renderView(){
   h+='<div class="row"><span class="k">Datum</span><span class="v">'+fmtDateSI(b.booking_date)+'</span></div>';
   if(b.booking_date) h+='<div class="row"><span class="k">Ura</span><span class="v">'+fmtTime(b.start_time)+'–'+fmtTime(b.end_time)+'</span></div>';
   if(b.total_price!=null) h+='<div class="row"><span class="k">Cena</span><span class="v">'+eur(b.total_price)+'</span></div>';
-  h+='<div class="row"><span class="k">Status</span><span class="v">'+statusBadge(b.status)+'</span></div>';
 
   if(b.status==='preklicano'){
     h+='<div class="note note-bad">Ta termin je <strong>preklican</strong>. Za nov termin obiščite našo spletno stran.</div>';
