@@ -771,7 +771,11 @@
   body.cenik-view #cenik{
     display:block; position:fixed; inset:0; z-index:3000;
     background:var(--bez2); overflow-y:auto; -webkit-overflow-scrolling:touch;
-    padding:64px 0 40px;
+    padding:64px clamp(20px, 6vw, 56px) 48px;
+  }
+  body.cenik-view #cenik > .sec-center,
+  body.cenik-view #cenikGrid{
+    max-width:1080px; margin-left:auto; margin-right:auto;
   }
   .cenik-close{
     position:fixed; top:14px; right:14px; z-index:3100;
@@ -783,7 +787,7 @@
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v15-2026-06-10 (cenik kot loceni pogled, ne na domaci strani) -->
+<!-- NAJS-BUILD: v16-2026-06-10 (cenik pogled - stranska obloga, omejena sirina) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
