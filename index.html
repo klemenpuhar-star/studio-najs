@@ -787,7 +787,7 @@
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v16-2026-06-10 (cenik pogled - stranska obloga, omejena sirina) -->
+<!-- NAJS-BUILD: v17-2026-09-02 (streznisko preverjanje rezervacij, popravek nujnih terminov, cenik gumb nazaj) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1783,35 +1783,37 @@ function submitBooking(btn){
     if((gsa + gsd) <= totalDur){ gapAfter = gsa; gapDuration = gsd; }
   }
 
-  var mtoken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
-  var rec = {
-    manage_token:       mtoken,
-    service_id:         sv.id,
-    service_name:       sv.name,
-    services_text:      servicesText,
-    total_price:        parseFloat(totalPrice.toFixed(2)),
-    total_duration_min: totalDur,
-    gap_after_min:      gapAfter,
-    gap_duration_min:   gapDuration,
-    customer_name:      c.name,
-    customer_phone:     c.phone,
-    customer_email:     c.email || null,
-    booking_date:       state.isNujni ? null : isoDate(state.date),
-    start_time:         state.isNujni ? '00:00' : state.slot.start,
-    end_time:           state.isNujni ? '00:00' : state.slot.end,
-    status:             state.isNujni ? 'po dogovoru' : 'nova',
-    note:               state.isNujni
-                          ? (state.nujniNote + (c.note ? ('\n'+c.note) : ''))
-                          : (c.note || null)
+  var mtoken = null;
+  var storitveArr = selArr.map(function(s){ return { id: s.id, qty: qtyOf(s) }; });
+  var rpcArgs = {
+    storitve: storitveArr,
+    datum:    state.isNujni ? null : isoDate(state.date),
+    zacetek:  state.isNujni ? null : state.slot.start,
+    ime:      c.name,
+    telefon:  c.phone,
+    epota:    c.email || null,
+    opomba:   state.isNujni ? (state.nujniNote + (c.note ? ('\n'+c.note) : '')) : (c.note || null),
+    nujni:    !!state.isNujni
   };
 
-  sb.from('bookings').insert([rec]).then(function(res){
-    if(res.error){
+  sb.rpc('ustvari_rezervacijo', rpcArgs).then(function(res){
+    var r = res.data || {};
+    if(res.error || !r.ok){
+      var t = 'Prišlo je do napake. Pokličite nas na 031 217 361.';
+      if(r.napaka==='zasedeno')             t = 'Ta termin je bil pravkar zaseden. Prosimo, izberite drug termin.';
+      else if(r.napaka==='prepozno')        t = 'Termin je premalo vnaprej. Naročanje je možno najmanj 4 ure vnaprej.';
+      else if(r.napaka==='izven-delovnega-casa' || r.napaka==='zaprto')
+                                            t = 'Izbrani termin je izven delovnega časa. Prosimo, izberite drug termin.';
+      else if(r.napaka==='manjkajo-podatki') t = 'Prosimo, vnesite ime in telefonsko številko.';
+      else if(r.napaka==='ni-storitev' || r.napaka==='neveljavna-storitev')
+                                            t = 'Prišlo je do napake pri izbiri storitve. Poskusite znova.';
+      else if(res.error)                    t = 'Prišlo je do napake: '+res.error.message+'. Pokličite nas na 031 217 361.';
       var errEl = document.getElementById('bkErr2');
-      if(errEl){ errEl.textContent = 'Prišlo je do napake: '+res.error.message+'. Pokličite nas na 031 217 361.'; errEl.classList.add('show'); }
+      if(errEl){ errEl.textContent = t; errEl.classList.add('show'); }
       btn.disabled=false; btn.textContent='Potrdi naročilo ✶';
       return;
     }
+    mtoken = r.zeton;
     foot.innerHTML = '';
     var mbase = location.origin + location.pathname.replace(/[^/]*$/, '');
     var mlink = mbase + 'narocilo.html?id=' + mtoken;
@@ -1941,8 +1943,16 @@ function showBodyError(msg){
     var hmb=document.getElementById('hmb'); if(hmb) hmb.setAttribute('aria-expanded','false');
     window.scrollTo(0,0);
     var c=document.getElementById('cenik'); if(c) c.scrollTop=0;
+    try{ if(history.state===null || !history.state.cenik) history.pushState({cenik:1},'','#cenik'); }catch(e){}
   }
-  function closeCenik(){ document.body.classList.remove('cenik-view'); }
+  function closeCenik(){
+    if(!document.body.classList.contains('cenik-view')) return;
+    document.body.classList.remove('cenik-view');
+    try{ if(history.state && history.state.cenik) history.back(); }catch(e){}
+  }
+  window.addEventListener('popstate', function(){
+    if(!(history.state && history.state.cenik)) document.body.classList.remove('cenik-view');
+  });
   window.openCenik=openCenik; window.closeCenik=closeCenik;
   var links=document.querySelectorAll('a[href="#cenik"]');
   for(var i=0;i<links.length;i++){

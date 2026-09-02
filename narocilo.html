@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v4-2026-06-10 (rok 'do 00:00', brez vrstice status) -->
+<!-- NAJS-NAROCILO: v5-2026-09-02 (sporocila za strezniska preverjanja) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -356,6 +356,9 @@ function saveEdit(){
     if(res.error||!r.ok){
       var t='Sprememba ni uspela.';
       if(r.napaka==='rok-potekel') t='Rok za spremembe je potekel.';
+      else if(r.napaka==='zasedeno') t='Ta termin je bil pravkar zaseden. Prosimo, izberite drug termin.';
+      else if(r.napaka==='prepozno') t='Termin je premalo vnaprej – izberite termin vsaj 4 ure vnaprej.';
+      else if(r.napaka==='izven-delovnega-casa' || r.napaka==='zaprto') t='Izbrani termin je izven delovnega časa.';
       else if(r.napaka==='ni-mozno') t='Tega termina ni mogoče spreminjati.';
       else if(r.napaka==='neveljavna-storitev') t='Izbrana storitev ni veljavna.';
       else if(r.napaka==='ni-storitev') t='Izberite vsaj eno storitev.';
