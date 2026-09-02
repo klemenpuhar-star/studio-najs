@@ -787,7 +787,7 @@
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v18-2026-09-02 (brez povezave na zaslonu - dobi jo po e-posti) -->
+<!-- NAJS-BUILD: v19-2026-09-02 (delovni cas iz baze) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1362,6 +1362,28 @@ var DC = {
 };
 var SLOT_STEP = 15; // minutni raaster za generiranje
 var MIN_LEAD_MIN = 240; // najmanjsi cas vnaprej za narocanje (v minutah); 240 = 4 ure
+
+/* Delovni cas se bere iz baze (tabela delovni_cas) – zgornje vrednosti so le zasilne. */
+function nalozDelovniCas(){
+  try{
+    return sb.from('delovni_cas').select('dan,nacin,od,do_').then(function(res){
+      if(res.error || !res.data || !res.data.length) return;
+      var novi = {};
+      res.data.forEach(function(r){
+        var d = parseInt(r.dan);
+        if(r.nacin === 'odprto' && r.od && r.do_){
+          novi[d] = { start: String(r.od).substring(0,5), end: String(r.do_).substring(0,5) };
+        } else if(r.nacin === 'dogovor'){
+          novi[d] = 'dogovor';
+        }
+        // 'zaprto' -> dan ostane nedolocen (zaprto)
+      });
+      for(var k in DC){ if(DC.hasOwnProperty(k)) delete DC[k]; }
+      for(var k2 in novi){ if(novi.hasOwnProperty(k2)) DC[k2] = novi[k2]; }
+    });
+  }catch(e){ /* ob napaki ostanejo zasilne vrednosti */ }
+}
+nalozDelovniCas();
 function daysPerView(){ return window.innerWidth <= 600 ? 3 : 8; }
 var stripOffset = 0; // offset v dnevih (0 = danes)
 

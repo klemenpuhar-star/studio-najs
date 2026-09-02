@@ -230,7 +230,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v19-2026-06-09 (barve+trak, geslo, validacija) -->
+<!-- NAJS-BUILD: v20-2026-09-02 (delovni cas iz baze) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -427,10 +427,30 @@ function hm(t){return String(t||'').substring(0,5);}
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 function isMobile(){return window.innerWidth<=820;}
 function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DNI[d.getDay()]+', '+(+p[2])+'. '+MES[+p[1]-1]+' '+p[0];}
-function dayInfo(dow){if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};}
+var DCAS=null; /* nalozen iz tabele delovni_cas; null = uporabi zasilne vrednosti */
+function dayInfo(dow){
+  if(DCAS && DCAS[dow]) return DCAS[dow];
+  if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};
+}
+function nalozDelovniCas(cb){
+  sb.from('delovni_cas').select('dan,nacin,od,do_').then(function(res){
+    if(!res.error && res.data && res.data.length){
+      var m={};
+      res.data.forEach(function(r){
+        var d=parseInt(r.dan);
+        if(r.nacin==='odprto' && r.od && r.do_){
+          m[d]={h:[parseInt(String(r.od).substring(0,2)), parseInt(String(r.do_).substring(0,2))]};
+        } else if(r.nacin==='dogovor'){ m[d]={arrangement:true}; }
+        else { m[d]={closed:true}; }
+      });
+      DCAS=m;
+    }
+    if(cb) cb();
+  });
+}
 
 /* AUTH */
-function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;buildMini();loadServices(load);}
+function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;nalozDelovniCas(function(){buildMini();loadServices(load);});}
 function showLogin(){appView.classList.add('hidden');loginView.classList.remove('hidden');}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('password').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});

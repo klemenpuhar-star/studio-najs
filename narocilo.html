@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v5-2026-09-02 (sporocila za strezniska preverjanja) -->
+<!-- NAJS-NAROCILO: v6-2026-09-02 (delovni cas iz baze) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -148,6 +148,19 @@ function calcFreeSlots(ds,dow,busyRaw,dur){
 
 function init(){
   if(!TOKEN){ app.innerHTML='<div class="note note-bad">Povezava ni veljavna. Odprite jo iz potrditvenega sporočila ali nas pokličite na <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>'; return; }
+  sb.from('delovni_cas').select('dan,nacin,od,do_').then(function(dres){
+    if(!dres.error && dres.data && dres.data.length){
+      var novi={};
+      dres.data.forEach(function(r){
+        var d=parseInt(r.dan);
+        if(r.nacin==='odprto' && r.od && r.do_) novi[d]={start:String(r.od).substring(0,5), end:String(r.do_).substring(0,5)};
+        else if(r.nacin==='dogovor') novi[d]='dogovor';
+        else novi[d]='zaprto';
+      });
+      for(var k in DC){ if(DC.hasOwnProperty(k)) delete DC[k]; }
+      for(var k2 in novi){ if(novi.hasOwnProperty(k2)) DC[k2]=novi[k2]; }
+    }
+  });
   sb.from('services').select('id,name,description,price,category,sort_order,duration_min,gap_after_min,gap_duration_min')
     .eq('active',true).order('category').order('sort_order')
     .then(function(res){ SERVICES=res.data||[]; loadBooking(); });
