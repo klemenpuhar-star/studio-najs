@@ -6,9 +6,10 @@
   <title>Frizerski Studio Najs – Nataša Markuta, Škofja Loka</title>
   <meta name="description" content="Frizerski studio Najs by Nataša Markuta v Škofji Loki. Striženje, barvanje, pramena, rituali." />
   <link rel="icon" href="logo.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  
+  
+  <!-- Googlove pisave se nalozijo sele po privolitvi obiskovalca (glej piskotki.html) -->
+<link id="najsFonts" data-href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     /* ── RESET ── */
@@ -787,7 +788,7 @@
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v19-2026-09-02 (delovni cas iz baze) -->
+<!-- NAJS-BUILD: v22-2026-09-02 (zasebnost: podrobne kategorije s tabelami) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -920,8 +921,18 @@
       </div>
     </div>
     <div class="map-wrap reveal" style="transition-delay:.1s">
+      <div id="mapPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:280px;height:100%;background:#efe6da;border-radius:14px;padding:26px;text-align:center">
+        <div style="font-size:1.6rem">📍</div>
+        <p style="margin:0;font-weight:600;color:#2c4251">Cesta talcev 3B, 4220 Škofja Loka</p>
+        <p style="margin:0;font-size:.86rem;color:#6f7f89;max-width:330px;line-height:1.5">
+          Zemljevid prikazuje Google. Za prikaz je potrebna vaša privolitev, saj Google ob tem prejme vaš IP naslov.
+        </p>
+        <button type="button" onclick="najsDovoliZemljevid()" style="background:#d06666;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-family:inherit;font-weight:600;font-size:.9rem;cursor:pointer">Prikaži zemljevid</button>
+        <a href="https://maps.google.com/?q=Cesta+talcev+3B,+4220+%C5%A0kofja+Loka" target="_blank" rel="noopener" style="font-size:.84rem;color:#d06666">Odpri v Google Zemljevidih ↗</a>
+      </div>
       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2763.5!2d14.3056!3d46.1651!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477abf3b1a67c3b3%3A0x500c6d1f86d70700!2sCesta%20talcev%203B%2C%204220%20%C5%A0kofja%20Loka!5e0!3m2!1ssl!2ssi!4v1700000000000!5m2!1ssl!2ssi"
+        id="najsMap" style="display:none"
+        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2763.5!2d14.3056!3d46.1651!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477abf3b1a67c3b3%3A0x500c6d1f86d70700!2sCesta%20talcev%203B%2C%204220%20%C5%A0kofja%20Loka!5e0!3m2!1ssl!2ssi!4v1700000000000!5m2!1ssl!2ssi"
         allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
         title="Lokacija Frizerski studio Najs">
       </iframe>
@@ -941,6 +952,11 @@
       <a href="#narocanje">Naroči se</a>
     </nav>
     <p class="footer-stamp">✦ &nbsp;Have a nice hair day&nbsp; ✦</p>
+    <nav class="footer-links" style="margin-top:6px">
+      <a href="zasebnost.html">Pravilnik o zasebnosti</a>
+      <a href="piskotki.html">Politika piškotkov</a>
+      <a href="#" onclick="najsOdpriNastavitve();return false;">Nastavitve zasebnosti</a>
+    </nav>
     <p class="footer-copy">© 2026 Frizerski studio Najs, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka</p>
   </div>
 </footer>
@@ -1978,6 +1994,218 @@ function showBodyError(msg){
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeCenik(); });
 })();
 </script>
+<!-- ══ PRIVOLITEV ZA ZUNANJE VSEBINE ═══════════════════════════ -->
+<style>
+#najsPrivola{ position:fixed; left:0; right:0; bottom:0; z-index:9000; display:none;
+  background:#fffdfa; border-top:3px solid #d06666; box-shadow:0 -10px 34px rgba(44,66,81,.18);
+  padding:22px 24px; font-family:'Poppins',system-ui,Arial,sans-serif; color:#2c4251; }
+#najsPrivola.show{ display:block; }
+.np-inner{ max-width:1180px; margin:0 auto; display:flex; gap:28px; align-items:center; flex-wrap:wrap; }
+.np-text{ flex:1; min-width:290px; }
+.np-title{ font-size:1.12rem; font-weight:700; margin:0 0 7px; color:#2c4251; letter-spacing:.2px; }
+.np-desc{ margin:0; font-size:.88rem; line-height:1.6; color:#5b6f7c; }
+.np-desc a{ color:#d06666; font-weight:600; }
+.np-btns{ display:flex; gap:11px; flex-wrap:wrap; align-items:center; }
+.np-btn{ border-radius:10px; padding:12px 24px; font-family:inherit; font-weight:600;
+  font-size:.9rem; cursor:pointer; white-space:nowrap; transition:filter .15s, background .15s; }
+.np-ghost{ background:#fff; color:#2c4251; border:1.5px solid #e5ccb2; }
+.np-ghost:hover{ background:#faf3ea; border-color:#d06666; color:#d06666; }
+.np-navy{ background:#2c4251; color:#fff; border:1.5px solid #2c4251; }
+.np-navy:hover{ filter:brightness(1.18); }
+.np-coral{ background:#d06666; color:#fff; border:1.5px solid #d06666; }
+.np-coral:hover{ filter:brightness(.93); }
+@media(max-width:760px){
+  #najsPrivola{ padding:18px 16px; max-height:88vh; overflow-y:auto; }
+  .np-btns{ width:100%; } .np-btn{ flex:1 1 100%; }
+}
+/* Plosca za prilagajanje */
+#najsNast{ position:fixed; inset:0; z-index:9100; display:none; background:rgba(44,66,81,.55); padding:20px; }
+#najsNast.show{ display:flex; align-items:center; justify-content:center; }
+.nn-card{ background:#fffdfa; border-radius:16px; max-width:580px; width:100%; max-height:86vh;
+  overflow-y:auto; padding:26px 28px; box-shadow:0 18px 50px rgba(44,66,81,.3);
+  font-family:'Poppins',system-ui,Arial,sans-serif; color:#2c4251; }
+.nn-card h3{ margin:0 0 6px; font-size:1.2rem; }
+.nn-card .nn-sub{ margin:0 0 18px; font-size:.86rem; color:#5b6f7c; line-height:1.55; }
+.nn-row{ border:1px solid #e5ccb2; border-radius:12px; padding:14px 16px; margin-bottom:12px; background:#fff; }
+.nn-head{ display:flex; justify-content:space-between; align-items:center; gap:14px; }
+.nn-name{ font-weight:600; font-size:.95rem; }
+.nn-info{ margin:7px 0 0; font-size:.82rem; color:#5b6f7c; line-height:1.55; }
+.nn-lock{ font-size:.78rem; font-weight:600; color:#1f7a44; background:#dcf3e3;
+  padding:4px 11px; border-radius:999px; white-space:nowrap; }
+.sw{ position:relative; width:48px; height:26px; flex:0 0 48px; }
+.sw input{ opacity:0; width:0; height:0; position:absolute; }
+.sw span{ position:absolute; inset:0; background:#cfc3b4; border-radius:999px; cursor:pointer; transition:background .18s; }
+.sw span:before{ content:""; position:absolute; height:20px; width:20px; left:3px; top:3px;
+  background:#fff; border-radius:50%; transition:transform .18s; }
+.sw input:checked + span{ background:#d06666; }
+.sw input:checked + span:before{ transform:translateX(22px); }
+.nn-btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.nn-btns .np-btn{ flex:1; min-width:150px; }
+.nn-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.nn-x{ background:none; border:none; font-size:1.15rem; color:#8a969d; cursor:pointer; line-height:1; padding:2px 4px; }
+.nn-x:hover{ color:#d06666; }
+.nn-head{ cursor:pointer; }
+.nn-arr{ display:inline-block; color:#d06666; font-weight:700; font-size:1.15rem;
+  transition:transform .18s; flex:0 0 auto; }
+.nn-arr.open{ transform:rotate(90deg); }
+.nn-head .nn-name{ flex:1; }
+.nn-body{ display:none; margin-top:10px; }
+.nn-body.open{ display:block; }
+.nn-tab{ width:100%; border-collapse:collapse; background:#faf7f3; border-radius:8px; overflow:hidden; margin-top:8px; }
+.nn-tab th{ text-align:left; width:34%; padding:8px 11px; font-size:.8rem; font-weight:600;
+  color:#5b6f7c; vertical-align:top; border-bottom:1px solid #efe6da; }
+.nn-tab td{ padding:8px 11px; font-size:.8rem; line-height:1.5; vertical-align:top; border-bottom:1px solid #efe6da; }
+.nn-tab tr:last-child th, .nn-tab tr:last-child td{ border-bottom:none; }
+.nn-tab code{ background:#efe6da; padding:1px 6px; border-radius:4px; font-size:.78rem; }
+.nn-tab a{ color:#d06666; }
+.nn-foot{ font-size:.82rem; color:#5b6f7c; margin:14px 0 0; }
+.nn-foot a{ color:#d06666; }
+</style>
+
+<div id="najsPrivola" role="dialog" aria-live="polite" aria-label="Obvestilo o zasebnosti">
+  <div class="np-inner">
+    <div class="np-text">
+      <p class="np-title">Cenimo vašo zasebnost</p>
+      <p class="np-desc">
+        Ta stran ne uporablja piškotkov za sledenje, oglaševanje ali analitiko. Za prikaz zemljevida
+        z našo lokacijo in oblikovnih pisav pa se poveže z Googlom, ki ob tem prejme vaš IP naslov.
+        S klikom na »Sprejmi vse« se strinjate s prikazom teh vsebin. Če jih zavrnete, stran in
+        naročanje delujeta povsem normalno.
+        <a href="piskotki.html">Politika piškotkov</a> · <a href="zasebnost.html">Zasebnost</a>
+      </p>
+    </div>
+    <div class="np-btns">
+      <button type="button" class="np-btn np-ghost" onclick="najsOdpriNastavitve()">Prilagodi</button>
+      <button type="button" class="np-btn np-navy" onclick="najsPrivolaZavrni()">Zavrni</button>
+      <button type="button" class="np-btn np-coral" onclick="najsPrivolaSprejmi()">Sprejmi vse</button>
+    </div>
+  </div>
+</div>
+
+<div id="najsNast" role="dialog" aria-modal="true" aria-label="Nastavitve zasebnosti">
+  <div class="nn-card">
+    <div class="nn-top">
+      <h3>Prilagodite nastavitve zasebnosti</h3>
+      <button type="button" class="nn-x" onclick="najsZapriNastavitve()" aria-label="Zapri">✕</button>
+    </div>
+
+    <p class="nn-sub">
+      Spodaj je natančen seznam vsega, kar ta stran shrani v vaš brskalnik ali naloži z drugih strežnikov.
+      Kliknite kategorijo za podrobnosti. Naša stran <strong>ne uporablja piškotkov za sledenje, analitiko
+      ali oglaševanje</strong>, zato takih kategorij tu ne boste našli.
+    </p>
+
+    <!-- 1. NUJNO POTREBNO -->
+    <div class="nn-row">
+      <div class="nn-head" onclick="najsRazsiri('k1')">
+        <span class="nn-arr" id="a-k1">›</span>
+        <span class="nn-name">Nujno potrebno</span>
+        <span class="nn-lock">Vedno aktivno</span>
+      </div>
+      <div class="nn-body" id="b-k1">
+        <p class="nn-info">Omogoča prikaz strani in delovanje spletnega naročanja. Brez tega rezervacija
+          ne deluje, zato tega ni mogoče izklopiti. Za sledenje ali oglaševanje se ne uporablja.</p>
+        <table class="nn-tab">
+          <tr><th>Zapis</th><td><code>najs-privola</code></td></tr>
+          <tr><th>Vrsta</th><td>Lokalna shramba brskalnika (ni piškotek)</td></tr>
+          <tr><th>Trajanje</th><td>Do izbrisa podatkov brskalnika (predvidoma 12 mesecev)</td></tr>
+          <tr><th>Opis</th><td>Shrani vašo odločitev s te plošče, da vas ob vsakem obisku ne sprašujemo
+            znova. Ne vsebuje osebnih podatkov in se ne pošilja nikomur.</td></tr>
+        </table>
+        <p class="nn-info" style="margin-top:12px">Za delovanje strani so potrebni tudi ponudniki
+          <strong>Supabase</strong> (shranjevanje rezervacij, strežniki v EU), <strong>jsDelivr</strong>
+          (programska knjižnica za obrazec) in <strong>GitHub Pages</strong> (gostovanje). Ti piškotkov
+          ne postavljajo, ob obisku pa tehnično obdelajo vaš IP naslov.</p>
+      </div>
+    </div>
+
+    <!-- 2. ZUNANJE VSEBINE -->
+    <div class="nn-row">
+      <div class="nn-head">
+        <span class="nn-arr" id="a-k2" onclick="najsRazsiri('k2')">›</span>
+        <span class="nn-name" onclick="najsRazsiri('k2')">Zunanje vsebine (Google)</span>
+        <label class="sw"><input type="checkbox" id="nnZunanje"><span></span></label>
+      </div>
+      <div class="nn-body" id="b-k2">
+        <p class="nn-info">Zemljevid z lokacijo salona in oblikovne pisave. Naložijo se šele, ko to
+          dovolite. Če je izklopljeno, namesto zemljevida prikažemo naš naslov, besedilo pa se izpiše
+          s pisavami, ki so že na vaši napravi. Naročanje deluje enako v obeh primerih.</p>
+        <table class="nn-tab">
+          <tr><th>Vsebina</th><td>Google Zemljevidi (prikaz lokacije)</td></tr>
+          <tr><th>Ponudnik</th><td>Google Ireland Ltd. / Google LLC</td></tr>
+          <tr><th>Piškotki</th><td>Da – imena in trajanje določa Google; navedeni so v
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Googlovi politiki zasebnosti</a></td></tr>
+          <tr><th>Podatki</th><td>Google prejme vaš IP naslov in podatke o brskalniku</td></tr>
+        </table>
+        <table class="nn-tab" style="margin-top:10px">
+          <tr><th>Vsebina</th><td>Google Fonts (oblikovne pisave)</td></tr>
+          <tr><th>Piškotki</th><td>Ne postavlja piškotkov</td></tr>
+          <tr><th>Podatki</th><td>Ob prenosu pisav Google prejme vaš IP naslov</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <p class="nn-foot">Več v <a href="piskotki.html">politiki piškotkov</a> in
+      <a href="zasebnost.html">pravilniku o zasebnosti</a>.</p>
+
+    <div class="nn-btns">
+      <button type="button" class="np-btn np-ghost" onclick="najsPrivolaZavrni()">Zavrni</button>
+      <button type="button" class="np-btn np-navy" onclick="najsShraniNastavitve()">Shrani nastavitve</button>
+      <button type="button" class="np-btn np-coral" onclick="najsPrivolaSprejmi()">Sprejmi vse</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KLJUC='najs-privola';
+  function beri(){ try{ return localStorage.getItem(KLJUC); }catch(e){ return null; } }
+  function pisi(v){ try{ localStorage.setItem(KLJUC,v); localStorage.setItem(KLJUC+'-datum', new Date().toISOString()); }catch(e){} }
+  function pas(p){ var el=document.getElementById('najsPrivola'); if(el) el.classList.toggle('show', !!p); }
+  function plosca(p){ var el=document.getElementById('najsNast'); if(el) el.classList.toggle('show', !!p); }
+
+  function naloziPisave(){
+    var l=document.getElementById('najsFonts');
+    if(l && l.dataset.href && !l.getAttribute('href')) l.setAttribute('href', l.dataset.href);
+  }
+  function naloziZemljevid(){
+    var f=document.getElementById('najsMap'), p=document.getElementById('mapPlaceholder');
+    if(f && f.dataset.src && !f.getAttribute('src')){
+      f.setAttribute('src', f.dataset.src);
+      f.style.display='block'; f.style.width='100%'; f.style.height='100%'; f.style.minHeight='280px';
+    }
+    if(p) p.style.display='none';
+  }
+  function uveljavi(){ naloziPisave(); naloziZemljevid(); }
+
+  window.najsPrivolaSprejmi=function(){ pisi('sprejeto'); uveljavi(); plosca(false); pas(false); };
+  window.najsPrivolaZavrni=function(){ pisi('zavrnjeno'); plosca(false); pas(false); };
+  window.najsOdpriNastavitve=function(){
+    var c=document.getElementById('nnZunanje'); if(c) c.checked = (beri()==='sprejeto');
+    plosca(true);
+  };
+  window.najsZapriNastavitve=function(){ plosca(false); if(!beri()) pas(true); };
+  window.najsShraniNastavitve=function(){
+    var c=document.getElementById('nnZunanje');
+    if(c && c.checked){ pisi('sprejeto'); uveljavi(); } else { pisi('zavrnjeno'); }
+    plosca(false); pas(false);
+  };
+  window.najsDovoliZemljevid=function(){ najsPrivolaSprejmi(); };
+
+  window.najsRazsiri=function(id){
+    var b=document.getElementById('b-'+id), a=document.getElementById('a-'+id);
+    if(!b) return;
+    var odprt=b.classList.toggle('open');
+    if(a) a.classList.toggle('open', odprt);
+  };
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') window.najsZapriNastavitve(); });
+  var n=document.getElementById('najsNast');
+  if(n) n.addEventListener('click', function(e){ if(e.target===n) window.najsZapriNastavitve(); });
+
+  var v=beri();
+  if(v==='sprejeto') uveljavi();
+  else if(v!=='zavrnjeno') pas(true);
+})();
+</script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
