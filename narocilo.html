@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v6-2026-09-02 (delovni cas iz baze) -->
+<!-- NAJS-NAROCILO: v7-2026-09-02 (zasebnost: zadrzane pisave, pravne povezave) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <title>Moje naročilo — Frizerski studio Najs</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Googlove pisave le po privolitvi -->
+<link id="najsFonts" data-href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{ --navy:#2c4251; --coral:#d06666; --bez:#e5ccb2; --line:#e7e0d8; --bg:#faf7f3; }
@@ -387,6 +386,20 @@ function saveEdit(){
 
 window.toggleSvc=toggleSvc; window.bumpQty=bumpQty; window.pickSlot=pickSlot;
 init();
+</script>
+<div style="text-align:center;margin:26px auto 40px;font-size:.82rem;color:#8a969d">
+  <a href="zasebnost.html" style="color:#8a969d">Pravilnik o zasebnosti</a> ·
+  <a href="piskotki.html" style="color:#8a969d">Politika piškotkov</a>
+</div>
+<script>
+(function(){
+  try{
+    if(localStorage.getItem('najs-privola')==='sprejeto'){
+      var l=document.getElementById('najsFonts');
+      if(l && l.dataset.href) l.setAttribute('href', l.dataset.href);
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
