@@ -227,10 +227,32 @@ header .who{font-size:.74rem;opacity:.65}
 .block-form input[type=text]{width:100%}
 .block-form .bf-actions{display:flex;gap:.6rem;align-items:center}
 @media(max-width:700px){.range{min-width:110px;font-size:1.05rem}}
+.uvoz-bar{display:flex;gap:.6rem;align-items:flex-start;flex-wrap:wrap}
+.uvoz-bar .search{flex:1;min-width:220px}
+.uvoz-btn{background:var(--navy);color:#fff;padding:.72rem 1.15rem;font-size:.9rem;white-space:nowrap}
+.uvoz-btn:hover{background:var(--coral)}
+.uvoz-tag{font-size:.72rem;background:#efe6da;color:#6b5a45;padding:2px 9px;border-radius:999px}
+.uvoz-pop{max-width:640px;width:100%;max-height:88vh;overflow:auto}
+.uvoz-stat{display:flex;gap:.6rem;margin:.9rem 0}
+.uvoz-stat div{flex:1;background:#faf7f3;border-radius:12px;padding:.7rem;text-align:center}
+.uvoz-stat b{display:block;font-size:1.45rem;color:var(--navy)}
+.uvoz-stat span{font-size:.78rem;color:#6f7f89}
+.uvoz-sub{font-size:.82rem;color:#6f7f89;margin:.35rem 0;line-height:1.5}
+.uvoz-tw{overflow-x:auto}
+.uvoz-tab{width:100%;border-collapse:collapse;font-size:.82rem;margin:.5rem 0}
+.uvoz-tab th,.uvoz-tab td{text-align:left;padding:.42rem .55rem;border-bottom:1px solid #eee}
+.uvoz-tab th{background:#faf7f3}
+.uvoz-det{font-size:.8rem;margin:.45rem 0}
+.uvoz-det summary{cursor:pointer;color:var(--coral);font-weight:600}
+.uvoz-det div{padding:.18rem 0;color:#555}
+.uvoz-btns{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap}
+.uvoz-preklici{background:#eee;color:var(--navy);padding:.62rem 1.15rem}
+.uvoz-potrdi{background:var(--coral);color:#fff;padding:.62rem 1.25rem;font-weight:600}
+.uvoz-potrdi:disabled,.uvoz-preklici:disabled{opacity:.6;cursor:default}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v20-2026-09-02 (delovni cas iz baze) -->
+<!-- NAJS-BUILD: v21-2026-09-21 (uvoz strank iz Excela) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -246,7 +268,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v19 · 9.6.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v21 · 21.9.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -726,17 +748,144 @@ function buildCustomers(rows){
   return arr;
 }
 function loadCustomersThen(cb){
-  sb.from('bookings').select('id,customer_name,customer_phone,customer_email,booking_date,start_time,end_time,total_duration_min,services_text,service_name,total_price,status,note,gap_after_min,gap_duration_min').order('booking_date',{ascending:false,nullsFirst:false}).then(function(res){
-    CUSTOMERS=res.error?[]:buildCustomers(res.data||[]);
+  var q1=sb.from('bookings').select('id,customer_name,customer_phone,customer_email,booking_date,start_time,end_time,total_duration_min,services_text,service_name,total_price,status,note,gap_after_min,gap_duration_min').order('booking_date',{ascending:false,nullsFirst:false});
+  var q2=sb.from('stranke').select('id,ime,telefon,email,opomba,vir,created_at');
+  Promise.all([q1,q2]).then(function(r){
+    CUSTOMERS=r[0].error?[]:buildCustomers(r[0].data||[]);
+    if(!r[1].error) mergeStranke(r[1].data||[]);
     if(cb)cb();
   });
 }
+/* Uvozene/rocno dodane stranke zdruzi s strankami iz rezervacij (po telefonu, sicer po imenu) */
+function telKljuc(t){var d=String(t||'').replace(/\D/g,'');return d.length>=8?d.slice(-8):'';}
+function mergeStranke(rows){
+  var poTel={},poIme={};
+  CUSTOMERS.forEach(function(c){var k=telKljuc(c.phone);if(k)poTel[k]=c;poIme[(c.name||'').toLowerCase().trim()]=c;});
+  rows.forEach(function(r){
+    var k=telKljuc(r.telefon), ime=(r.ime||'').toLowerCase().trim();
+    var c=(k&&poTel[k])||(!k&&poIme[ime])||null;
+    if(c){ if(!c.email&&r.email)c.email=r.email; if(r.opomba)c.opomba=r.opomba; c.strankaId=r.id; return; }
+    c={key:k||('n:'+ime),name:r.ime||'',phone:r.telefon||'',email:r.email||'',opomba:r.opomba||'',bookings:[],visits:0,last:null,uvozena:true,strankaId:r.id};
+    CUSTOMERS.push(c); if(k)poTel[k]=c; poIme[ime]=c;
+  });
+}
+
+/* ── UVOZ STRANK IZ EXCELA / CSV ── */
+var XLSX_URL='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+function naloziXlsx(cb){
+  if(window.XLSX)return cb();
+  var sc=document.createElement('script'); sc.src=XLSX_URL;
+  sc.onload=function(){cb();};
+  sc.onerror=function(){alert('Knjižnice za branje Excela ni bilo mogoče naložiti. Preverite internetno povezavo.');};
+  document.head.appendChild(sc);
+}
+function brezSum(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function uvozBeri(file){
+  naloziXlsx(function(){
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        uvozObdelaj(XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false}), file.name);
+      }catch(err){ alert('Datoteke ni bilo mogoče prebrati: '+err.message); }
+    };
+    fr.readAsArrayBuffer(file);
+  });
+}
+function uvozStolpci(glava){
+  var m={ime:-1,priimek:-1,telefon:-1,email:-1,opomba:-1};
+  glava.forEach(function(h,i){
+    var t=brezSum(h); if(!t)return;
+    if(m.email<0 && /(e-?mail|e-?posta|^mail)/.test(t)) m.email=i;
+    else if(m.telefon<0 && /(tel|gsm|mobi|phone|stevilka|kontakt)/.test(t)) m.telefon=i;
+    else if(m.priimek<0 && /(priimek|surname|last ?name)/.test(t) && !/\bime\b/.test(t)) m.priimek=i;
+    else if(m.ime<0 && /(ime|name|stranka|naziv)/.test(t)) m.ime=i;
+    else if(m.opomba<0 && /(opomb|note|komentar|posebnost)/.test(t)) m.opomba=i;
+  });
+  return m;
+}
+/* Excel pogosto "poje" vodilno niclo (40326769) ali zapise stevilko kot 3,86E+11 */
+function popraviTel(t){
+  var s=String(t||'').trim(); if(!s)return '';
+  if(/e\+/i.test(s)) return null;
+  var d=s.replace(/[^\d+]/g,'');
+  if(/^\d{8}$/.test(d)) return '0'+d;
+  return s.replace(/\s+/g,' ');
+}
+function uvozObdelaj(vrst,datoteka){
+  vrst=vrst.filter(function(r){return r.some(function(c){return String(c).trim()!=='';});});
+  if(!vrst.length){alert('Datoteka je prazna.');return;}
+  var hi=-1,m=null;
+  for(var i=0;i<Math.min(5,vrst.length);i++){var mm=uvozStolpci(vrst[i]); if(mm.ime>=0||mm.telefon>=0){hi=i;m=mm;break;}}
+  var brezGlave=hi<0; if(brezGlave) m={ime:0,priimek:-1,telefon:1,email:2,opomba:3};
+  var obst={}; CUSTOMERS.forEach(function(c){var k=telKljuc(c.phone); if(k)obst['t'+k]=1; else obst['i'+brezSum(c.name)]=1;});
+  var novi=[],podv=[],napake=[],vDat={},slabEmail=0;
+  vrst.slice(hi+1).forEach(function(r,idx){
+    var g=function(j){return j>=0?String(r[j]==null?'':r[j]).trim():'';};
+    var imeS=g(m.ime); if(m.priimek>=0&&g(m.priimek)) imeS=(imeS+' '+g(m.priimek)).trim();
+    var telS=popraviTel(g(m.telefon)), em=g(m.email), op=g(m.opomba), vr=idx+hi+2;
+    if(telS===null){napake.push({v:vr,ime:imeS,razlog:'telefon je v Excelu zapisan kot število (npr. 3,86E+11) – stolpec nastavite na »Besedilo«'});return;}
+    if(!imeS){napake.push({v:vr,ime:telS||'(prazna vrstica)',razlog:'manjka ime'});return;}
+    if(em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ em=''; slabEmail++; }
+    var k=telKljuc(telS), kl=k?('t'+k):('i'+brezSum(imeS));
+    if(obst[kl]){podv.push({ime:imeS,tel:telS});return;}
+    if(vDat[kl]){podv.push({ime:imeS,tel:telS,vDatoteki:true});return;}
+    vDat[kl]=1;
+    novi.push({ime:imeS,telefon:telS||null,email:em||null,opomba:op||null,vir:'uvoz'});
+  });
+  uvozPredogled(novi,podv,napake,m,brezGlave,datoteka,slabEmail);
+}
+function uvozPredogled(novi,podv,napake,m,brezGlave,datoteka,slabEmail){
+  var ov=document.getElementById('uvozOverlay'); if(ov)ov.remove();
+  ov=document.createElement('div'); ov.id='uvozOverlay'; ov.className='overlay';
+  var st=function(i){return i>=0?String.fromCharCode(65+i):'—';};
+  var h='<div class="pop uvoz-pop"><h3 style="margin:0">Uvoz strank</h3><p class="uvoz-sub">'+esc(datoteka)+'</p>';
+  h+='<div class="uvoz-stat"><div><b>'+novi.length+'</b><span>novih</span></div><div><b>'+podv.length+'</b><span>že obstaja</span></div><div><b>'+napake.length+'</b><span>izpuščenih</span></div></div>';
+  h+='<p class="uvoz-sub">'+(brezGlave
+      ?'Naslovne vrstice nisem prepoznal, zato predvidevam: stolpec A ime, B telefon, C e-pošta, D opomba.'
+      :'Prepoznani stolpci: ime '+st(m.ime)+(m.priimek>=0?(' + priimek '+st(m.priimek)):'')+', telefon '+st(m.telefon)+', e-pošta '+st(m.email)+', opomba '+st(m.opomba)+'.')
+     +' Preden potrdite, preverite predogled.</p>';
+  if(slabEmail) h+='<p class="uvoz-sub">Neveljavnih e-naslovov, ki jih ne bom uvozil: '+slabEmail+'.</p>';
+  if(novi.length){
+    h+='<div class="uvoz-tw"><table class="uvoz-tab"><tr><th>Ime</th><th>Telefon</th><th>E-pošta</th></tr>';
+    novi.slice(0,8).forEach(function(r){h+='<tr><td>'+esc(r.ime)+'</td><td>'+esc(r.telefon||'')+'</td><td>'+esc(r.email||'')+'</td></tr>';});
+    h+='</table></div>'; if(novi.length>8)h+='<p class="uvoz-sub">… in še '+(novi.length-8)+'.</p>';
+  }
+  if(napake.length){h+='<details class="uvoz-det"><summary>Izpuščene vrstice ('+napake.length+')</summary>';napake.slice(0,40).forEach(function(e){h+='<div>vrstica '+e.v+': '+esc(e.ime)+' – '+esc(e.razlog)+'</div>';});h+='</details>';}
+  if(podv.length){h+='<details class="uvoz-det"><summary>Že obstajajo ('+podv.length+')</summary>';podv.slice(0,40).forEach(function(e){h+='<div>'+esc(e.ime)+(e.tel?(' · '+esc(e.tel)):'')+(e.vDatoteki?' – podvojena v datoteki':'')+'</div>';});h+='</details>';}
+  h+='<div id="uvozMsg" class="uvoz-sub"></div><div class="uvoz-btns"><button type="button" class="btn uvoz-preklici" id="uvozPreklici">Prekliči</button>'
+    +(novi.length?'<button type="button" class="btn uvoz-potrdi" id="uvozPotrdi">Uvozi '+novi.length+' strank</button>':'')+'</div></div>';
+  ov.innerHTML=h; document.body.appendChild(ov);
+  document.getElementById('uvozPreklici').onclick=function(){ov.remove();};
+  var p=document.getElementById('uvozPotrdi'); if(p)p.onclick=function(){uvozShrani(novi,p);};
+}
+function uvozShrani(novi,btn){
+  btn.disabled=true; document.getElementById('uvozPreklici').disabled=true;
+  var msg=document.getElementById('uvozMsg'), i=0, ok=0, KOS=200;
+  function zakljuci(t){
+    msg.textContent=t;
+    var z=document.getElementById('uvozPreklici'); z.disabled=false; z.textContent='Zapri';
+    z.onclick=function(){var o=document.getElementById('uvozOverlay');if(o)o.remove();loadStranke();};
+  }
+  (function naslednji(){
+    if(i>=novi.length){ btn.textContent='Končano ✓'; zakljuci('Uvoženih je '+ok+' strank.'); return; }
+    var kos=novi.slice(i,i+KOS); btn.textContent='Uvažam … '+Math.min(i+KOS,novi.length)+'/'+novi.length;
+    sb.from('stranke').insert(kos).then(function(res){
+      if(res.error){ btn.textContent='Prekinjeno'; zakljuci('Napaka: '+res.error.message+'. Uvoženih do zdaj: '+ok+'. Zaprite okno in datoteko uvozite znova – že uvožene bodo samodejno preskočene.'); return; }
+      ok+=kos.length; i+=KOS; naslednji();
+    });
+  })();
+}
+
 function loadStranke(){
   calScroll.classList.add('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.remove('hidden');
   resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Stranke';
   var box=document.getElementById('strankeView');
-  box.innerHTML='<input class="search" id="custSearch" placeholder="Išči po imenu ali telefonu …"><div id="custList"><div class="empty">Nalagam …</div></div>';
+  box.innerHTML='<div class="uvoz-bar"><input class="search" id="custSearch" placeholder="Išči po imenu ali telefonu …"><button type="button" class="btn uvoz-btn" id="uvozBtn">📥 Uvozi iz Excela</button><input type="file" id="uvozFile" accept=".xlsx,.xls,.csv" hidden></div><div id="custList"><div class="empty">Nalagam …</div></div>';
+  document.getElementById('uvozBtn').addEventListener('click',function(){document.getElementById('uvozFile').click();});
+  document.getElementById('uvozFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';if(f)uvozBeri(f);});
   document.getElementById('custSearch').addEventListener('input',refreshStrankeList);
   loadCustomersThen(refreshStrankeList);
 }
@@ -748,14 +897,15 @@ function refreshStrankeList(){
   if(!list.length){listEl.innerHTML='<div class="empty">Ni zadetkov.</div>';return;}
   var html='';
   list.slice(0,300).forEach(function(c,i){
-    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'"><div><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div><div class="cust-meta">'+obiski(c.visits)+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div></div><div class="cust-hist hidden"></div></div>';
+    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'"><div><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div><div class="cust-meta">'+(c.uvozena&&!c.visits?'<span class="uvoz-tag">uvožena</span>':obiski(c.visits))+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div></div><div class="cust-hist hidden"></div></div>';
   });
   listEl.innerHTML=html;
   listEl.querySelectorAll('.cust-head').forEach(function(hd){
     hd.addEventListener('click',function(){
       var c=list[+hd.getAttribute('data-ci')], hist=hd.nextElementSibling;
       if(!hist.classList.contains('hidden')){hist.classList.add('hidden');hist.innerHTML='';return;}
-      var hh='';
+      var hh=c.opomba?('<div class="hist-row" style="cursor:default"><span class="h-svc">📝 '+esc(c.opomba)+'</span></div>'):'';
+      if(!c.bookings.length) hh+='<div class="hist-row" style="cursor:default"><span class="h-svc">Še brez rezervacij v sistemu.</span></div>';
       c.bookings.forEach(function(b){cache[b.id]=b;hh+='<div class="hist-row" data-id="'+b.id+'"><span class="h-date">'+(b.booking_date?(prettyShort(b.booking_date)+' '+hm(b.start_time)):'Po dogovoru')+'</span><span class="h-svc">'+esc(b.services_text||b.service_name||'')+'</span><span class="h-price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>';});
       hist.innerHTML=hh; hist.classList.remove('hidden');
       hist.querySelectorAll('.hist-row').forEach(function(r){r.addEventListener('click',function(){openDetail(cache[r.getAttribute('data-id')]);});});
