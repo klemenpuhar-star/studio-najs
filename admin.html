@@ -252,7 +252,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v21-2026-09-21 (uvoz strank iz Excela) -->
+<!-- NAJS-BUILD: v22-2026-09-21 (druzinske stranke z isto stevilko loceno) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -268,7 +268,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v21 · 21.9.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v22 · 21.9.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -758,15 +758,22 @@ function loadCustomersThen(cb){
 }
 /* Uvozene/rocno dodane stranke zdruzi s strankami iz rezervacij (po telefonu, sicer po imenu) */
 function telKljuc(t){var d=String(t||'').replace(/\D/g,'');return d.length>=8?d.slice(-8):'';}
+/* Ista oseba, ce so vse besede krajsega imena vsebovane v daljsem ("Aleksandra" ~ "Brezev Aleksandra").
+   "Neza Obradovic" in "Nina Obradovic" (druzina z isto stevilko) sta razlicni osebi. */
+function besedeImena(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z]+/).filter(function(w){return w.length>=2;});}
+function isteOsebe(a,b){var A=besedeImena(a),B=besedeImena(b);if(!A.length||!B.length)return true;
+  return A.every(function(w){return B.indexOf(w)>=0;})||B.every(function(w){return A.indexOf(w)>=0;});}
 function mergeStranke(rows){
   var poTel={},poIme={};
   CUSTOMERS.forEach(function(c){var k=telKljuc(c.phone);if(k)poTel[k]=c;poIme[(c.name||'').toLowerCase().trim()]=c;});
   rows.forEach(function(r){
     var k=telKljuc(r.telefon), ime=(r.ime||'').toLowerCase().trim();
-    var c=(k&&poTel[k])||(!k&&poIme[ime])||null;
+    var c=null;
+    if(k&&poTel[k]&&isteOsebe(poTel[k].name,r.ime)) c=poTel[k];   /* ista stevilka + zdruzljivo ime */
+    else if(!k&&poIme[ime]) c=poIme[ime];
     if(c){ if(!c.email&&r.email)c.email=r.email; if(r.opomba)c.opomba=r.opomba; c.strankaId=r.id; return; }
     c={key:k||('n:'+ime),name:r.ime||'',phone:r.telefon||'',email:r.email||'',opomba:r.opomba||'',bookings:[],visits:0,last:null,uvozena:true,strankaId:r.id};
-    CUSTOMERS.push(c); if(k)poTel[k]=c; poIme[ime]=c;
+    CUSTOMERS.push(c); if(k&&!poTel[k])poTel[k]=c; poIme[ime]=c;
   });
 }
 
