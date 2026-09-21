@@ -249,10 +249,20 @@ header .who{font-size:.74rem;opacity:.65}
 .uvoz-preklici{background:#eee;color:var(--navy);padding:.62rem 1.15rem}
 .uvoz-potrdi{background:var(--coral);color:#fff;padding:.62rem 1.25rem;font-weight:600}
 .uvoz-potrdi:disabled,.uvoz-preklici:disabled{opacity:.6;cursor:default}
+.ui-top{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.ui-x{background:none;border:none;font-size:1.15rem;color:#8a969d;cursor:pointer;padding:2px 6px}
+.ui-x:hover{color:var(--coral)}
+.ui-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1rem}
+.ui-card{background:#faf7f3;border-radius:14px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.35rem}
+.ui-card b{font-size:1rem;color:var(--navy)}
+.ui-card .btn{margin-top:auto;align-self:flex-start}
+.ui-ico{font-size:1.3rem;color:var(--coral)}
+.ui-pred{border-top:1px solid #eee;margin-top:1rem;padding-top:1rem}
+@media(max-width:560px){.ui-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v22-2026-09-21 (druzinske stranke z isto stevilko loceno) -->
+<!-- NAJS-BUILD: v23-2026-09-21 (okno za uvoz in izvoz strank v Excel) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -268,7 +278,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v22 · 21.9.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v23 · 21.9.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -777,109 +787,172 @@ function mergeStranke(rows){
   });
 }
 
-/* ── UVOZ STRANK IZ EXCELA / CSV ── */
+/* ── UVOZ / IZVOZ STRANK (Excel) ──────────────────────────────── */
 var XLSX_URL='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
 function naloziXlsx(cb){
   if(window.XLSX)return cb();
   var sc=document.createElement('script'); sc.src=XLSX_URL;
   sc.onload=function(){cb();};
-  sc.onerror=function(){alert('Knjižnice za branje Excela ni bilo mogoče naložiti. Preverite internetno povezavo.');};
+  sc.onerror=function(){alert('Knjižnice za Excel ni bilo mogoče naložiti. Preverite internetno povezavo.');};
   document.head.appendChild(sc);
 }
 function brezSum(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
-function uvozBeri(file){
-  naloziXlsx(function(){
-    var fr=new FileReader();
-    fr.onload=function(){
-      try{
-        var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
-        var ws=wb.Sheets[wb.SheetNames[0]];
-        uvozObdelaj(XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false}), file.name);
-      }catch(err){ alert('Datoteke ni bilo mogoče prebrati: '+err.message); }
-    };
-    fr.readAsArrayBuffer(file);
-  });
+var UV_NI_OSEBA=['mosko','zensko','otrok','otroci','test','stranka','neznano','opravek'];
+/* "IRENA DEBELJAK" / "kos jernej" -> "Irena Debeljak" / "Kos Jernej"; mesana imena ostanejo */
+function lepoIme(t){
+  t=String(t||'').replace(/\s+/g,' ').trim();
+  /* vsaka beseda posebej: "čelan" -> "Čelan", "POTOČNIK" -> "Potočnik"; kratice (S.P., RD) ostanejo */
+  return t.split(' ').map(function(w){
+    return w.split('-').map(function(d){
+      var crke=d.replace(/[^A-Za-zČŠŽĆĐčšžćđ]/g,'');
+      if(crke.length>=3&&d===d.toUpperCase()) d=d.toLowerCase();
+      return d.charAt(0).toUpperCase()+d.slice(1);
+    }).join('-');
+  }).join(' ');
+}
+/* Excel "poje" vodilno niclo, stevilko zapise kot 3,86E+11, tuje stevilke brez "+" */
+function popraviTel(t){
+  var s=String(t||'').trim(); if(!s)return '';
+  if(/e\+/i.test(s)) return null;
+  var d=s.replace(/[^\d+]/g,'');
+  if(!d.replace(/\+/g,'')||/^0+$/.test(d)) return '';
+  if(/^\d{8}$/.test(d)) return '0'+d;
+  if(/^00\d{10,13}$/.test(d)) return '+'+d.slice(2);
+  if(/^\d{11,13}$/.test(d)&&d.charAt(0)!=='0') return '+'+d;
+  return s.replace(/\s+/g,' ');
 }
 function uvozStolpci(glava){
   var m={ime:-1,priimek:-1,telefon:-1,email:-1,opomba:-1};
   glava.forEach(function(h,i){
     var t=brezSum(h); if(!t)return;
-    if(m.email<0 && /(e-?mail|e-?posta|^mail)/.test(t)) m.email=i;
-    else if(m.telefon<0 && /(tel|gsm|mobi|phone|stevilka|kontakt)/.test(t)) m.telefon=i;
-    else if(m.priimek<0 && /(priimek|surname|last ?name)/.test(t) && !/\bime\b/.test(t)) m.priimek=i;
-    else if(m.ime<0 && /(ime|name|stranka|naziv)/.test(t)) m.ime=i;
-    else if(m.opomba<0 && /(opomb|note|komentar|posebnost)/.test(t)) m.opomba=i;
+    if(m.email<0&&/(e-?mail|e-?posta|^mail)/.test(t)) m.email=i;
+    else if(m.telefon<0&&/(tel|gsm|mobi|phone|stevilka|kontakt)/.test(t)) m.telefon=i;
+    else if(m.priimek<0&&/(priimek|surname|last ?name)/.test(t)&&!/\bime\b/.test(t)) m.priimek=i;
+    else if(m.ime<0&&/(ime|name|stranka|naziv)/.test(t)) m.ime=i;
+    else if(m.opomba<0&&/(opomb|note|komentar|posebnost)/.test(t)) m.opomba=i;
   });
   return m;
 }
-/* Excel pogosto "poje" vodilno niclo (40326769) ali zapise stevilko kot 3,86E+11 */
-function popraviTel(t){
-  var s=String(t||'').trim(); if(!s)return '';
-  if(/e\+/i.test(s)) return null;
-  var d=s.replace(/[^\d+]/g,'');
-  if(/^\d{8}$/.test(d)) return '0'+d;
-  return s.replace(/\s+/g,' ');
-}
-function uvozObdelaj(vrst,datoteka){
-  vrst=vrst.filter(function(r){return r.some(function(c){return String(c).trim()!=='';});});
-  if(!vrst.length){alert('Datoteka je prazna.');return;}
+/* jedro: iz vrstic tabele naredi seznam novih strank (brez DOM) */
+function uvozPripravi(vrst,obstojece){
+  vrst=vrst.filter(function(r){return r.some(function(c){return String(c==null?'':c).trim()!=='';});});
   var hi=-1,m=null;
-  for(var i=0;i<Math.min(5,vrst.length);i++){var mm=uvozStolpci(vrst[i]); if(mm.ime>=0||mm.telefon>=0){hi=i;m=mm;break;}}
-  var brezGlave=hi<0; if(brezGlave) m={ime:0,priimek:-1,telefon:1,email:2,opomba:3};
-  var obst={}; CUSTOMERS.forEach(function(c){var k=telKljuc(c.phone); if(k)obst['t'+k]=1; else obst['i'+brezSum(c.name)]=1;});
-  var novi=[],podv=[],napake=[],vDat={},slabEmail=0;
+  for(var i=0;i<Math.min(5,vrst.length);i++){var mm=uvozStolpci(vrst[i]);if(mm.ime>=0||mm.telefon>=0){hi=i;m=mm;break;}}
+  var brezGlave=hi<0; if(brezGlave)m={ime:0,priimek:-1,telefon:1,email:2,opomba:3};
+  var oTel={},oIme={},oMail={};
+  obstojece.forEach(function(c){var k=telKljuc(c.phone);if(k)(oTel[k]=oTel[k]||[]).push(c);oIme[brezSum(c.name)]=c;if(c.email)oMail[String(c.email).toLowerCase()]=c;});
+  var novi=[],podv=[],napake=[],dopolni=[],slabEmail=0,dTel={},dIme={};
   vrst.slice(hi+1).forEach(function(r,idx){
     var g=function(j){return j>=0?String(r[j]==null?'':r[j]).trim():'';};
-    var imeS=g(m.ime); if(m.priimek>=0&&g(m.priimek)) imeS=(imeS+' '+g(m.priimek)).trim();
-    var telS=popraviTel(g(m.telefon)), em=g(m.email), op=g(m.opomba), vr=idx+hi+2;
-    if(telS===null){napake.push({v:vr,ime:imeS,razlog:'telefon je v Excelu zapisan kot število (npr. 3,86E+11) – stolpec nastavite na »Besedilo«'});return;}
-    if(!imeS){napake.push({v:vr,ime:telS||'(prazna vrstica)',razlog:'manjka ime'});return;}
-    if(em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ em=''; slabEmail++; }
-    var k=telKljuc(telS), kl=k?('t'+k):('i'+brezSum(imeS));
-    if(obst[kl]){podv.push({ime:imeS,tel:telS});return;}
-    if(vDat[kl]){podv.push({ime:imeS,tel:telS,vDatoteki:true});return;}
-    vDat[kl]=1;
-    novi.push({ime:imeS,telefon:telS||null,email:em||null,opomba:op||null,vir:'uvoz'});
+    var ime=g(m.ime); if(m.priimek>=0&&g(m.priimek)) ime=(ime+' '+g(m.priimek)).trim();
+    ime=lepoIme(ime);
+    var tel=popraviTel(g(m.telefon)), em=g(m.email), op=g(m.opomba), vr=idx+hi+2, bi=brezSum(ime);
+    if(tel===null){napake.push({v:vr,ime:ime,razlog:'telefon zapisan kot število (npr. 3,86E+11) – stolpec nastavite na »Besedilo«'});return;}
+    if(!ime){napake.push({v:vr,ime:tel||em||'(prazno)',razlog:'manjka ime'});return;}
+    if(UV_NI_OSEBA.indexOf(bi)>=0||bi.replace(/[^a-z]/g,'').length<2){napake.push({v:vr,ime:ime,razlog:'ni ime osebe'});return;}
+    if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){em='';slabEmail++;}
+    if(!tel&&!em){napake.push({v:vr,ime:ime,razlog:'ni telefona ne e-pošte (verjetno opomnik, ne stranka)'});return;}
+    var k=telKljuc(tel), ob=null;
+    if(k&&oTel[k]) ob=oTel[k].filter(function(c){return isteOsebe(c.name,ime);})[0]||null;
+    else if(!k) ob=(em&&oMail[em.toLowerCase()])||oIme[bi]||null;
+    if(ob){ if(em&&!ob.email&&ob.strankaId) dopolni.push({id:ob.strankaId,email:em,ime:ob.name}); podv.push({ime:ime,tel:tel}); return; }
+    var d=null;
+    if(k&&dTel[k]) d=dTel[k].filter(function(x){return isteOsebe(x.ime,ime);})[0]||null;
+    else if(!k) d=dIme[bi]||null;
+    if(d){
+      if(besedeImena(ime).length>besedeImena(d.ime).length) d.ime=ime;
+      if(!d.email&&em)d.email=em; if(!d.opomba&&op)d.opomba=op;
+      podv.push({ime:ime,tel:tel,vDatoteki:true}); return;
+    }
+    var z={ime:ime,telefon:tel||null,email:em||null,opomba:op||null,vir:'uvoz'};
+    novi.push(z); if(k)(dTel[k]=dTel[k]||[]).push(z); else dIme[bi]=z;
   });
-  uvozPredogled(novi,podv,napake,m,brezGlave,datoteka,slabEmail);
+  return {novi:novi,podv:podv,napake:napake,dopolni:dopolni,slabEmail:slabEmail,m:m,brezGlave:brezGlave};
 }
-function uvozPredogled(novi,podv,napake,m,brezGlave,datoteka,slabEmail){
+
+/* ── okno ── */
+function openUvozIzvoz(){
   var ov=document.getElementById('uvozOverlay'); if(ov)ov.remove();
   ov=document.createElement('div'); ov.id='uvozOverlay'; ov.className='overlay';
-  var st=function(i){return i>=0?String.fromCharCode(65+i):'—';};
-  var h='<div class="pop uvoz-pop"><h3 style="margin:0">Uvoz strank</h3><p class="uvoz-sub">'+esc(datoteka)+'</p>';
-  h+='<div class="uvoz-stat"><div><b>'+novi.length+'</b><span>novih</span></div><div><b>'+podv.length+'</b><span>že obstaja</span></div><div><b>'+napake.length+'</b><span>izpuščenih</span></div></div>';
-  h+='<p class="uvoz-sub">'+(brezGlave
-      ?'Naslovne vrstice nisem prepoznal, zato predvidevam: stolpec A ime, B telefon, C e-pošta, D opomba.'
-      :'Prepoznani stolpci: ime '+st(m.ime)+(m.priimek>=0?(' + priimek '+st(m.priimek)):'')+', telefon '+st(m.telefon)+', e-pošta '+st(m.email)+', opomba '+st(m.opomba)+'.')
-     +' Preden potrdite, preverite predogled.</p>';
-  if(slabEmail) h+='<p class="uvoz-sub">Neveljavnih e-naslovov, ki jih ne bom uvozil: '+slabEmail+'.</p>';
-  if(novi.length){
-    h+='<div class="uvoz-tw"><table class="uvoz-tab"><tr><th>Ime</th><th>Telefon</th><th>E-pošta</th></tr>';
-    novi.slice(0,8).forEach(function(r){h+='<tr><td>'+esc(r.ime)+'</td><td>'+esc(r.telefon||'')+'</td><td>'+esc(r.email||'')+'</td></tr>';});
-    h+='</table></div>'; if(novi.length>8)h+='<p class="uvoz-sub">… in še '+(novi.length-8)+'.</p>';
-  }
-  if(napake.length){h+='<details class="uvoz-det"><summary>Izpuščene vrstice ('+napake.length+')</summary>';napake.slice(0,40).forEach(function(e){h+='<div>vrstica '+e.v+': '+esc(e.ime)+' – '+esc(e.razlog)+'</div>';});h+='</details>';}
-  if(podv.length){h+='<details class="uvoz-det"><summary>Že obstajajo ('+podv.length+')</summary>';podv.slice(0,40).forEach(function(e){h+='<div>'+esc(e.ime)+(e.tel?(' · '+esc(e.tel)):'')+(e.vDatoteki?' – podvojena v datoteki':'')+'</div>';});h+='</details>';}
-  h+='<div id="uvozMsg" class="uvoz-sub"></div><div class="uvoz-btns"><button type="button" class="btn uvoz-preklici" id="uvozPreklici">Prekliči</button>'
-    +(novi.length?'<button type="button" class="btn uvoz-potrdi" id="uvozPotrdi">Uvozi '+novi.length+' strank</button>':'')+'</div></div>';
-  ov.innerHTML=h; document.body.appendChild(ov);
-  document.getElementById('uvozPreklici').onclick=function(){ov.remove();};
-  var p=document.getElementById('uvozPotrdi'); if(p)p.onclick=function(){uvozShrani(novi,p);};
+  ov.innerHTML='<div class="pop uvoz-pop">'
+   +'<div class="ui-top"><h3 style="margin:0">Stranke – uvoz in izvoz</h3><button type="button" class="ui-x" id="uiZapri" aria-label="Zapri">✕</button></div>'
+   +'<div class="ui-grid">'
+   +'<div class="ui-card"><div class="ui-ico">⬇</div><b>Izvoz v Excel</b><p class="uvoz-sub">Vse stranke ('+CUSTOMERS.length+') v eni tabeli – za varnostno kopijo ali urejanje. Datoteko lahko pozneje uvozite nazaj.</p><button type="button" class="btn uvoz-potrdi" id="uiIzvozi">Izvozi v Excel</button></div>'
+   +'<div class="ui-card"><div class="ui-ico">⬆</div><b>Uvoz iz Excela</b><p class="uvoz-sub">Datoteka .xlsx, .xls ali .csv. Pred shranjevanjem boste videli predogled. Obstoječe stranke se ne podvojijo.</p><button type="button" class="btn uvoz-btn" id="uiIzberi">Izberi datoteko</button><input type="file" id="uvozFile" accept=".xlsx,.xls,.csv" hidden></div>'
+   +'</div>'
+   +'<p class="uvoz-sub" style="margin-top:.8rem">🔒 Datoteka vsebuje osebne podatke strank. Hranite jo varno in je ne pošiljajte naprej. V opombe ne vpisujte zdravstvenih podatkov.</p>'
+   +'<div id="uvozVsebina"></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('uiZapri').onclick=function(){ov.remove();};
+  document.getElementById('uiIzvozi').onclick=izvoziStranke;
+  document.getElementById('uiIzberi').onclick=function(){document.getElementById('uvozFile').click();};
+  document.getElementById('uvozFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';if(f)uvozBeri(f);});
 }
-function uvozShrani(novi,btn){
-  btn.disabled=true; document.getElementById('uvozPreklici').disabled=true;
-  var msg=document.getElementById('uvozMsg'), i=0, ok=0, KOS=200;
-  function zakljuci(t){
-    msg.textContent=t;
-    var z=document.getElementById('uvozPreklici'); z.disabled=false; z.textContent='Zapri';
-    z.onclick=function(){var o=document.getElementById('uvozOverlay');if(o)o.remove();loadStranke();};
+function izvoziStranke(){
+  var btn=document.getElementById('uiIzvozi'); if(btn){btn.disabled=true;btn.textContent='Pripravljam …';}
+  naloziXlsx(function(){ loadCustomersThen(function(){
+    var rows=CUSTOMERS.slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','sl');}).map(function(c){
+      return {'Ime in priimek':c.name||'','Telefon':c.phone||'','E-pošta':c.email||'','Opomba':c.opomba||'',
+              'Število obiskov':c.visits||0,'Zadnji obisk':c.last?String(c.last).split('-').reverse().join('.'):'',
+              'Vir':c.uvozena?'uvoz':'rezervacije'};
+    });
+    var ws=XLSX.utils.json_to_sheet(rows,{header:['Ime in priimek','Telefon','E-pošta','Opomba','Število obiskov','Zadnji obisk','Vir']});
+    ws['!cols']=[{wch:28},{wch:15},{wch:32},{wch:30},{wch:15},{wch:13},{wch:12}];
+    var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Stranke');
+    var d=new Date(); XLSX.writeFile(wb,'Stranke_Najs_'+d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'.xlsx');
+    if(btn){btn.disabled=false;btn.textContent='Izvozi v Excel';}
+  });});
+}
+function uvozBeri(file){
+  var box=document.getElementById('uvozVsebina'); if(box)box.innerHTML='<p class="uvoz-sub">Berem datoteko …</p>';
+  naloziXlsx(function(){
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
+        var vrst=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:false});
+        if(!vrst.length){box.innerHTML='<p class="uvoz-sub">Datoteka je prazna.</p>';return;}
+        loadCustomersThen(function(){ uvozPredogled(uvozPripravi(vrst,CUSTOMERS),file.name); });
+      }catch(err){ box.innerHTML='<p class="uvoz-sub">Datoteke ni bilo mogoče prebrati: '+esc(err.message)+'</p>'; }
+    };
+    fr.readAsArrayBuffer(file);
+  });
+}
+function uvozPredogled(R,datoteka){
+  var box=document.getElementById('uvozVsebina'); if(!box)return;
+  var st=function(i){return i>=0?String.fromCharCode(65+i):'—';}, m=R.m;
+  var h='<div class="ui-pred"><b>'+esc(datoteka)+'</b>';
+  h+='<div class="uvoz-stat"><div><b>'+R.novi.length+'</b><span>novih</span></div><div><b>'+R.podv.length+'</b><span>že obstaja</span></div><div><b>'+R.napake.length+'</b><span>izpuščenih</span></div></div>';
+  h+='<p class="uvoz-sub">'+(R.brezGlave?'Naslovne vrstice nisem prepoznal – predvidevam: A ime, B telefon, C e-pošta, D opomba.'
+     :'Prepoznani stolpci: ime '+st(m.ime)+(m.priimek>=0?(' + priimek '+st(m.priimek)):'')+', telefon '+st(m.telefon)+', e-pošta '+st(m.email)+', opomba '+st(m.opomba)+'.')+'</p>';
+  if(R.dopolni.length) h+='<p class="uvoz-sub">Obstoječim strankam bom dopolnil manjkajoči e-naslov: '+R.dopolni.length+'.</p>';
+  if(R.slabEmail) h+='<p class="uvoz-sub">Neveljavnih e-naslovov, ki jih ne bom uvozil: '+R.slabEmail+'.</p>';
+  if(m.opomba>=0) h+='<p class="uvoz-sub" style="color:#8a5a00">⚠ Datoteka ima stolpec z opombami. Preverite, da ne vsebuje zdravstvenih podatkov (alergije, bolezni).</p>';
+  if(R.novi.length){
+    h+='<div class="uvoz-tw"><table class="uvoz-tab"><tr><th>Ime</th><th>Telefon</th><th>E-pošta</th></tr>';
+    R.novi.slice(0,8).forEach(function(r){h+='<tr><td>'+esc(r.ime)+'</td><td>'+esc(r.telefon||'')+'</td><td>'+esc(r.email||'')+'</td></tr>';});
+    h+='</table></div>'+(R.novi.length>8?'<p class="uvoz-sub">… in še '+(R.novi.length-8)+'.</p>':'');
+  }
+  if(R.napake.length){h+='<details class="uvoz-det"><summary>Izpuščene vrstice ('+R.napake.length+')</summary>';R.napake.slice(0,60).forEach(function(e){h+='<div>vrstica '+e.v+': '+esc(e.ime)+' – '+esc(e.razlog)+'</div>';});h+='</details>';}
+  if(R.podv.length){h+='<details class="uvoz-det"><summary>Že obstajajo ali podvojene ('+R.podv.length+')</summary>';R.podv.slice(0,60).forEach(function(e){h+='<div>'+esc(e.ime)+(e.tel?(' · '+esc(e.tel)):'')+(e.vDatoteki?' – podvojena v datoteki':'')+'</div>';});h+='</details>';}
+  var nic=!R.novi.length&&!R.dopolni.length;
+  h+='<div id="uvozMsg" class="uvoz-sub"></div><div class="uvoz-btns">'
+   +(nic?'<span class="uvoz-sub">Ni novih podatkov za uvoz.</span>':'<button type="button" class="btn uvoz-potrdi" id="uvozPotrdi">Uvozi '+R.novi.length+' strank</button>')+'</div></div>';
+  box.innerHTML=h;
+  var p=document.getElementById('uvozPotrdi'); if(p)p.onclick=function(){uvozShrani(R,p);};
+}
+function uvozShrani(R,btn){
+  btn.disabled=true; var msg=document.getElementById('uvozMsg'), i=0, ok=0, KOS=200, novi=R.novi;
+  function konec(t){ msg.textContent=t; loadStranke(); }
+  function dopolniEmail(j){
+    if(j>=R.dopolni.length){ btn.textContent='Končano ✓'; konec('Uvoženih strank: '+ok+(R.dopolni.length?(', dopolnjenih e-naslovov: '+R.dopolni.length):'')+'.'); return; }
+    sb.from('stranke').update({email:R.dopolni[j].email}).eq('id',R.dopolni[j].id).then(function(){dopolniEmail(j+1);});
   }
   (function naslednji(){
-    if(i>=novi.length){ btn.textContent='Končano ✓'; zakljuci('Uvoženih je '+ok+' strank.'); return; }
+    if(i>=novi.length){ dopolniEmail(0); return; }
     var kos=novi.slice(i,i+KOS); btn.textContent='Uvažam … '+Math.min(i+KOS,novi.length)+'/'+novi.length;
     sb.from('stranke').insert(kos).then(function(res){
-      if(res.error){ btn.textContent='Prekinjeno'; zakljuci('Napaka: '+res.error.message+'. Uvoženih do zdaj: '+ok+'. Zaprite okno in datoteko uvozite znova – že uvožene bodo samodejno preskočene.'); return; }
+      if(res.error){ btn.textContent='Prekinjeno'; konec('Napaka: '+res.error.message+'. Uvoženih: '+ok+'. Datoteko uvozite znova – že uvožene bodo preskočene.'); return; }
       ok+=kos.length; i+=KOS; naslednji();
     });
   })();
@@ -890,9 +963,8 @@ function loadStranke(){
   resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Stranke';
   var box=document.getElementById('strankeView');
-  box.innerHTML='<div class="uvoz-bar"><input class="search" id="custSearch" placeholder="Išči po imenu ali telefonu …"><button type="button" class="btn uvoz-btn" id="uvozBtn">📥 Uvozi iz Excela</button><input type="file" id="uvozFile" accept=".xlsx,.xls,.csv" hidden></div><div id="custList"><div class="empty">Nalagam …</div></div>';
-  document.getElementById('uvozBtn').addEventListener('click',function(){document.getElementById('uvozFile').click();});
-  document.getElementById('uvozFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';if(f)uvozBeri(f);});
+  box.innerHTML='<div class="uvoz-bar"><input class="search" id="custSearch" placeholder="Išči po imenu ali telefonu …"><button type="button" class="btn uvoz-btn" id="uvozBtn">⇅ Uvoz / izvoz</button></div><div id="custList"><div class="empty">Nalagam …</div></div>';
+  document.getElementById('uvozBtn').addEventListener('click',openUvozIzvoz);
   document.getElementById('custSearch').addEventListener('input',refreshStrankeList);
   loadCustomersThen(refreshStrankeList);
 }
