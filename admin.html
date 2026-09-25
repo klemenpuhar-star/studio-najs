@@ -298,10 +298,23 @@ header .who{font-size:.74rem;opacity:.65}
 .obr-btns{display:flex;gap:.5rem;margin-top:.6rem}
 .obr-btns .act{flex:1}
 @media(max-width:860px){.bl-top{grid-template-columns:1fr 1fr}.bl-glavni{grid-column:1/-1}}
+.obr-done-hd{font-weight:600;margin-bottom:.4rem}
+.obr-big{display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:#fff;border-radius:10px;padding:.55rem .75rem;margin-bottom:.5rem}
+.obr-big b{font-size:1.5rem;color:var(--navy)}
+.obr-copy{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:.4rem .7rem;font-family:inherit;font-size:.78rem;cursor:pointer;white-space:nowrap}
+.obr-copy:hover{background:var(--coral)}
+.obr-rn{display:flex;align-items:flex-end;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.obr-rn label{display:flex;flex-direction:column;gap:.2rem;flex:1;min-width:150px;font-size:.74rem;color:#1f5b38}
+.obr-rn input{padding:.45rem;border:1px solid #bfe6cd;border-radius:8px;font-family:inherit;font-size:.9rem;color:var(--navy)}
+.obr-rn-save{background:#fff;border:1.5px solid #bfe6cd;color:#1f5b38;border-radius:8px;padding:.45rem .8rem;cursor:pointer;font-family:inherit;font-size:.82rem}
+.obr-rn span{font-size:.76rem;color:#1f5b38}
+.bl-rn{display:inline-block;margin-left:.4rem;font-size:.72rem;background:#eef4fb;color:#2f5e92;padding:1px 7px;border-radius:999px}
+.bl-rn-ni{background:#fdf0d5;color:#8a5a00}
+.bl-opoz{background:#fdf0d5;border:1px solid #ffe08a;color:#7a5600;border-radius:10px;padding:.55rem .8rem;font-size:.82rem;margin-bottom:.7rem}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v24-2026-09-21 (blagajna: obracun, dnevni promet, izvoz) -->
+<!-- NAJS-BUILD: v25-2026-09-21 (blagajna + povezava z miniBLAGAJNO) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -317,7 +330,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v24 · 21.9.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v25 · 21.9.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1009,12 +1022,33 @@ function stevilo(v){var n=parseFloat(String(v==null?'':v).replace(',','.'));retu
 /* --- obracun znotraj okna termina --- */
 function obrPreveri(b){
   var box=document.getElementById('obrBox'); if(!box)return;
-  sb.from('obracuni').select('id,znesek,nacin,popust,datum,cas').eq('booking_id',b.id).then(function(res){
+  sb.from('obracuni').select('id,znesek,nacin,popust,datum,cas,stevilka_racuna').eq('booking_id',b.id).then(function(res){
     var o=(res.data||[])[0];
     if(o){
-      box.innerHTML='<div class="obr-done">✓ Obračunano: <b>'+eur(o.znesek)+'</b> · '+nacinIme(o.nacin)
-        +(stevilo(o.popust)>0?(' · popust '+eur(o.popust)):'')
-        +' <button class="obr-del" data-id="'+o.id+'">prekliči obračun</button></div>';
+      box.innerHTML='<div class="obr-done">'
+        +'<div class="obr-done-hd">✓ Obračunano · '+nacinIme(o.nacin)+(stevilo(o.popust)>0?(' · popust '+eur(o.popust)):'')+'</div>'
+        +'<div class="obr-big">Za blagajno: <b>'+eur(o.znesek)+'</b>'
+        +'<button class="obr-copy" id="obrCopy" title="Kopiraj znesek">📋 kopiraj</button></div>'
+        +'<div class="obr-rn"><label>Št. računa iz miniBLAGAJNE'
+        +'<input type="text" id="obrRn" value="'+esc(o.stevilka_racuna||'')+'" placeholder="npr. 12-1-2026"></label>'
+        +'<button class="obr-rn-save" id="obrRnSave">Shrani</button><span id="obrRnMsg"></span></div>'
+        +'<button class="obr-del" data-id="'+o.id+'">prekliči obračun</button></div>';
+      var cp=box.querySelector('#obrCopy');
+      if(cp)cp.addEventListener('click',function(){
+        var t=Number(o.znesek).toFixed(2).replace('.',',');
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);cp.textContent='✓ kopirano';}
+        else{cp.textContent=t;}
+        setTimeout(function(){cp.textContent='📋 kopiraj';},1800);
+      });
+      var rs=box.querySelector('#obrRnSave');
+      if(rs)rs.addEventListener('click',function(){
+        var v=document.getElementById('obrRn').value.trim(), m=document.getElementById('obrRnMsg');
+        rs.disabled=true;
+        sb.from('obracuni').update({stevilka_racuna:v||null}).eq('id',o.id).then(function(r2){
+          rs.disabled=false; m.textContent=r2.error?('napaka: '+r2.error.message):'shranjeno ✓';
+          setTimeout(function(){m.textContent='';},2500);
+        });
+      });
       var d=box.querySelector('.obr-del');
       d.addEventListener('click',function(){
         if(!confirm('Odstranim ta obračun iz prometa?'))return;
@@ -1095,6 +1129,7 @@ function loadBlagajna(){
       +'<div class="bl-kpi"><span>🏦 Nakazilo</span><b>'+eur(vs(dnevni,'nakazilo'))+'</b></div>'
       +'<div class="bl-kpi bl-mesec"><span>Mesec '+(cur.getMonth()+1)+'/'+cur.getFullYear()+'</span><b>'+eur(vs(mesecni))+'</b><i>'+mesecni.length+' obračunov</i></div>'
       +'</div>'
+      +(dnevni.filter(function(o){return !o.stevilka_racuna;}).length?('<div class="bl-opoz">📋 Brez vpisane številke računa: '+dnevni.filter(function(o){return !o.stevilka_racuna;}).length+' — račun izdajte v miniBLAGAJNI, številko pa vpišite pri terminu.</div>'):'')
       +'<div class="bl-actions"><button class="btn bl-add" id="blAdd">➕ Prost vnos</button>'
       +'<button class="btn bl-exp" id="blExp">⬇ Izvozi mesec v Excel</button></div>'
       +'<div id="blForm"></div>';
@@ -1103,7 +1138,8 @@ function loadBlagajna(){
       h+='<div class="bl-list">'+dnevni.map(function(o){
         return '<div class="bl-row"><div class="bl-l"><b>'+esc(String(o.cas).slice(0,5))+'</b> '+esc(o.stranka||'—')
           +'<div class="bl-svc">'+esc(o.storitve||'')+(o.opomba?(' · '+esc(o.opomba)):'')
-          +(stevilo(o.popust)>0?(' · popust '+eur(o.popust)):'')+'</div></div>'
+          +(stevilo(o.popust)>0?(' · popust '+eur(o.popust)):'')
+          +(o.stevilka_racuna?('<span class="bl-rn">račun '+esc(o.stevilka_racuna)+'</span>'):'<span class="bl-rn bl-rn-ni">ni št. računa</span>')+'</div></div>'
           +'<div class="bl-r"><b>'+eur(o.znesek)+'</b><span>'+nacinIme(o.nacin)+'</span>'
           +'<button class="bl-del" data-id="'+o.id+'" title="Odstrani">✕</button></div></div>';
       }).join('')+'</div>';
@@ -1158,10 +1194,10 @@ function blIzvoz(){
                 'Stranka':o.stranka||'','Storitve':o.storitve||'','Cena':stevilo(o.osnova),
                 'Popust':stevilo(o.popust),'Plačano':stevilo(o.znesek),
                 'Način':({gotovina:'Gotovina',kartica:'Kartica',nakazilo:'Nakazilo'})[o.nacin]||o.nacin,
-                'Opomba':o.opomba||''};
+                'Št. računa':o.stevilka_racuna||'','Opomba':o.opomba||''};
       });
-      var ws=XLSX.utils.json_to_sheet(rows,{header:['Datum','Ura','Stranka','Storitve','Cena','Popust','Plačano','Način','Opomba']});
-      ws['!cols']=[{wch:11},{wch:7},{wch:24},{wch:34},{wch:9},{wch:9},{wch:10},{wch:11},{wch:22}];
+      var ws=XLSX.utils.json_to_sheet(rows,{header:['Datum','Ura','Stranka','Storitve','Cena','Popust','Plačano','Način','Št. računa','Opomba']});
+      ws['!cols']=[{wch:11},{wch:7},{wch:24},{wch:34},{wch:9},{wch:9},{wch:10},{wch:11},{wch:14},{wch:22}];
       var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Promet');
       XLSX.writeFile(wb,'Promet_Najs_'+cur.getFullYear()+'-'+pad(cur.getMonth()+1)+'.xlsx');
       btn.disabled=false; btn.textContent='⬇ Izvozi mesec v Excel';
