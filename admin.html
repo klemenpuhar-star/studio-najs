@@ -336,10 +336,49 @@ header .who{font-size:.74rem;opacity:.65}
 .kos-rocno button,.kos-novart button{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:.45rem .8rem;cursor:pointer;font-family:inherit;font-size:.8rem;white-space:nowrap}
 .kos-novart button{background:#fff;color:var(--navy);border:1.5px solid #e7e0d8}
 .kos-novart span{font-size:.76rem;color:#7c8a93;align-self:center}
+/* ── MOBILNA POSTAVITEV ─────────────────────────────── */
+@media(max-width:600px){
+  /* pogledi v simetrično mrežo 3×2 namesto stisnjene vrstice */
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(23,57,75,.16);
+       border:1.5px solid rgba(23,57,75,.16);border-radius:14px;overflow:hidden;width:100%;margin:.15rem 0 0}
+  .seg button{background:#fff;padding:.6rem .2rem;font-size:.75rem;line-height:1.2;border-radius:0}
+  .seg button.active{background:var(--navy);color:#fff}
+  /* blagajna: kartice prometa 2 v vrsti, dnevni promet čez celo širino */
+  .bl-top{grid-template-columns:1fr 1fr;gap:.5rem}
+  .bl-glavni,.bl-mesec{grid-column:1/-1}
+  .bl-kpi b{font-size:1.2rem}
+  .bl-actions .btn{flex:1}
+  .bl-row{flex-direction:column;align-items:stretch;gap:.35rem}
+  .bl-r{justify-content:space-between}
+  /* košarica: naziv v svojo vrstico, da se cene ne stisnejo */
+  .kos-row{flex-wrap:wrap}
+  .kos-nz{flex:1 0 100%;margin-bottom:.15rem}
+  .kos-kol{width:56px}.kos-cena{flex:1;width:auto}
+  .kos-vs{width:auto;min-width:64px}
+  /* obračun in obrazci: polja čez celo širino */
+  .obr-row label,.obr-op{flex:1 0 100%}
+  .obr-nacin{flex-wrap:wrap}
+  .obr-nacin button{flex:1 0 30%;font-size:.78rem}
+  .obr-big b{font-size:1.35rem}
+  .obr-rn label{flex:1 0 100%}
+  /* uvoz/izvoz in stranke */
+  .uvoz-bar{flex-direction:column}
+  .uvoz-bar .search,.uvoz-btn{width:100%}
+  .uvoz-stat{flex-wrap:wrap}.uvoz-stat div{flex:1 0 30%}
+  .ui-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  .seg button{font-size:.7rem;padding:.55rem .1rem}
+  .kos-cena{min-width:66px}
+}
+.kos-pop{display:flex;gap:.25rem;align-items:stretch}
+.kos-pop input{flex:1;min-width:60px;padding:.5rem;border:1px solid #e7e0d8;border-radius:9px;font-family:inherit;font-size:.95rem;color:var(--navy)}
+.kos-pv{width:38px;border:1.5px solid #e7e0d8;background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.9rem;color:var(--navy)}
+.kos-pv.on{background:var(--coral);border-color:var(--coral);color:#fff}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v26-2026-09-21 (blagajna: kosarica storitev in izdelkov) -->
+<!-- NAJS-BUILD: v27-2026-09-21 (mobilna postavitev, popust v % ali EUR, iskanje strank) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -355,7 +394,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v26 · 21.9.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v27 · 21.9.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1045,7 +1084,7 @@ function nacinIme(n){for(var i=0;i<NACINI.length;i++){if(NACINI[i][0]===n)return
 function stevilo(v){var n=parseFloat(String(v==null?'':v).replace(',','.'));return isNaN(n)?0:n;}
 
 /* ── KOŠARICA (postavke obračuna) ─────────────────────────────── */
-var ARTIKLI=[], KOS={postavke:[],popust:0,nacin:'gotovina',opomba:''};
+var ARTIKLI=[], KOS={postavke:[],popust:0,popustVrsta:'eur',nacin:'gotovina',opomba:''};
 function loadArtikli(cb){
   sb.from('artikli').select('id,naziv,cena').eq('aktiven',true).order('naziv').then(function(r){
     ARTIKLI=r.error?[]:(r.data||[]); if(cb)cb();
@@ -1072,7 +1111,18 @@ function kosIzTermina(b){
   return out;
 }
 function kosVsota(){ return KOS.postavke.reduce(function(a,r){return a+stevilo(r.cena)*(parseInt(r.kol)||1);},0); }
-function kosZnesek(){ var z=kosVsota()-stevilo(KOS.popust); return z<0?0:z; }
+function kosPopustPct(){ var v=stevilo(KOS.popust); if(v<0)v=0; return v>100?100:v; }
+function kosPopustEur(){
+  var vsota=kosVsota(), v=stevilo(KOS.popust); if(v<=0)return 0;
+  if(KOS.popustVrsta==='pct') v=Math.round(vsota*kosPopustPct())/100;
+  return v>vsota?vsota:v;   /* popust nikoli vecji od vrednosti racuna */
+}
+function kosZnesek(){ var z=kosVsota()-kosPopustEur(); return z<0?0:z; }
+function kosOpombaShrani(){
+  var o=(KOS.opomba||'').trim();
+  if(KOS.popustVrsta==='pct'&&kosPopustPct()>0) o=(o?(o+' · '):'')+'popust '+kosPopustPct()+' %';
+  return o||null;
+}
 function kosOpis(){ return KOS.postavke.map(function(r){return r.naziv+((parseInt(r.kol)||1)>1?(' ×'+r.kol):'');}).join(' + '); }
 
 function kosRisi(){
@@ -1087,10 +1137,15 @@ function kosRisi(){
       +'<button class="kos-x" data-i="'+i+'" title="Odstrani">✕</button></div>';
   });
   h+='</div><button type="button" class="kos-add" id="kosAdd">➕ Dodaj storitev ali izdelek</button><div id="kosPick"></div>';
-  h+='<div class="obr-row" style="margin-top:.6rem"><label>Popust (€)<input type="text" id="kosPopust" value="'+stevilo(KOS.popust).toFixed(2)+'"></label>'
+  h+='<div class="obr-row" style="margin-top:.6rem"><label>Popust<span class="kos-pop">'
+    +'<input type="text" id="kosPopust" value="'+stevilo(KOS.popust)+'">'
+    +'<button type="button" class="kos-pv'+(KOS.popustVrsta==='eur'?' on':'')+'" data-v="eur">€</button>'
+    +'<button type="button" class="kos-pv'+(KOS.popustVrsta==='pct'?' on':'')+'" data-v="pct">%</button></span></label>'
     +'<label>Opomba<input type="text" id="kosOpomba" value="'+esc(KOS.opomba||'')+'" placeholder="neobvezno"></label></div>'
     +'<div class="obr-nacin" id="kosNacin">'+NACINI.map(function(n){return '<button type="button" data-n="'+n[0]+'"'+(KOS.nacin===n[0]?' class="on"':'')+'>'+n[1]+'</button>';}).join('')+'</div>'
-    +'<div class="obr-total">Skupaj '+eur(kosVsota())+(stevilo(KOS.popust)>0?(' − popust '+eur(KOS.popust)):'')+' · za plačilo <b>'+eur(kosZnesek())+'</b></div>';
+    +'<div class="obr-total">Skupaj '+eur(kosVsota())
+      +(kosPopustEur()>0?(' − popust '+eur(kosPopustEur())+(KOS.popustVrsta==='pct'?(' ('+kosPopustPct()+' %)'):'')):'')
+      +' · za plačilo <b>'+eur(kosZnesek())+'</b></div>';
   box.innerHTML=h;
 
   box.querySelectorAll('.kos-kol').forEach(function(el){el.addEventListener('input',function(){
@@ -1101,6 +1156,8 @@ function kosRisi(){
     KOS.postavke.splice(+el.getAttribute('data-i'),1); kosRisi();});});
   document.getElementById('kosAdd').addEventListener('click',kosIzbirnik);
   document.getElementById('kosPopust').addEventListener('change',function(){KOS.popust=stevilo(this.value);kosRisi();});
+  box.querySelectorAll('.kos-pv').forEach(function(btn){btn.addEventListener('click',function(){
+    KOS.popustVrsta=btn.getAttribute('data-v'); kosRisi();});});
   document.getElementById('kosOpomba').addEventListener('input',function(){KOS.opomba=this.value;});
   box.querySelectorAll('#kosNacin button').forEach(function(btn){btn.addEventListener('click',function(){
     KOS.nacin=btn.getAttribute('data-n');
@@ -1204,8 +1261,8 @@ function obrObrazec(b){
     btn.disabled=true; btn.textContent='Shranjujem …';
     sb.from('obracuni').insert([{booking_id:b.id, datum:b.booking_date||isoOf(new Date()),
       stranka:b.customer_name||null, storitve:kosOpis(), postavke:KOS.postavke,
-      osnova:kosVsota(), popust:stevilo(KOS.popust), znesek:z, nacin:KOS.nacin,
-      opomba:KOS.opomba||null}]).then(function(res){
+      osnova:kosVsota(), popust:kosPopustEur(), znesek:z, nacin:KOS.nacin,
+      opomba:kosOpombaShrani()}]).then(function(res){
       if(res.error){msg.textContent='Napaka: '+res.error.message;btn.disabled=false;btn.textContent='Shrani obračun';return;}
       sb.from('bookings').update({status:'opravljeno'}).eq('id',b.id).then(function(){ obrPreveri(b); load(); });
     });
@@ -1267,13 +1324,14 @@ function blProstVnos(){
   var box=document.getElementById('blForm'); if(!box)return;
   KOS={postavke:[], popust:0, nacin:'gotovina', opomba:''};
   box.innerHTML='<div class="obr-form"><div class="d-edit-hd">Prost vnos (stranka brez rezervacije)</div>'
-    +'<div class="obr-row"><label>Stranka<input type="text" id="pvIme" placeholder="ime (neobvezno)"></label>'
+    +'<div class="obr-row"><label>Stranka<input type="text" id="pvIme" list="custNames" placeholder="išči ali vpiši ime" autocomplete="off"></label>'
     +'<label>Ura<input type="time" id="pvCas" value="'+pad(new Date().getHours())+':'+pad(new Date().getMinutes())+'"></label></div>'
     +'<div id="kosBox"></div>'
     +'<div class="obr-btns"><button class="act" id="pvCancel">Prekliči</button><button class="act save" id="pvSave">Shrani</button></div>'
     +'<div class="d-edit-msg" id="pvMsg"></div></div>';
   loadArtikli(kosRisi);
   kosRisi();
+  loadCustomersThen(populateCustDatalist);
   document.getElementById('pvCancel').addEventListener('click',function(){box.innerHTML='';});
   document.getElementById('pvSave').addEventListener('click',function(){
     var btn=this, msg=document.getElementById('pvMsg'), z=kosZnesek();
@@ -1282,8 +1340,8 @@ function blProstVnos(){
     btn.disabled=true; btn.textContent='Shranjujem …';
     sb.from('obracuni').insert([{datum:isoOf(cur), cas:document.getElementById('pvCas').value||null,
       stranka:document.getElementById('pvIme').value||null, storitve:kosOpis(), postavke:KOS.postavke,
-      osnova:kosVsota(), popust:stevilo(KOS.popust), znesek:z, nacin:KOS.nacin,
-      opomba:KOS.opomba||null}]).then(function(res){
+      osnova:kosVsota(), popust:kosPopustEur(), znesek:z, nacin:KOS.nacin,
+      opomba:kosOpombaShrani()}]).then(function(res){
       if(res.error){msg.textContent='Napaka: '+res.error.message;btn.disabled=false;btn.textContent='Shrani';return;}
       loadBlagajna();
     });
