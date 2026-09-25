@@ -259,10 +259,49 @@ header .who{font-size:.74rem;opacity:.65}
 .ui-ico{font-size:1.3rem;color:var(--coral)}
 .ui-pred{border-top:1px solid #eee;margin-top:1rem;padding-top:1rem}
 @media(max-width:560px){.ui-grid{grid-template-columns:1fr}}
+/* blagajna */
+.bl-top{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:.9rem}
+.bl-kpi{background:#fff;border:1px solid #efe6da;border-radius:14px;padding:.8rem .9rem;display:flex;flex-direction:column;gap:.15rem}
+.bl-kpi span{font-size:.74rem;color:#7c8a93;text-transform:uppercase;letter-spacing:.04em}
+.bl-kpi b{font-size:1.32rem;color:var(--navy)}
+.bl-kpi i{font-style:normal;font-size:.74rem;color:#9aa6ad}
+.bl-glavni{background:var(--navy)}.bl-glavni span,.bl-glavni i{color:#c9d6de}.bl-glavni b{color:#fff}
+.bl-mesec{background:#faf7f3}
+.bl-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem}
+.bl-add{background:var(--coral);color:#fff;padding:.65rem 1.1rem}
+.bl-exp{background:#fff;color:var(--navy);border:1.5px solid #efe6da;padding:.65rem 1.1rem}
+.bl-exp:hover{border-color:var(--coral);color:var(--coral)}
+.bl-list{background:#fff;border:1px solid #efe6da;border-radius:14px;overflow:hidden}
+.bl-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.7rem .95rem;border-bottom:1px solid #f3ece4}
+.bl-row:last-child{border-bottom:none}
+.bl-l b{color:var(--navy)}
+.bl-svc{font-size:.8rem;color:#7c8a93;margin-top:.15rem}
+.bl-r{display:flex;align-items:center;gap:.7rem;white-space:nowrap}
+.bl-r b{font-size:1.05rem;color:var(--navy)}
+.bl-r span{font-size:.78rem;color:#7c8a93}
+.bl-del{background:none;border:none;color:#c9a0a0;cursor:pointer;font-size:.95rem;padding:2px 5px}
+.bl-del:hover{color:#b23b3b}
+/* obracun v oknu termina */
+.obr-box{margin-top:.8rem}
+.obr-done{background:#dcf3e3;color:#1f5b38;border-radius:10px;padding:.6rem .8rem;font-size:.88rem}
+.obr-del{background:none;border:none;color:#1f5b38;text-decoration:underline;cursor:pointer;font-size:.8rem;margin-left:.3rem}
+.obr-open{background:var(--coral)!important;color:#fff!important;width:100%}
+.obr-form{background:#faf7f3;border-radius:12px;padding:.85rem}
+.obr-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem}
+.obr-row label,.obr-op{display:flex;flex-direction:column;gap:.2rem;flex:1;min-width:120px;font-size:.76rem;color:#7c8a93}
+.obr-row input,.obr-op input{padding:.5rem;border:1px solid #e7e0d8;border-radius:9px;font-family:inherit;font-size:.95rem;color:var(--navy)}
+.obr-nacin{display:flex;gap:.4rem;margin:.5rem 0}
+.obr-nacin button{flex:1;padding:.55rem .3rem;border:1.5px solid #e7e0d8;background:#fff;border-radius:10px;cursor:pointer;font-family:inherit;font-size:.82rem;color:var(--navy)}
+.obr-nacin button.on{border-color:var(--coral);background:var(--coral);color:#fff}
+.obr-total{text-align:right;font-size:.9rem;color:#7c8a93;margin:.3rem 0}
+.obr-total b{font-size:1.3rem;color:var(--navy);margin-left:.4rem}
+.obr-btns{display:flex;gap:.5rem;margin-top:.6rem}
+.obr-btns .act{flex:1}
+@media(max-width:860px){.bl-top{grid-template-columns:1fr 1fr}.bl-glavni{grid-column:1/-1}}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v23-2026-09-21 (okno za uvoz in izvoz strank v Excel) -->
+<!-- NAJS-BUILD: v24-2026-09-21 (blagajna: obracun, dnevni promet, izvoz) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -278,7 +317,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v23 · 21.9.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v24 · 21.9.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -296,6 +335,7 @@ header .who{font-size:.74rem;opacity:.65}
       <button data-mode="month">Mesec</button>
       <button data-mode="nujni">Nujni</button>
       <button data-mode="stranke">Stranke</button>
+      <button data-mode="blagajna">Blagajna</button>
     </div>
   </div>
 
@@ -324,6 +364,7 @@ header .who{font-size:.74rem;opacity:.65}
         <div class="cal-scroll" id="calScroll"></div>
         <div class="cards hidden" id="nujniList"></div>
         <div class="stranke hidden" id="strankeView"></div>
+        <div class="blagajna hidden" id="blagajnaView"></div>
       </div>
     </div>
   </div>
@@ -681,12 +722,13 @@ function rangeText(days){
   var a=days[0],b=days[days.length-1];return a.getDate()+'. '+MES[a.getMonth()].substring(0,3)+' – '+b.getDate()+'. '+MES[b.getMonth()].substring(0,3)+' '+b.getFullYear();
 }
 function load(){
-  var lg=document.getElementById('catLegend'); if(lg)lg.style.display=(mode==='stranke')?'none':'flex';
+  var lg=document.getElementById('catLegend'); if(lg)lg.style.display=(mode==='stranke'||mode==='blagajna')?'none':'flex';
   if(isMobile()&&MINI_BUILT){buildMini();}else{updateMiniSel();}
   if(mode==='nujni'){loadNujni();return;}
   if(mode==='stranke'){loadStranke();return;}
+  if(mode==='blagajna'){loadBlagajna();return;}
   if(mode==='month'){loadMonth();return;}
-  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');
+  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');skrijBlagajno();
   var days=daysForMode();
   document.getElementById('rangeLabel').textContent=rangeText(days);
   var fromISO=isoOf(days[0]),toISO=isoOf(days[days.length-1]);
@@ -700,7 +742,7 @@ function load(){
   });
 }
 function loadMonth(){
-  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');
+  calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');skrijBlagajno();
   document.getElementById('rangeLabel').textContent=rangeText();
   var cells=monthGrid(cur);
   calScroll.innerHTML='<div class="empty">Nalagam …</div>';
@@ -715,7 +757,7 @@ function loadMonth(){
   });
 }
 function loadNujni(){
-  calScroll.classList.add('hidden');nujniList.classList.remove('hidden');document.getElementById('strankeView').classList.add('hidden');resetMiniHeight();
+  calScroll.classList.add('hidden');nujniList.classList.remove('hidden');document.getElementById('strankeView').classList.add('hidden');skrijBlagajno();resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Nujni / po dogovoru';
   nujniList.innerHTML='<div class="empty">Nalagam …</div>';
   sb.from('bookings').select('*').is('booking_date',null).order('id',{ascending:false}).then(function(res){
@@ -958,6 +1000,175 @@ function uvozShrani(R,btn){
   })();
 }
 
+function skrijBlagajno(){var b=document.getElementById("blagajnaView");if(b)b.classList.add("hidden");}
+/* ── BLAGAJNA: obracun opravljenih storitev ───────────────────── */
+var NACINI=[['gotovina','💶 Gotovina'],['kartica','💳 Kartica'],['nakazilo','🏦 Nakazilo']];
+function nacinIme(n){for(var i=0;i<NACINI.length;i++){if(NACINI[i][0]===n)return NACINI[i][1];}return n;}
+function stevilo(v){var n=parseFloat(String(v==null?'':v).replace(',','.'));return isNaN(n)?0:n;}
+
+/* --- obracun znotraj okna termina --- */
+function obrPreveri(b){
+  var box=document.getElementById('obrBox'); if(!box)return;
+  sb.from('obracuni').select('id,znesek,nacin,popust,datum,cas').eq('booking_id',b.id).then(function(res){
+    var o=(res.data||[])[0];
+    if(o){
+      box.innerHTML='<div class="obr-done">✓ Obračunano: <b>'+eur(o.znesek)+'</b> · '+nacinIme(o.nacin)
+        +(stevilo(o.popust)>0?(' · popust '+eur(o.popust)):'')
+        +' <button class="obr-del" data-id="'+o.id+'">prekliči obračun</button></div>';
+      var d=box.querySelector('.obr-del');
+      d.addEventListener('click',function(){
+        if(!confirm('Odstranim ta obračun iz prometa?'))return;
+        sb.from('obracuni').delete().eq('id',o.id).then(function(){obrPreveri(b);});
+      });
+    } else {
+      box.innerHTML='<button class="act obr-open" id="obrOpen">💶 Obračunaj</button>';
+      document.getElementById('obrOpen').addEventListener('click',function(){obrObrazec(b);});
+    }
+  });
+}
+function obrObrazec(b){
+  var box=document.getElementById('obrBox'); if(!box)return;
+  var osn=stevilo(b.total_price);
+  box.innerHTML='<div class="obr-form">'
+    +'<div class="d-edit-hd">Obračun</div>'
+    +'<div class="obr-row"><label>Cena storitev<input type="text" id="obrOsnova" value="'+osn.toFixed(2)+'"></label>'
+    +'<label>Popust (€)<input type="text" id="obrPopust" value="0"></label></div>'
+    +'<div class="obr-nacin" id="obrNacin">'+NACINI.map(function(n,i){return '<button type="button" data-n="'+n[0]+'"'+(i===0?' class="on"':'')+'>'+n[1]+'</button>';}).join('')+'</div>'
+    +'<div class="obr-total">Za plačilo: <b id="obrZnesek">'+eur(osn)+'</b></div>'
+    +'<label class="obr-op">Opomba (neobvezno)<input type="text" id="obrOpomba" placeholder="npr. napitnina, poseben dogovor"></label>'
+    +'<div class="obr-btns"><button class="act" id="obrCancel">Prekliči</button><button class="act save" id="obrSave">Shrani obračun</button></div>'
+    +'<div class="d-edit-msg" id="obrMsg"></div></div>';
+  var nacin='gotovina';
+  function osvezi(){
+    var z=stevilo(document.getElementById('obrOsnova').value)-stevilo(document.getElementById('obrPopust').value);
+    if(z<0)z=0; document.getElementById('obrZnesek').textContent=eur(z); return z;
+  }
+  box.querySelector('#obrOsnova').addEventListener('input',osvezi);
+  box.querySelector('#obrPopust').addEventListener('input',osvezi);
+  box.querySelectorAll('#obrNacin button').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      nacin=btn.getAttribute('data-n');
+      box.querySelectorAll('#obrNacin button').forEach(function(x){x.classList.toggle('on',x===btn);});
+    });
+  });
+  document.getElementById('obrCancel').addEventListener('click',function(){obrPreveri(b);});
+  document.getElementById('obrSave').addEventListener('click',function(){
+    var btn=this, z=osvezi(), msg=document.getElementById('obrMsg');
+    if(z<=0&&!confirm('Znesek je 0 €. Vseeno shranim?'))return;
+    btn.disabled=true; btn.textContent='Shranjujem …';
+    var vrstica={booking_id:b.id, datum:b.booking_date||isoOf(new Date()),
+      stranka:b.customer_name||null, storitve:b.services_text||b.service_name||null,
+      osnova:stevilo(document.getElementById('obrOsnova').value),
+      popust:stevilo(document.getElementById('obrPopust').value),
+      znesek:z, nacin:nacin, opomba:document.getElementById('obrOpomba').value||null};
+    sb.from('obracuni').insert([vrstica]).then(function(res){
+      if(res.error){msg.textContent='Napaka: '+res.error.message;btn.disabled=false;btn.textContent='Shrani obračun';return;}
+      sb.from('bookings').update({status:'opravljeno'}).eq('id',b.id).then(function(){
+        obrPreveri(b); load();
+      });
+    });
+  });
+}
+
+/* --- pogled Blagajna --- */
+function loadBlagajna(){
+  calScroll.classList.add('hidden'); nujniList.classList.add('hidden');
+  document.getElementById('strankeView').classList.add('hidden');
+  var box=document.getElementById('blagajnaView'); box.classList.remove('hidden');
+  resetMiniHeight();
+  document.getElementById('rangeLabel').textContent='Blagajna · '+prettyDate(isoOf(cur));
+  box.innerHTML='<div class="empty">Nalagam …</div>';
+  var dan=isoOf(cur);
+  var prvi=isoOf(new Date(cur.getFullYear(),cur.getMonth(),1));
+  var zadnji=isoOf(new Date(cur.getFullYear(),cur.getMonth()+1,0));
+  Promise.all([
+    sb.from('obracuni').select('*').eq('datum',dan).order('cas'),
+    sb.from('obracuni').select('znesek,nacin').gte('datum',prvi).lte('datum',zadnji)
+  ]).then(function(r){
+    if(r[0].error){box.innerHTML='<div class="empty">Napaka: '+esc(r[0].error.message)+'</div>';return;}
+    var dnevni=r[0].data||[], mesecni=r[1].data||[];
+    var vs=function(arr,n){return arr.filter(function(o){return !n||o.nacin===n;}).reduce(function(a,o){return a+stevilo(o.znesek);},0);};
+    var h='<div class="bl-top">'
+      +'<div class="bl-kpi bl-glavni"><span>Danes skupaj</span><b>'+eur(vs(dnevni))+'</b><i>'+dnevni.length+' obračunov</i></div>'
+      +'<div class="bl-kpi"><span>💶 Gotovina</span><b>'+eur(vs(dnevni,'gotovina'))+'</b></div>'
+      +'<div class="bl-kpi"><span>💳 Kartica</span><b>'+eur(vs(dnevni,'kartica'))+'</b></div>'
+      +'<div class="bl-kpi"><span>🏦 Nakazilo</span><b>'+eur(vs(dnevni,'nakazilo'))+'</b></div>'
+      +'<div class="bl-kpi bl-mesec"><span>Mesec '+(cur.getMonth()+1)+'/'+cur.getFullYear()+'</span><b>'+eur(vs(mesecni))+'</b><i>'+mesecni.length+' obračunov</i></div>'
+      +'</div>'
+      +'<div class="bl-actions"><button class="btn bl-add" id="blAdd">➕ Prost vnos</button>'
+      +'<button class="btn bl-exp" id="blExp">⬇ Izvozi mesec v Excel</button></div>'
+      +'<div id="blForm"></div>';
+    if(!dnevni.length){ h+='<div class="empty">Ta dan še ni obračunov.</div>'; }
+    else {
+      h+='<div class="bl-list">'+dnevni.map(function(o){
+        return '<div class="bl-row"><div class="bl-l"><b>'+esc(String(o.cas).slice(0,5))+'</b> '+esc(o.stranka||'—')
+          +'<div class="bl-svc">'+esc(o.storitve||'')+(o.opomba?(' · '+esc(o.opomba)):'')
+          +(stevilo(o.popust)>0?(' · popust '+eur(o.popust)):'')+'</div></div>'
+          +'<div class="bl-r"><b>'+eur(o.znesek)+'</b><span>'+nacinIme(o.nacin)+'</span>'
+          +'<button class="bl-del" data-id="'+o.id+'" title="Odstrani">✕</button></div></div>';
+      }).join('')+'</div>';
+    }
+    box.innerHTML=h;
+    document.getElementById('blAdd').addEventListener('click',blProstVnos);
+    document.getElementById('blExp').addEventListener('click',blIzvoz);
+    box.querySelectorAll('.bl-del').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        if(!confirm('Odstranim ta obračun?'))return;
+        sb.from('obracuni').delete().eq('id',btn.getAttribute('data-id')).then(loadBlagajna);
+      });
+    });
+  });
+}
+function blProstVnos(){
+  var box=document.getElementById('blForm'); if(!box)return;
+  box.innerHTML='<div class="obr-form"><div class="d-edit-hd">Prost vnos (stranka brez rezervacije)</div>'
+    +'<div class="obr-row"><label>Stranka<input type="text" id="pvIme" placeholder="ime (neobvezno)"></label>'
+    +'<label>Storitev<input type="text" id="pvSvc" placeholder="npr. Moško striženje"></label></div>'
+    +'<div class="obr-row"><label>Znesek (€)<input type="text" id="pvZnesek" value="0"></label>'
+    +'<label>Ura<input type="time" id="pvCas" value="'+pad(new Date().getHours())+':'+pad(new Date().getMinutes())+'"></label></div>'
+    +'<div class="obr-nacin" id="pvNacin">'+NACINI.map(function(n,i){return '<button type="button" data-n="'+n[0]+'"'+(i===0?' class="on"':'')+'>'+n[1]+'</button>';}).join('')+'</div>'
+    +'<div class="obr-btns"><button class="act" id="pvCancel">Prekliči</button><button class="act save" id="pvSave">Shrani</button></div>'
+    +'<div class="d-edit-msg" id="pvMsg"></div></div>';
+  var nacin='gotovina';
+  box.querySelectorAll('#pvNacin button').forEach(function(btn){
+    btn.addEventListener('click',function(){nacin=btn.getAttribute('data-n');
+      box.querySelectorAll('#pvNacin button').forEach(function(x){x.classList.toggle('on',x===btn);});});
+  });
+  document.getElementById('pvCancel').addEventListener('click',function(){box.innerHTML='';});
+  document.getElementById('pvSave').addEventListener('click',function(){
+    var btn=this, z=stevilo(document.getElementById('pvZnesek').value), msg=document.getElementById('pvMsg');
+    if(z<=0){msg.textContent='Vnesite znesek.';return;}
+    btn.disabled=true; btn.textContent='Shranjujem …';
+    sb.from('obracuni').insert([{datum:isoOf(cur), cas:document.getElementById('pvCas').value||null,
+      stranka:document.getElementById('pvIme').value||null, storitve:document.getElementById('pvSvc').value||null,
+      osnova:z, popust:0, znesek:z, nacin:nacin}]).then(function(res){
+      if(res.error){msg.textContent='Napaka: '+res.error.message;btn.disabled=false;btn.textContent='Shrani';return;}
+      loadBlagajna();
+    });
+  });
+}
+function blIzvoz(){
+  var btn=document.getElementById('blExp'); btn.disabled=true; btn.textContent='Pripravljam …';
+  var prvi=isoOf(new Date(cur.getFullYear(),cur.getMonth(),1)),
+      zadnji=isoOf(new Date(cur.getFullYear(),cur.getMonth()+1,0));
+  naloziXlsx(function(){
+    sb.from('obracuni').select('*').gte('datum',prvi).lte('datum',zadnji).order('datum').order('cas').then(function(res){
+      var rows=(res.data||[]).map(function(o){
+        return {'Datum':String(o.datum).split('-').reverse().join('.'),'Ura':String(o.cas||'').slice(0,5),
+                'Stranka':o.stranka||'','Storitve':o.storitve||'','Cena':stevilo(o.osnova),
+                'Popust':stevilo(o.popust),'Plačano':stevilo(o.znesek),
+                'Način':({gotovina:'Gotovina',kartica:'Kartica',nakazilo:'Nakazilo'})[o.nacin]||o.nacin,
+                'Opomba':o.opomba||''};
+      });
+      var ws=XLSX.utils.json_to_sheet(rows,{header:['Datum','Ura','Stranka','Storitve','Cena','Popust','Plačano','Način','Opomba']});
+      ws['!cols']=[{wch:11},{wch:7},{wch:24},{wch:34},{wch:9},{wch:9},{wch:10},{wch:11},{wch:22}];
+      var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Promet');
+      XLSX.writeFile(wb,'Promet_Najs_'+cur.getFullYear()+'-'+pad(cur.getMonth()+1)+'.xlsx');
+      btn.disabled=false; btn.textContent='⬇ Izvozi mesec v Excel';
+    });
+  });
+}
+
 function loadStranke(){
   calScroll.classList.add('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.remove('hidden');
   resetMiniHeight();
@@ -1134,9 +1345,11 @@ function openDetail(b){
       +'<button class="act save" id="edSave">Shrani spremembe</button>'
       +'<div class="d-edit-msg" id="edMsg"></div>'
     +'</div>'
+    +'<div id="obrBox" class="obr-box"></div>'
     +'<div class="d-actions"><button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button><button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act" data-id="'+b.id+'" data-s="preklicano">Prekliči</button><button class="act danger" id="edDel">Izbriši</button></div>';
   buildEdServices(edServiceMatchIds(b));
   updateEdSummary();
+  obrPreveri(b);
   var edTimeEl=document.getElementById('edTime'); if(edTimeEl)edTimeEl.addEventListener('change',edSyncEnd);
   var edEndEl=document.getElementById('edEnd'); if(edEndEl)edEndEl.addEventListener('change',updateEdSummary);
   detailBody.querySelectorAll('.act[data-s]').forEach(function(btn){btn.addEventListener('click',function(){
