@@ -375,10 +375,29 @@ header .who{font-size:.74rem;opacity:.65}
 .kos-pop input{flex:1;min-width:60px;padding:.5rem;border:1px solid #e7e0d8;border-radius:9px;font-family:inherit;font-size:.95rem;color:var(--navy)}
 .kos-pv{width:38px;border:1.5px solid #e7e0d8;background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.9rem;color:var(--navy)}
 .kos-pv.on{background:var(--coral);border-color:var(--coral);color:#fff}
+/* okno termina: lastno drsenje, da so gumbi vedno dosegljivi */
+.overlay{align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pop{margin:auto}
+#detail .pop{padding:0;display:flex;flex-direction:column;max-height:calc(100vh - 2.4rem)}
+#detail #detailBody{overflow-y:auto;overscroll-behavior:contain;padding:1.5rem}
+#detail .pop .x{z-index:4;background:rgba(255,255,255,.9);border-radius:999px;width:32px;height:32px;line-height:1}
+.d-head{position:sticky;top:0;z-index:3;background:#fff;margin:-1.5rem -1.5rem .7rem;
+  padding:1rem 3rem .7rem 1.5rem;border-bottom:1px solid #efe6da}
+.d-head-ime{font-size:1.12rem;font-weight:600;color:var(--navy);line-height:1.25;word-break:break-word}
+.d-head-sub{font-size:.78rem;color:#7c8a93;margin-top:.15rem}
+.d-actions{gap:.45rem;margin-top:.2rem}
+.d-actions .act{flex:1 1 auto;min-width:84px;text-align:center;padding:.5rem .6rem}
+.d-actions .act.danger{flex-basis:100%;border-color:#e0b4ab;color:#b04a3a}
+@media(max-width:600px){
+  #detail .pop{max-height:calc(100vh - 1.2rem)}
+  #detail #detailBody{padding:1.1rem}
+  .d-head{margin:-1.1rem -1.1rem .6rem;padding:.9rem 2.8rem .6rem 1.1rem}
+  .d-actions .act{flex:1 1 45%}
+}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v27-2026-09-21 (mobilna postavitev, popust v % ali EUR, iskanje strank) -->
+<!-- NAJS-BUILD: v29-2026-10-01 (okno termina: drsenje, pritrjena glava z imenom) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -394,7 +413,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v27 · 21.9.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v29 · 1.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1526,10 +1545,11 @@ function openDetail(b){
   hideTip();
   var gap=(b.gap_duration_min>0)?('<div class="d-meta">⏳ vmesni prosti čas: '+b.gap_after_min+'+'+b.gap_duration_min+' min</div>'):'';
   detailBody.innerHTML=''
-    +'<div class="d-date">'+(b.booking_date?prettyDate(b.booking_date):'Po dogovoru / nujni')+'</div>'
-    +'<div class="d-time">'+(b.booking_date?(hm(b.start_time)+'–'+hm(b.end_time)+' · '+(b.total_duration_min||0)+' min'):'')+'</div>'
+    +'<div class="d-head"><div class="d-head-ime">'+esc(b.customer_name||'—')+'</div>'
+      +'<div class="d-head-sub">'+(b.booking_date?(prettyDate(b.booking_date)+' · '+hm(b.start_time)+'–'+hm(b.end_time)):'Po dogovoru / nujni')+'</div></div>'
+    +'<div class="d-time">'+(b.booking_date?((b.total_duration_min||0)+' min'):'')+'</div>'
     +'<div class="d-svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
-    +'<div class="d-meta">👤 '+esc(b.customer_name||'—')+(b.customer_phone?('<br>📞 <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>✉️ '+esc(b.customer_email)):'')+'</div>'
+    +'<div class="d-meta">'+(b.customer_phone?('📞 <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>✉️ '+esc(b.customer_email)):'')+'</div>'
     +(b.note?('<div class="d-note">'+esc(b.note)+'</div>'):'')+gap
     +'<div class="d-row"><span class="price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>'
     +'<div class="d-edit">'
@@ -1590,11 +1610,27 @@ function openDetail(b){
   var edDel=document.getElementById('edDel');
   if(edDel)edDel.addEventListener('click',function(){
     if(!confirm('Trajno izbrišem to rezervacijo? Tega ni mogoče razveljaviti.'))return;
+    /* Stranko lahko o odpovedi obvestimo po SMS - le pri prihodnjih terminih,
+       ki se niso preklicani/opravljeni in imajo telefonsko stevilko. */
+    var danes=isoOf(new Date());
+    var smiselno = !!(b.booking_date && b.customer_phone && b.booking_date>=danes
+                      && ['preklicano','opravljeno'].indexOf(b.status)<0);
+    var obvesti = smiselno && confirm('Želite stranko po SMS obvestiti, da je rezervacija odpovedana?\n\nOK = pošlji SMS in izbriši\nPrekliči = izbriši brez obvestila');
     edDel.textContent='…';edDel.disabled=true;
-    sb.from('bookings').delete().eq('id',b.id).then(function(res){
-      if(res.error){alert('Napaka pri brisanju: '+res.error.message);edDel.disabled=false;edDel.textContent='Izbriši';return;}
-      detail.classList.add('hidden');load();
-    });
+    function izbrisi(){
+      sb.from('bookings').delete().eq('id',b.id).then(function(res){
+        if(res.error){alert('Napaka pri brisanju: '+res.error.message);edDel.disabled=false;edDel.textContent='Izbriši';return;}
+        detail.classList.add('hidden');load();
+      });
+    }
+    if(obvesti){
+      /* preklic sprozi obvestilo stranki, nato vrstico izbrisemo */
+      edDel.textContent='Pošiljam SMS …';
+      sb.from('bookings').update({status:'preklicano'}).eq('id',b.id).then(function(r2){
+        if(r2.error)alert('SMS obvestila ni bilo mogoče sprožiti: '+r2.error.message);
+        setTimeout(izbrisi,1200);
+      });
+    } else izbrisi();
   });
   detail.classList.remove('hidden');
 }
