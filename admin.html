@@ -381,8 +381,7 @@ header .who{font-size:.74rem;opacity:.65}
 #detail .pop{padding:0;display:flex;flex-direction:column;max-height:calc(100vh - 2.4rem)}
 #detail #detailBody{overflow-y:auto;overscroll-behavior:contain;padding:1.5rem}
 #detail .pop .x{z-index:4;background:rgba(255,255,255,.9);border-radius:999px;width:32px;height:32px;line-height:1}
-.d-head{position:sticky;top:0;z-index:3;background:#fff;margin:-1.5rem -1.5rem .7rem;
-  padding:1rem 3rem .7rem 1.5rem;border-bottom:1px solid #efe6da}
+.d-head{margin:0 2.2rem .7rem 0;padding-bottom:.55rem;border-bottom:1px solid #efe6da}
 .d-head-ime{font-size:1.12rem;font-weight:600;color:var(--navy);line-height:1.25;word-break:break-word}
 .d-head-sub{font-size:.78rem;color:#7c8a93;margin-top:.15rem}
 .d-actions{gap:.45rem;margin-top:.2rem}
@@ -391,13 +390,13 @@ header .who{font-size:.74rem;opacity:.65}
 @media(max-width:600px){
   #detail .pop{max-height:calc(100vh - 1.2rem)}
   #detail #detailBody{padding:1.1rem}
-  .d-head{margin:-1.1rem -1.1rem .6rem;padding:.9rem 2.8rem .6rem 1.1rem}
+  .d-head{margin:0 2rem .6rem 0}
   .d-actions .act{flex:1 1 45%}
 }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v29-2026-10-01 (okno termina: drsenje, pritrjena glava z imenom) -->
+<!-- NAJS-BUILD: v30-2026-10-01 (okno termina: umirjena glava brez prekrivanja) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -413,7 +412,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v29 · 1.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v30 · 1.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
