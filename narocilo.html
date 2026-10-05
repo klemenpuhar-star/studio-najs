@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v7-2026-09-02 (zasebnost: zadrzane pisave, pravne povezave) -->
+<!-- NAJS-NAROCILO: v8-2026-10-05 (izmenicni urnik: lihi/sodi teden) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -87,6 +87,21 @@ var SB_KEY='sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
 var sb=supabase.createClient(SB_URL,SB_KEY);
 
 var SLOT_STEP=15, MIN_LEAD_MIN=240;
+var DCW={0:{},1:{},2:{}};   /* urnik po tednih: 0=vsak, 1=lihi, 2=sodi ISO teden */
+/* Teden A ali B se steje od fiksnega ponedeljka 5.10.2026 – tako se izmenjava
+   ne zalomi ob letih s 53 tedni (enako kot v bazi: najs_teden_vrsta). */
+function tedenVrsta(ds){
+  var p=String(ds).split('-');
+  var dni=Math.floor((Date.UTC(+p[0],+p[1]-1,+p[2]) - Date.UTC(2026,9,5))/86400000);
+  var teden=Math.floor(dni/7);
+  return (((teden%2)+2)%2===0) ? 1 : 2;
+}
+function dcZa(ds){
+  var p=String(ds).split('-');
+  var dow=new Date(+p[0],+p[1]-1,+p[2]).getDay();
+  var par=tedenVrsta(ds);
+  return (DCW[par]&&DCW[par][dow])||(DCW[0]&&DCW[0][dow])||DC[dow];
+}
 var DC={1:{start:'14:00',end:'20:00'},2:{start:'08:00',end:'15:00'},3:{start:'14:00',end:'20:00'},4:{start:'14:00',end:'20:00'},5:{start:'08:00',end:'15:00'},6:'dogovor',0:'zaprto'};
 var DOW_SI=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
 var DOW_GEN=['nedelje','ponedeljka','torka','srede','četrtka','petka','sobote'];
@@ -116,7 +131,7 @@ function sumDur(){ return selArr().reduce(function(a,s){ return a+(parseInt(s.du
 
 /* Prosti termini (enaka logika kot na javni strani: vrzel + 4h vnaprej + 15-min mreza) */
 function calcFreeSlots(ds,dow,busyRaw,dur){
-  var dc=DC[dow];
+  var dc=dcZa(ds);
   if(!dc||dc==='dogovor'||dc==='zaprto') return [];
   var wS=timeToMin(dc.start), wE=timeToMin(dc.end);
   var busy=[];
@@ -147,17 +162,15 @@ function calcFreeSlots(ds,dow,busyRaw,dur){
 
 function init(){
   if(!TOKEN){ app.innerHTML='<div class="note note-bad">Povezava ni veljavna. Odprite jo iz potrditvenega sporočila ali nas pokličite na <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>'; return; }
-  sb.from('delovni_cas').select('dan,nacin,od,do_').then(function(dres){
+  sb.from('delovni_cas').select('dan,teden,nacin,od,do_').then(function(dres){
     if(!dres.error && dres.data && dres.data.length){
-      var novi={};
+      var novi={0:{},1:{},2:{}};
       dres.data.forEach(function(r){
-        var d=parseInt(r.dan);
-        if(r.nacin==='odprto' && r.od && r.do_) novi[d]={start:String(r.od).substring(0,5), end:String(r.do_).substring(0,5)};
-        else if(r.nacin==='dogovor') novi[d]='dogovor';
-        else novi[d]='zaprto';
+        var d=parseInt(r.dan), t=parseInt(r.teden)||0;
+        if(r.nacin==='odprto' && r.od && r.do_) novi[t][d]={start:String(r.od).substring(0,5), end:String(r.do_).substring(0,5)};
+        else if(r.nacin==='dogovor') novi[t][d]='dogovor';
       });
-      for(var k in DC){ if(DC.hasOwnProperty(k)) delete DC[k]; }
-      for(var k2 in novi){ if(novi.hasOwnProperty(k2)) DC[k2]=novi[k2]; }
+      DCW=novi;
     }
   });
   sb.from('services').select('id,name,description,price,category,sort_order,duration_min,gap_after_min,gap_duration_min')
@@ -328,7 +341,7 @@ function loadSlots(){
   if(!arr.length){ area.innerHTML='<div class="slotmsg">Najprej izberite storitev.</div>'; checkSave(); return; }
   var ds=di.value; var d=parseISO(ds); var dow=d.getDay();
   if(dow===0){ area.innerHTML='<div class="slotmsg">Nedelja smo zaprti.</div>'; checkSave(); return; }
-  if(DC[dow]==='dogovor'){ area.innerHTML='<div class="slotmsg">📞 Sobota je po dogovoru — pokličite <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>'; checkSave(); return; }
+  if(dcZa(ds)==='dogovor'){ area.innerHTML='<div class="slotmsg">📞 Sobota je po dogovoru — pokličite <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>'; checkSave(); return; }
   area.innerHTML='<div class="slotmsg">Preverjam proste ure…</div>';
   var dur=sumDur()||30;
   sb.rpc('zasedeni_intervali_brez',{izbrani_datum:ds,izvzeti_zeton:TOKEN}).then(function(res){

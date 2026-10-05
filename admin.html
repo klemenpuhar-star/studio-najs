@@ -396,7 +396,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v30-2026-10-01 (okno termina: umirjena glava brez prekrivanja) -->
+<!-- NAJS-BUILD: v31-2026-10-05 (izmenicni urnik: lihi/sodi teden) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -412,7 +412,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v30 · 1.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v31 · 5.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -595,21 +595,37 @@ function hm(t){return String(t||'').substring(0,5);}
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 function isMobile(){return window.innerWidth<=820;}
 function prettyDate(iso){if(!iso)return '';var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DNI[d.getDay()]+', '+(+p[2])+'. '+MES[+p[1]-1]+' '+p[0];}
-var DCAS=null; /* nalozen iz tabele delovni_cas; null = uporabi zasilne vrednosti */
-function dayInfo(dow){
-  if(DCAS && DCAS[dow]) return DCAS[dow];
+var DCAS=null; /* iz tabele delovni_cas: teden (0=vsak,1=lihi,2=sodi) -> dan; null = zasilne vrednosti */
+/* Teden A ali B se steje od fiksnega ponedeljka 5.10.2026 – tako se izmenjava
+   ne zalomi ob letih s 53 tedni (enako kot v bazi: najs_teden_vrsta). */
+function tedenVrsta(ds){
+  var p=String(ds).split('-');
+  var dni=Math.floor((Date.UTC(+p[0],+p[1]-1,+p[2]) - Date.UTC(2026,9,5))/86400000);
+  var teden=Math.floor(dni/7);
+  return (((teden%2)+2)%2===0) ? 1 : 2;
+}
+/* x je lahko Date, datum "YYYY-MM-DD" ali (zastarelo) stevilka dneva v tednu */
+function dayInfo(x){
+  var dow, iso=null;
+  if(x instanceof Date){ dow=x.getDay(); iso=isoOf(x); }
+  else if(typeof x==='string'){ var p=x.split('-'); dow=new Date(+p[0],+p[1]-1,+p[2]).getDay(); iso=x; }
+  else { dow=x; }
+  if(DCAS){
+    if(iso){ var par=tedenVrsta(iso); if(DCAS[par]&&DCAS[par][dow]) return DCAS[par][dow]; }
+    if(DCAS[0]&&DCAS[0][dow]) return DCAS[0][dow];
+  }
   if(dow===1||dow===3||dow===4)return {h:[14,20]};if(dow===2||dow===5)return {h:[8,15]};if(dow===6)return {arrangement:true};return {closed:true};
 }
 function nalozDelovniCas(cb){
-  sb.from('delovni_cas').select('dan,nacin,od,do_').then(function(res){
+  sb.from('delovni_cas').select('dan,teden,nacin,od,do_').then(function(res){
     if(!res.error && res.data && res.data.length){
-      var m={};
+      var m={0:{},1:{},2:{}};
       res.data.forEach(function(r){
-        var d=parseInt(r.dan);
+        var d=parseInt(r.dan), t=parseInt(r.teden)||0;
         if(r.nacin==='odprto' && r.od && r.do_){
-          m[d]={h:[parseInt(String(r.od).substring(0,2)), parseInt(String(r.do_).substring(0,2))]};
-        } else if(r.nacin==='dogovor'){ m[d]={arrangement:true}; }
-        else { m[d]={closed:true}; }
+          m[t][d]={h:[parseInt(String(r.od).substring(0,2)), parseInt(String(r.do_).substring(0,2))]};
+        } else if(r.nacin==='dogovor'){ m[t][d]={arrangement:true}; }
+        else { m[t][d]={closed:true}; }
       });
       DCAS=m;
     }
@@ -697,7 +713,7 @@ document.getElementById('blkAllDay').addEventListener('click',function(){
   var dEl=document.getElementById('blkDate'); if(!dEl.value)dEl.value=isoOf(cur);
   var date=dEl.value;
   var p=date.split('-'); var wd=new Date(+p[0],+p[1]-1,+p[2]).getDay();
-  var info=dayInfo(wd); var h=(info&&info.h)?info.h:[8,20];
+  var info=dayInfo(date); var h=(info&&info.h)?info.h:[8,20];
   var wStart=h[0]*60, wEnd=h[1]*60;
   var note=document.getElementById('blkNote').value.trim();
   var msg=document.getElementById('blkMsg'); msg.className='msg';
@@ -1440,12 +1456,12 @@ function badge(s){var m={'nova':'nova','potrjeno':'potrjeno','opravljeno':'oprav
 function renderCal(days,bookings,blocks){
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
-  days.forEach(function(d){var info=dayInfo(d.getDay());var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
+  days.forEach(function(d){var info=dayInfo(d);var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
   days.forEach(function(d){
-    var info=dayInfo(d.getDay()),di=isoOf(d),col='<div class="col" data-date="'+di+'" style="height:'+TOTAL+'px">';
+    var info=dayInfo(d),di=isoOf(d),col='<div class="col" data-date="'+di+'" style="height:'+TOTAL+'px">';
     if(info.closed)col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.arrangement)col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.h){if(info.h[0]>H0)col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';if(info.h[1]<H1)col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';}

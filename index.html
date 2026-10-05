@@ -815,7 +815,7 @@
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v24-2026-10-05 (besedilo pri rezervaciji posodobljeno) -->
+<!-- NAJS-BUILD: v25-2026-10-05 (izmenicni urnik: lihi/sodi teden) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1414,23 +1414,36 @@ var DC = {
 var SLOT_STEP = 15; // minutni raaster za generiranje
 var MIN_LEAD_MIN = 240; // najmanjsi cas vnaprej za narocanje (v minutah); 240 = 4 ure
 
-/* Delovni cas se bere iz baze (tabela delovni_cas) – zgornje vrednosti so le zasilne. */
+/* Delovni cas se bere iz baze (tabela delovni_cas) – zgornje vrednosti so le zasilne.
+   Urnik je lahko razlicen v lihih in sodih ISO tednih (torek/sreda si izmenjata izmeno). */
+var DCW = {0:{},1:{},2:{}};   /* teden (0=vsak,1=lihi,2=sodi) -> dan -> urnik */
+/* Teden A ali B se steje od fiksnega ponedeljka 5.10.2026 – tako se izmenjava
+   ne zalomi ob letih s 53 tedni (enako kot v bazi: najs_teden_vrsta). */
+function tedenVrsta(ds){
+  var p=String(ds).split('-');
+  var dni=Math.floor((Date.UTC(+p[0],+p[1]-1,+p[2]) - Date.UTC(2026,9,5))/86400000);
+  var teden=Math.floor(dni/7);
+  return (((teden%2)+2)%2===0) ? 1 : 2;
+}
+function dcZa(ds){
+  var p=String(ds).split('-');
+  var dow=new Date(+p[0],+p[1]-1,+p[2]).getDay();
+  var par=tedenVrsta(ds);
+  return (DCW[par] && DCW[par][dow]) || (DCW[0] && DCW[0][dow]) || DC[dow];
+}
 function nalozDelovniCas(){
   try{
-    return sb.from('delovni_cas').select('dan,nacin,od,do_').then(function(res){
+    return sb.from('delovni_cas').select('dan,teden,nacin,od,do_').then(function(res){
       if(res.error || !res.data || !res.data.length) return;
-      var novi = {};
+      var novi={0:{},1:{},2:{}};
       res.data.forEach(function(r){
-        var d = parseInt(r.dan);
-        if(r.nacin === 'odprto' && r.od && r.do_){
-          novi[d] = { start: String(r.od).substring(0,5), end: String(r.do_).substring(0,5) };
-        } else if(r.nacin === 'dogovor'){
-          novi[d] = 'dogovor';
-        }
-        // 'zaprto' -> dan ostane nedolocen (zaprto)
+        var d=parseInt(r.dan), t=parseInt(r.teden)||0;
+        if(r.nacin==='odprto' && r.od && r.do_)
+          novi[t][d]={ start:String(r.od).substring(0,5), end:String(r.do_).substring(0,5) };
+        else if(r.nacin==='dogovor') novi[t][d]='dogovor';
+        /* 'zaprto' -> dan ostane nedolocen */
       });
-      for(var k in DC){ if(DC.hasOwnProperty(k)) delete DC[k]; }
-      for(var k2 in novi){ if(novi.hasOwnProperty(k2)) DC[k2] = novi[k2]; }
+      DCW=novi;
     });
   }catch(e){ /* ob napaki ostanejo zasilne vrednosti */ }
 }
@@ -1521,7 +1534,7 @@ function buildStrip(){
 
     if(past){ statusHtml='<div class="bk-day-status closed">preteklo</div>'; disClass='disabled'; }
     else if(dow===0){ statusHtml='<div class="bk-day-status closed">zaprto</div>'; disClass='disabled'; }
-    else if(DC[dow]==='dogovor'){ statusHtml='<div class="bk-day-status closed">po dogovoru</div>'; disClass='disabled'; }
+    else if(dcZa(ds)==='dogovor'){ statusHtml='<div class="bk-day-status closed">po dogovoru</div>'; disClass='disabled'; }
     else if(status==='all'){ statusHtml='<div class="bk-day-status busy">vse zasedeno</div>'; disClass='disabled'; }
     else if(status==='free'){
       var tp = getTotalPrice();
@@ -1568,7 +1581,7 @@ function buildStrip(){
 }
 
 function prefetchDayStatus(ds, dow, isFuture){
-  if(!isFuture || DC[dow]==='dogovor' || !DC[dow]) return;
+  if(!isFuture || dcZa(ds)==='dogovor' || !dcZa(ds)) return;
   var dur = getTotalDur();
   sb.rpc('zasedeni_intervali',{izbrani_datum:ds}).then(function(res){
     if(res.error) return;
@@ -1588,7 +1601,7 @@ function prefetchDayStatus(ds, dow, isFuture){
 }
 
 function calcFreeSlots(ds, dow, busyRaw, dur){
-  var dc = DC[dow];
+  var dc = dcZa(ds);
   if(!dc || dc==='dogovor') return [];
   var wS = timeToMin(dc.start), wE = timeToMin(dc.end);
   var busy = [];
@@ -1642,7 +1655,7 @@ function loadSlotList(){
   var dow = state.date.getDay();
 
   if(dow===0){ area.innerHTML='<div class="bk-slot-msg">Nedelja smo zaprti.</div>'; return; }
-  if(DC[dow]==='dogovor'){
+  if(dcZa(ds)==='dogovor'){
     area.innerHTML='<div class="bk-slot-msg">📞 <strong>Sobota je po dogovoru</strong><br/>'
       +'Pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</div>';
     return;
