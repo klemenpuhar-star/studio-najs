@@ -100,7 +100,12 @@ header .who{font-size:.74rem;opacity:.65}
 .ev.potrjeno{background:#e6f0e9;border-left-color:#3f8f5b}
 .ev.opravljeno{background:#e4e9ec;border-left-color:var(--navy);opacity:.85}
 .ev.preklicano{background:#f2e3e0;border-left-color:#b04a3a;opacity:.5;text-decoration:line-through}
-.ev.block{background:repeating-linear-gradient(45deg,#fff,#fff 7px,rgba(206,126,111,.14) 7px,rgba(206,126,111,.14) 14px);border-left:3px dashed var(--coral);color:var(--coral)}
+.ev.block{background:repeating-linear-gradient(45deg,#c8705f,#c8705f 9px,#b8614f 9px,#b8614f 18px);
+  border-left:5px solid #8f4334;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.block .ev-t{color:rgba(255,255,255,.9);font-size:.72rem}
+.block .ev-n{color:#fff;font-size:.95rem;font-weight:700;line-height:1.2;letter-spacing:.01em;
+  white-space:normal;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.block .ev-s{color:rgba(255,255,255,.95);font-size:.8rem;font-weight:500;white-space:normal}
 .ev .ev-st{position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(255,255,255,.6);z-index:3}
 .st-nova{background:#e0a23c}.st-potrjeno{background:#3f8f5b}.st-opravljeno{background:#8a97a0}.st-preklicano{background:#b04a3a}.st-podogovoru{background:#d06666}
 .cat-legend{display:flex;flex-wrap:wrap;gap:.35rem .8rem;align-items:center;padding:.55rem 4% .2rem}
@@ -393,10 +398,19 @@ header .who{font-size:.74rem;opacity:.65}
   .d-head{margin:0 2rem .6rem 0}
   .d-actions .act{flex:1 1 45%}
 }
+.op-pop{max-width:430px;width:100%}
+.op-lab{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:#7c8a93;margin:.6rem 0}
+.op-lab input{padding:.6rem;border:1.5px solid #e7e0d8;border-radius:10px;font-family:inherit;font-size:1rem;color:var(--navy)}
+.op-btns{display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem}
+.op-btns .btn{width:100%;padding:.65rem 1rem;font-size:.9rem}
+.op-shrani{background:var(--navy);color:#fff}
+.op-vrini{background:var(--coral);color:#fff}
+.op-brisi{background:#fff;color:#b04a3a;border:1.5px solid #e0b4ab}
+.op-brisi:hover{background:#fbe0e0}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v31-2026-10-05 (izmenicni urnik: lihi/sodi teden) -->
+<!-- NAJS-BUILD: v32-2026-10-05 (opravek: mocnejsa oznaka, opis, vrivanje termina) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -412,7 +426,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v31 · 5.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v32 · 5.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1475,7 +1489,7 @@ function renderCal(days,bookings,blocks){
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
       blockCache[bl.id]=bl;
       var s=toMin(bl.start_time),e=toMin(bl.end_time),top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,18);
-      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">Opravek</div>'+(bl.note?('<div class="ev-s">'+esc(bl.note)+'</div>'):'')+'</div>';
+      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">'+esc(bl.note||'Opravek')+'</div>'+(bl.note?'<div class="ev-s">opravek</div>':'')+'</div>';
     });
     col+='</div>';h+=col;
   });
@@ -1492,7 +1506,7 @@ function renderCal(days,bookings,blocks){
     el.addEventListener('mouseenter',function(){showTip(tipBlock(bl),el);});
     el.addEventListener('mouseleave',hideTip);
     el.addEventListener('touchstart',function(){showTip(tipBlock(bl),el);},{passive:true});
-    el.addEventListener('click',function(){hideTip();if(confirm('Odstranim ta opravek?'))sb.from('blocks').delete().eq('id',el.getAttribute('data-blk')).then(function(res){if(res.error)alert('Napaka: '+res.error.message);load();});});
+    el.addEventListener('click',function(){hideTip();odpriOpravek(bl);});
   });
   calScroll.querySelectorAll('.col').forEach(function(colEl){
     colEl.addEventListener('dblclick',function(e){
@@ -1777,6 +1791,43 @@ function openNew(){
   document.getElementById('nbSummary').textContent='Izberi vsaj eno storitev.';
   document.getElementById('newbk').classList.remove('hidden');
   loadCustomersThen(populateCustDatalist);
+}
+/* Okno opravka: opis, vrivanje termina kljub opravku, brisanje */
+function odpriOpravek(bl){
+  var ov=document.getElementById('opravekOverlay'); if(ov)ov.remove();
+  ov=document.createElement('div'); ov.id='opravekOverlay'; ov.className='overlay';
+  ov.innerHTML='<div class="pop op-pop">'
+    +'<div class="ui-top"><h3 style="margin:0">Opravek</h3><button type="button" class="ui-x" id="opZapri">✕</button></div>'
+    +'<p class="uvoz-sub">'+esc(prettyDate(bl.block_date))+' · '+esc(hm(bl.start_time))+'–'+esc(hm(bl.end_time))+'</p>'
+    +'<label class="op-lab">Za kakšen opravek gre?'
+    +'<input type="text" id="opOpis" value="'+esc(bl.note||'')+'" placeholder="npr. malica, dostava, zdravnik, dopust"></label>'
+    +'<div class="op-btns">'
+    +'<button type="button" class="btn op-shrani" id="opShrani">Shrani opis</button>'
+    +'<button type="button" class="btn op-vrini" id="opVrini">➕ Vrini termin ob '+esc(hm(bl.start_time))+'</button>'
+    +'<button type="button" class="btn op-brisi" id="opBrisi">🗑 Odstrani opravek</button>'
+    +'</div><div id="opMsg" class="uvoz-sub"></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('opZapri').onclick=function(){ov.remove();};
+  document.getElementById('opShrani').onclick=function(){
+    var v=document.getElementById('opOpis').value.trim(), m=document.getElementById('opMsg'); this.disabled=true;
+    sb.from('blocks').update({note:v||null}).eq('id',bl.id).then(function(r){
+      if(r.error){m.textContent='Napaka: '+r.error.message;document.getElementById('opShrani').disabled=false;return;}
+      ov.remove(); load();
+    });
+  };
+  document.getElementById('opVrini').onclick=function(){
+    ov.remove();
+    openNewAt(bl.block_date, hm(bl.start_time));
+    var m=document.getElementById('nbMsg');
+    if(m){m.textContent='Opomba: ob tej uri je vpisan opravek – termin bo vseeno vnesen.';m.className='msg';}
+  };
+  document.getElementById('opBrisi').onclick=function(){
+    if(!confirm('Odstranim ta opravek?'))return;
+    sb.from('blocks').delete().eq('id',bl.id).then(function(r){
+      if(r.error){alert('Napaka: '+r.error.message);return;}
+      ov.remove(); load();
+    });
+  };
 }
 function openNewAt(dateISO,timeStr){
   openNew();
