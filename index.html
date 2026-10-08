@@ -837,6 +837,17 @@
   .nov-slika{ order:-1; max-width:420px; margin:0 auto; }
   #novosti{ padding:3rem 1rem; }
 }
+.onas-storitve{ margin-top:1.6rem; padding-top:1.3rem; border-top:1px solid rgba(255,255,255,.18); }
+.onas-st-naslov{ font-size:.78rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--coral); margin:0 0 .7rem; }
+.onas-st-sez{ list-style:none; padding:0; margin:0; display:grid;
+  grid-template-columns:1fr 1fr; gap:.4rem 1.2rem; }
+.onas-st-sez li{ position:relative; padding-left:1.1rem; font-size:.9rem; line-height:1.5;
+  color:rgba(255,255,255,.88); }
+.onas-st-sez li::before{ content:"✦"; position:absolute; left:0; color:var(--coral); font-size:.72rem; top:.18rem; }
+.onas-st-opomba{ font-size:.84rem; color:rgba(255,255,255,.65); margin:.9rem 0 0; }
+.onas-st-opomba a{ color:var(--coral); }
+@media(max-width:700px){ .onas-st-sez{ grid-template-columns:1fr; } }
 </style>
 <style id="cenik-overlay-css">
   /* Cenik prikazan kot loceni celozaslonski pogled (ne na domaci strani) */
@@ -896,7 +907,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v28-2026-10-08 (sekcija Novosti: ponovno odprtje 19.10.) -->
+<!-- NAJS-BUILD: v30-2026-10-08 (prva oseba, seznam storitev, datum cenika) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -950,9 +961,9 @@
 <section id="cenik">
   <button class="cenik-close" type="button" onclick="closeCenik()">✕ Zapri cenik</button>
   <div class="sec-center reveal">
-    <p class="sec-label">Naše storitve</p>
+    <p class="sec-label">Moje storitve</p>
     <h2 class="sec-title" style="margin-bottom:0.3rem">Cenik</h2>
-    <p style="font-size:.82rem;opacity:.55;margin-bottom:2.5rem">Cene so v EUR · Veljavno od 18. 9. 2023</p>
+    <p style="font-size:.82rem;opacity:.55;margin-bottom:2.5rem">Cene so v EUR · Veljavno od 19. 10. 2026</p>
   </div>
   <div class="cenik-dyn-grid reveal" id="cenikGrid">
     <div class="cenik-loading">Nalagam cenik…</div>
@@ -1011,11 +1022,25 @@
 <section id="onas">
   <div class="onas-grid">
     <div class="reveal">
-      <p class="sec-label">O nas</p>
+      <p class="sec-label">O meni</p>
       <h2 class="sec-title" style="color:#fff;margin-bottom:1.5rem">Studio z dušo</h2>
-      <p class="onas-p">Frizerski studio Najs je prostor, kjer se strast do las sreča z osebno pozornostjo. Lastnica Nataša Markuta z leti izkušenj in iskreno ljubeznijo do svojega poklica poskrbi, da vsak obisk postane prijetna izkušnja.</p>
-      <p class="onas-p">Delamo z najboljšimi produkti znamke Actyva – naravnimi, nežnimi in učinkovitimi. Vsaka pričeska je prilagojena točno vašemu tipu las in slogu.</p>
-      <p class="onas-p">Najdete nas v Škofji Loki, kjer z veseljem pričakujemo vsakega gosta – ženske, moške in otroke.</p>
+      <p class="onas-p">Sem Nataša Markuta in Frizerski studio Najs je moj prostor, kjer se strast do las sreča z osebno pozornostjo. Z leti izkušenj in iskreno ljubeznijo do svojega poklica poskrbim, da vsak obisk postane prijetna izkušnja.</p>
+      <p class="onas-p">Delam z najboljšimi produkti znamke Actyva – naravnimi, nežnimi in učinkovitimi. Vsako pričesko prilagodim točno vašemu tipu las in slogu.</p>
+      <p class="onas-p">Najdete me v Škofji Loki, kjer z veseljem sprejmem vsakega gosta – ženske, moške in otroke.</p>
+      <div class="onas-storitve">
+        <p class="onas-st-naslov">Kaj delam</p>
+        <ul class="onas-st-sez">
+          <li>Žensko striženje in oblikovanje pričesk</li>
+          <li>Moško striženje z umivanjem ali brez</li>
+          <li>Otroško striženje</li>
+          <li>Barvanje las in barvanje narastka</li>
+          <li>Pramena, balayage in posvetlitve</li>
+          <li>Preliv, toniranje in odsevi</li>
+          <li>Nega lasišča in las ter rituali</li>
+          <li>Fen in oblikovanje za posebne priložnosti</li>
+        </ul>
+        <p class="onas-st-opomba">Vse storitve s cenami najdete v <a href="#cenik">ceniku</a>.</p>
+      </div>
       <br/>
       <button class="btn-main open-modal" type="button" style="background:var(--coral)">Naroči se ✦</button>
     </div>
@@ -1029,10 +1054,10 @@
     <div class="reveal">
       <p class="sec-label">Rezervacija</p>
       <h2 class="sec-title">Naročite se</h2>
-      <p>Naročite se po telefonu, e-pošti ali prek spletnega obrazca. Radi vas vidimo in vam pomagamo do popolnih las!</p>
+      <p>Naročite se po telefonu, e-pošti ali kar prek spletnega obrazca. Z veseljem vas sprejmem in vam pomagam do popolnih las.</p>
       <button class="btn-main open-modal" type="button" style="font-size:.95rem;padding:1rem 2.8rem">Naroči se ✦</button>
       <br/><br/>
-      <p style="font-size:.8rem;opacity:.5;margin-bottom:0">Spletno naročanje je na voljo 24 ur na dan. Če želite termin še danes ali imate vprašanje, pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>
+      <p style="font-size:.8rem;opacity:.5;margin-bottom:0">Spletno naročanje je na voljo 24 ur na dan. Če želite termin še danes ali imate vprašanje, me pokličite na <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>
     </div>
   </div>
 </section>
@@ -1040,7 +1065,7 @@
 <!-- ══ KONTAKT ═══════════════════════════════════════════════ -->
 <section id="kontakt">
   <div class="sec-center reveal">
-    <p class="sec-label">Pridite k nam</p>
+    <p class="sec-label">Pridite k meni</p>
     <h2 class="sec-title">Kontakt</h2>
   </div>
   <div class="kontakt-grid">
