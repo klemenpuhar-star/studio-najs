@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /narocilo.html
+Disallow: /n/
+
+Sitemap: https://najs.si/sitemap.xml
