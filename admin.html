@@ -422,7 +422,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v34-2026-10-08 (mehak prehod med dnevi, ohranjen polozaj) -->
+<!-- NAJS-BUILD: v35-2026-10-08 (spletna rezervacija je takoj potrjena) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -438,7 +438,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v34 · 8.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v35 · 8.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1652,7 +1652,10 @@ function openDetail(b){
       +'<div class="d-edit-msg" id="edMsg"></div>'
     +'</div>'
     +'<div id="obrBox" class="obr-box"></div>'
-    +'<div class="d-actions"><button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button><button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act" data-id="'+b.id+'" data-s="preklicano">Prekliči</button><button class="act danger" id="edDel">Izbriši</button></div>';
+    +'<div class="d-actions">'
+    +((['potrjeno','opravljeno','preklicano'].indexOf(b.status)<0)
+        ? '<button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button>' : '')
+    +'<button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act" data-id="'+b.id+'" data-s="preklicano">Prekliči</button><button class="act danger" id="edDel">Izbriši</button></div>';
   buildEdServices(edServiceMatchIds(b));
   updateEdSummary();
   obrPreveri(b);
