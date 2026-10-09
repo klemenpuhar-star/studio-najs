@@ -419,10 +419,23 @@ header .who{font-size:.74rem;opacity:.65}
 @keyframes najsVstopR{ from{opacity:.4;transform:translateX(-22px)} to{opacity:1;transform:none} }
 .cal-scroll.osvezujem{ opacity:.55; transition:opacity .12s }
 .cal-scroll{ overscroll-behavior-y:contain; scroll-behavior:auto }
+/* dnevni/tedenski koledar: lasten navpicni drsnik (00:00–24:00, ob odprtju 6:00–21:00) */
+.cal-scroll{ overflow-y:auto; height:min(780px, calc(100vh - 215px));
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain; scrollbar-width:thin; }
+.cal-scroll::-webkit-scrollbar{ width:10px; height:10px }
+.cal-scroll::-webkit-scrollbar-thumb{ background:rgba(44,66,81,.22); border-radius:999px;
+  border:3px solid #fff }
+.cal-scroll::-webkit-scrollbar-thumb:hover{ background:rgba(44,66,81,.38) }
+.cal-scroll::-webkit-scrollbar-track{ background:transparent }
+/* mesecni pogled: brez drsnika, fiksna visina po vsebini */
+/* ce je overflow-x:auto, brskalnik navpicni "visible" obravnava kot "auto" in drsnik ostane,
+   zato mesecni pogled v celoti izklopi prelivanje */
+.cal-scroll.brez-drsnika{ overflow:visible; height:auto; max-height:none }
+@media(max-width:820px){ .cal-scroll{ height:calc(100vh - 185px) } }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v35-2026-10-08 (spletna rezervacija je takoj potrjena) -->
+<!-- NAJS-BUILD: v36-2026-10-08 (koledar 00-24 z lastnim drsnikom, mesec fiksen) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -438,7 +451,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v35 · 8.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v36 · 8.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -542,7 +555,8 @@ var sb=supabase.createClient(SB_URL,SB_KEY);
 var loginView=document.getElementById('loginView'),appView=document.getElementById('appView');
 var calScroll=document.getElementById('calScroll'),nujniList=document.getElementById('nujniList'),miniEl=document.getElementById('mini');
 
-var H0=6,H1=21,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
+var H0=0,H1=24,HOUR_PX=52,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
+var ZACETNA_URA=6, VIDNIH_UR=15;   /* ob odprtju vidno 6:00–21:00, pomik mogoc do polnoci */
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DOWF=['PONEDELJEK','TOREK','SREDA','ČETRTEK','PETEK','SOBOTA','NEDELJA'];
 var DNI=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
@@ -905,9 +919,11 @@ function load(){
   var fromISO=isoOf(days[0]),toISO=isoOf(days[days.length-1]);
   /* ohrani navpicni polozaj in staro vsebino, dokler ne pridejo novi podatki,
      da koledar ne skoci na vrh ob vsaki menjavi dneva */
-  var ohraniY = calScroll.scrollTop;
-  if(!calScroll.querySelector('.cal')) calScroll.innerHTML='<div class="empty">Nalagam …</div>';
+  var jeIzrisan = !!calScroll.querySelector('.cal');
+  var ohraniY = jeIzrisan ? calScroll.scrollTop : ZACETNA_URA*HOUR_PX;
+  if(!jeIzrisan) calScroll.innerHTML='<div class="empty">Nalagam …</div>';
   else calScroll.classList.add('osvezujem');
+  calScroll.classList.remove('brez-drsnika');
   Promise.all([
     sb.from('bookings').select('*').gte('booking_date',fromISO).lte('booking_date',toISO),
     sb.from('blocks').select('*').gte('block_date',fromISO).lte('block_date',toISO)
@@ -919,6 +935,7 @@ function load(){
   });
 }
 function loadMonth(){
+  calScroll.classList.add('brez-drsnika');      /* mesecni koledar je fiksen */
   calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');skrijBlagajno();
   document.getElementById('rangeLabel').textContent=rangeText();
   var cells=monthGrid(cur);
