@@ -412,10 +412,17 @@ header .who{font-size:.74rem;opacity:.65}
 @keyframes najsSwipeR{ from{opacity:.35;transform:translateX(-26px)} to{opacity:1;transform:none} }
 .swipe-l{ animation:najsSwipeL .22s ease-out }
 .swipe-r{ animation:najsSwipeR .22s ease-out }
+/* mehak prehod med dnevi: animira se vsebina, drsni okvir ostane na mestu */
+.cal.vstop-l{ animation:najsVstopL .2s ease-out }
+.cal.vstop-r{ animation:najsVstopR .2s ease-out }
+@keyframes najsVstopL{ from{opacity:.4;transform:translateX(22px)} to{opacity:1;transform:none} }
+@keyframes najsVstopR{ from{opacity:.4;transform:translateX(-22px)} to{opacity:1;transform:none} }
+.cal-scroll.osvezujem{ opacity:.55; transition:opacity .12s }
+.cal-scroll{ overscroll-behavior-y:contain; scroll-behavior:auto }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v33-2026-10-08 (poteg levo/desno po dnevih) -->
+<!-- NAJS-BUILD: v34-2026-10-08 (mehak prehod med dnevi, ohranjen polozaj) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -431,7 +438,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v33 · 8.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v34 · 8.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -717,7 +724,9 @@ document.querySelectorAll('.seg button').forEach(function(b){b.addEventListener(
 document.getElementById('todayBtn').addEventListener('click',function(){cur=new Date();cur.setHours(0,0,0,0);miniRef=new Date(cur);load();});
 document.getElementById('prevBtn').addEventListener('click',function(){nav(-1);});
 document.getElementById('nextBtn').addEventListener('click',function(){nav(1);});
+var SMER=0;            /* smer zadnjega premika: za mehak prehod */
 function nav(dir){
+  SMER=dir;
   if(mode==='day')cur=addDays(cur,dir);
   else if(mode==='month')cur=addMonths(cur,dir);
   else cur=addDays(cur,dir*7);
@@ -729,12 +738,7 @@ function nav(dir){
 (function(){
   var zx=0, zy=0, zt=0, aktiven=false;
   function okno(){ return document.querySelector('.overlay:not(.hidden)'); }
-  function pomik(dir){
-    var el=document.getElementById('calScroll');
-    if(el){ el.classList.remove('swipe-l','swipe-r'); void el.offsetWidth;
-            el.classList.add(dir>0?'swipe-l':'swipe-r'); }
-    nav(dir);
-  }
+  function pomik(dir){ nav(dir); }
   var cal=document.getElementById('calScroll');
   if(!cal) return;
   cal.addEventListener('touchstart',function(e){
@@ -899,13 +903,19 @@ function load(){
   var days=daysForMode();
   document.getElementById('rangeLabel').textContent=rangeText(days);
   var fromISO=isoOf(days[0]),toISO=isoOf(days[days.length-1]);
-  calScroll.innerHTML='<div class="empty">Nalagam …</div>';
+  /* ohrani navpicni polozaj in staro vsebino, dokler ne pridejo novi podatki,
+     da koledar ne skoci na vrh ob vsaki menjavi dneva */
+  var ohraniY = calScroll.scrollTop;
+  if(!calScroll.querySelector('.cal')) calScroll.innerHTML='<div class="empty">Nalagam …</div>';
+  else calScroll.classList.add('osvezujem');
   Promise.all([
     sb.from('bookings').select('*').gte('booking_date',fromISO).lte('booking_date',toISO),
     sb.from('blocks').select('*').gte('block_date',fromISO).lte('block_date',toISO)
   ]).then(function(r){
     if(r[0].error){calScroll.innerHTML='<div class="empty">Napaka: '+esc(r[0].error.message)+'<br><small>Preveri pravice (RLS).</small></div>';return;}
     renderCal(days,r[0].data||[],(r[1]&&!r[1].error)?(r[1].data||[]):[]);
+    calScroll.classList.remove('osvezujem');
+    calScroll.scrollTop = ohraniY;        /* ostani na isti visini kot prej */
   });
 }
 function loadMonth(){
@@ -1550,6 +1560,11 @@ function renderCal(days,bookings,blocks){
     el.addEventListener('touchstart',function(){showTip(tipBlock(bl),el);},{passive:true});
     el.addEventListener('click',function(){hideTip();odpriOpravek(bl);});
   });
+  if(SMER){
+    var platno=calScroll.querySelector('.cal');
+    if(platno){ platno.classList.add(SMER>0?'vstop-l':'vstop-r'); }
+    SMER=0;
+  }
   calScroll.querySelectorAll('.col').forEach(function(colEl){
     colEl.addEventListener('dblclick',function(e){
       if(e.target.closest('.ev'))return;
