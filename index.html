@@ -854,6 +854,17 @@
   border:1.5px solid var(--coral); color:var(--coral); border-radius:999px;
   padding:.6rem 1.3rem; font-size:.88rem; font-weight:600; transition:background .2s,color .2s; }
 .ocena-gumb:hover{ background:var(--coral); color:#fff; }
+.ocena-kartica{ display:flex; flex-direction:column; gap:.7rem; text-decoration:none;
+  background:#fff; border:1px solid rgba(44,66,81,.12); border-radius:16px;
+  padding:.9rem 1.1rem; margin-top:1.6rem; max-width:260px;
+  box-shadow:0 4px 16px rgba(44,66,81,.08); transition:transform .2s, box-shadow .2s; }
+.ocena-kartica:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(44,66,81,.14); }
+.ok-vrh{ display:flex; align-items:center; gap:.5rem; }
+.ok-ime{ font-size:1.05rem; font-weight:500; color:#3c4043; }
+.ok-pusc{ margin-left:auto; color:#5f6368; font-size:1rem; }
+.ok-spodaj{ display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; }
+.ok-ocena{ font-size:1.75rem; font-weight:500; color:#202124; line-height:1; }
+.ok-mnenj{ font-size:.86rem; color:#80868b; }
 </style>
 <style id="cenik-overlay-css">
   /* Cenik prikazan kot loceni celozaslonski pogled (ne na domaci strani) */
@@ -913,7 +924,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v32-2026-10-08 (povezava do ocen na Googlu) -->
+<!-- NAJS-BUILD: v33-2026-10-11 (kartica z oceno iz Googlovega profila) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1103,6 +1114,19 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.332 1.209-6 5.848 1.416 8.262L12 19.446l-7.416 3.891L6 15.075 0 9.227l8.332-1.209z"/></svg>
         </a>
       </div>
+      <a class="ocena-kartica reveal" id="ocenaKartica" href="https://g.page/r/Cdxc300gunjOEBM/review"
+         target="_blank" rel="noopener noreferrer" style="transition-delay:.32s; display:none"
+         aria-label="Ocena na Googlu – odpri mnenja">
+        <span class="ok-vrh">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.46a5.5 5.5 0 0 1-2.4 3.6v3h3.88c2.27-2.09 3.58-5.17 3.58-8.79z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.94-2.91l-3.88-3.01c-1.08.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.71-4.95H1.27v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.29 14.28a7.2 7.2 0 0 1 0-4.56v-3.1H1.27a12 12 0 0 0 0 10.76l4.02-3.1z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.16 15.23 0 12 0 7.31 0 3.26 2.69 1.27 6.62l4.02 3.1C6.23 6.86 8.88 4.75 12 4.75z"/></svg>
+          <span class="ok-ime">Google</span>
+          <span class="ok-pusc" aria-hidden="true">↗</span>
+        </span>
+        <span class="ok-spodaj">
+          <span class="ok-ocena" id="ocenaStevilka">–</span>
+          <span class="ok-mnenj" id="ocenaMnenj"></span>
+        </span>
+      </a>
       <div class="ocena-vabilo reveal" style="transition-delay:.34s">
         <p class="ocena-besedilo">Ste bili zadovoljni z obiskom? Vaša ocena na Googlu mi veliko pomeni 🤎</p>
         <a class="ocena-gumb" href="https://g.page/r/Cdxc300gunjOEBM/review" target="_blank" rel="noopener noreferrer">
@@ -2424,6 +2448,24 @@ function showBodyError(msg){
   sl.addEventListener('click', odpri);
   lb.addEventListener('click', zapri);
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') zapri(); });
+})();
+</script>
+<script>
+/* ocena iz Googlovega profila: osvezi jo strezniska funkcija enkrat dnevno,
+   stran jo le prebere iz baze (kljuc tako ni izpostavljen) */
+(function(){
+  try{
+    sb.from('google_ocena').select('ocena,stevilo_mnenj').limit(1).then(function(r){
+      var o=(r.data||[])[0];
+      if(r.error||!o||o.ocena==null) return;            /* brez podatka kartice ne pokazemo */
+      var k=document.getElementById('ocenaKartica');
+      document.getElementById('ocenaStevilka').textContent=String(o.ocena).replace('.',',')+'/5';
+      var n=o.stevilo_mnenj;
+      document.getElementById('ocenaMnenj').textContent =
+        n ? (n+' '+(n===1?'mnenje':(n===2?'mnenji':(n<5?'mnenja':'mnenj')))) : '';
+      if(k) k.style.display='flex';
+    });
+  }catch(e){}
 })();
 </script>
 </body>
