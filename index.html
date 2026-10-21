@@ -916,7 +916,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v35-2026-10-11 (galerija: video brez zvoka) -->
+<!-- NAJS-BUILD: v36-2026-10-18 (neposredna povezava do cenika za QR) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -2210,6 +2210,9 @@ function showBodyError(msg){
     if(!(history.state && history.state.cenik)) document.body.classList.remove('cenik-view');
   });
   window.openCenik=openCenik; window.closeCenik=closeCenik;
+  /* neposreden obisk najs.si/#cenik (npr. prek QR kode) naj odpre cenik */
+  if(location.hash==='#cenik') setTimeout(openCenik, 60);
+  window.addEventListener('hashchange', function(){ if(location.hash==='#cenik') openCenik(); });
   var links=document.querySelectorAll('a[href="#cenik"]');
   for(var i=0;i<links.length;i++){
     links[i].addEventListener('click', function(e){ e.preventDefault(); openCenik(); });
