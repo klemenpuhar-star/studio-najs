@@ -468,7 +468,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v40-2026-10-21 (nov pogled Izdelki in Narocila za spletno trgovino) -->
+<!-- NAJS-BUILD: v41-2026-10-21 (urejanje kontaktnih podatkov stranke pri Strankah) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -1720,18 +1720,74 @@ function refreshStrankeList(){
   if(!list.length){listEl.innerHTML='<div class="empty">Ni zadetkov.</div>';return;}
   var html='';
   list.slice(0,300).forEach(function(c,i){
-    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'"><div><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div><div class="cust-meta">'+(c.uvozena&&!c.visits?'<span class="uvoz-tag">uvožena</span>':obiski(c.visits))+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div></div><div class="cust-hist hidden"></div></div>';
+    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'"><div><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div><div class="cust-meta">'+(c.uvozena&&!c.visits?'<span class="uvoz-tag">uvožena</span>':obiski(c.visits))+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div><button type="button" class="act cust-edit-btn" data-ci="'+i+'" style="flex-shrink:0">✎ Uredi</button></div><div class="cust-edit-form hidden" id="custEdit'+i+'"></div><div class="cust-hist hidden"></div></div>';
   });
   listEl.innerHTML=html;
+  listEl.querySelectorAll('.cust-edit-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var i=+btn.getAttribute('data-ci'), c=list[i];
+      var box=document.getElementById('custEdit'+i);
+      if(!box.classList.contains('hidden')){box.classList.add('hidden');box.innerHTML='';return;}
+      prikaziStrankaEditForma(box,c,refreshStrankeList);
+      box.classList.remove('hidden');
+    });
+  });
   listEl.querySelectorAll('.cust-head').forEach(function(hd){
     hd.addEventListener('click',function(){
-      var c=list[+hd.getAttribute('data-ci')], hist=hd.nextElementSibling;
+      var c=list[+hd.getAttribute('data-ci')], hist=hd.nextElementSibling.nextElementSibling;
       if(!hist.classList.contains('hidden')){hist.classList.add('hidden');hist.innerHTML='';return;}
       var hh=c.opomba?('<div class="hist-row" style="cursor:default"><span class="h-svc">📝 '+esc(c.opomba)+'</span></div>'):'';
       if(!c.bookings.length) hh+='<div class="hist-row" style="cursor:default"><span class="h-svc">Še brez rezervacij v sistemu.</span></div>';
       c.bookings.forEach(function(b){cache[b.id]=b;hh+='<div class="hist-row" data-id="'+b.id+'"><span class="h-date">'+(b.booking_date?(prettyShort(b.booking_date)+' '+hm(b.start_time)):'Po dogovoru')+'</span><span class="h-svc">'+esc(b.services_text||b.service_name||'')+'</span><span class="h-price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>';});
       hist.innerHTML=hh; hist.classList.remove('hidden');
       hist.querySelectorAll('.hist-row').forEach(function(r){r.addEventListener('click',function(){openDetail(cache[r.getAttribute('data-id')]);});});
+    });
+  });
+}
+/* Urejanje kontaktnih podatkov stranke (ime/telefon/e-posta/opomba) – popravi imenik (stranke)
+   in vse njene obstojece rezervacije (bookings), da so podatki povsod usklajeni (npr. za SMS opomnike). */
+function prikaziStrankaEditForma(box,c,onSaved){
+  box.innerHTML='<div class="obr-form" style="margin:.3rem 0 .6rem">'
+    +'<div class="d-edit-hd">Uredi kontaktne podatke</div>'
+    +'<div class="obr-row">'
+    +'<label>Ime in priimek<input type="text" id="ceIme" value="'+esc(c.name||'')+'"></label>'
+    +'<label>Telefon<input type="text" id="ceTel" value="'+esc(c.phone||'')+'"></label>'
+    +'</div><div class="obr-row">'
+    +'<label>E-pošta<input type="text" id="ceEmail" value="'+esc(c.email||'')+'"></label>'
+    +'</div><div class="obr-row">'
+    +'<label style="flex:1 0 100%">Opomba<input type="text" id="ceOpomba" value="'+esc(c.opomba||'')+'"></label>'
+    +'</div>'
+    +(c.bookings&&c.bookings.length?('<p style="font-size:.76rem;opacity:.6;margin:.2rem 0 .6rem">Popravek se shrani v imenik strank in v '+c.bookings.length+' obstoječ'+(c.bookings.length===1?'o':'ih')+' rezervacij'+(c.bookings.length===1?'o':'')+' te stranke (npr. za pravilne SMS opomnike).</p>'):'')
+    +'<div class="obr-btns"><button class="act" id="ceCancel">Prekliči</button><button class="act save" id="ceSave">Shrani</button></div>'
+    +'<div class="d-edit-msg" id="ceMsg"></div></div>';
+  document.getElementById('ceCancel').addEventListener('click',function(){box.classList.add('hidden');box.innerHTML='';});
+  document.getElementById('ceSave').addEventListener('click',function(){
+    var btn=this, msg=document.getElementById('ceMsg');
+    var ime=document.getElementById('ceIme').value.trim();
+    var tel=document.getElementById('ceTel').value.trim();
+    var email=document.getElementById('ceEmail').value.trim();
+    var opomba=document.getElementById('ceOpomba').value.trim();
+    if(!ime){msg.textContent='Vnesite ime.';msg.className='d-edit-msg err';return;}
+    btn.disabled=true; btn.textContent='Shranjujem …';
+    var strankaPatch={ime:ime, telefon:tel||null, email:email||null, opomba:opomba||null};
+    var p = c.strankaId
+      ? sb.from('stranke').update(strankaPatch).eq('id',c.strankaId)
+      : sb.from('stranke').insert([Object.assign({vir:'admin'},strankaPatch)]).select('id');
+    p.then(function(res){
+      if(res.error){msg.textContent='Napaka pri imeniku: '+res.error.message;msg.className='d-edit-msg err';btn.disabled=false;btn.textContent='Shrani';return;}
+      if(!c.strankaId && res.data && res.data[0]) c.strankaId=res.data[0].id;
+      var bookIds=(c.bookings||[]).map(function(b){return b.id;});
+      var finish=function(){
+        c.name=ime; c.phone=tel; c.email=email; c.opomba=opomba;
+        box.classList.add('hidden'); box.innerHTML='';
+        if(onSaved) onSaved();
+      };
+      if(!bookIds.length){ finish(); return; }
+      sb.from('bookings').update({customer_name:ime, customer_phone:tel||null, customer_email:email||null}).in('id',bookIds).then(function(res2){
+        if(res2.error){msg.textContent='Imenik shranjen, a rezervacij ni bilo mogoče posodobiti: '+res2.error.message;msg.className='d-edit-msg err';btn.disabled=false;btn.textContent='Shrani';return;}
+        finish();
+      });
     });
   });
 }
