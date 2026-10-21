@@ -432,10 +432,18 @@ header .who{font-size:.74rem;opacity:.65}
    zato mesecni pogled v celoti izklopi prelivanje */
 .cal-scroll.brez-drsnika{ overflow:visible; height:auto; max-height:none }
 @media(max-width:820px){ .cal-scroll{ height:calc(100vh - 185px) } }
+/* števec otrok v admin obrazcih */
+.kol-vrsta{ display:flex; align-items:center; gap:.55rem; margin:-.2rem 0 .55rem;
+  padding:.45rem .7rem; background:#faf7f3; border:1px solid #efe6da; border-radius:10px; }
+.kol-lbl{ flex:1; font-size:.82rem; color:#6f7f89 }
+.kol-btn{ width:30px; height:30px; border:1.5px solid var(--coral); background:#fff;
+  color:var(--coral); border-radius:8px; font-size:1.05rem; line-height:1; cursor:pointer }
+.kol-btn:hover{ background:var(--coral); color:#fff }
+.kol-n{ min-width:24px; text-align:center; font-weight:700; color:var(--navy) }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v37-2026-10-08 (koledarcek v stranski vrstici je staticen) -->
+<!-- NAJS-BUILD: v38-2026-10-18 (stevilo otrok pri otroskih storitvah) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -451,7 +459,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v37 · 8.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v38 · 18.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1673,6 +1681,7 @@ function openDetail(b){
     +((['potrjeno','opravljeno','preklicano'].indexOf(b.status)<0)
         ? '<button class="act" data-id="'+b.id+'" data-s="potrjeno">Potrdi</button>' : '')
     +'<button class="act" data-id="'+b.id+'" data-s="opravljeno">Opravljeno</button><button class="act" data-id="'+b.id+'" data-s="preklicano">Prekliči</button><button class="act danger" id="edDel">Izbriši</button></div>';
+  edKolIzTermina(b);
   buildEdServices(edServiceMatchIds(b));
   updateEdSummary();
   obrPreveri(b);
@@ -1693,14 +1702,14 @@ function openDetail(b){
     if(!sel.length){m.textContent='Izberite vsaj eno storitev.';m.className='d-edit-msg err';return;}
     var dur=toMin(ne)-toMin(nt);
     if(dur<=0){m.textContent='Konec mora biti po začetku.';m.className='d-edit-msg err';return;}
-    var origIds=edServiceMatchIds(b).slice().sort().join(',');
-    var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
+    var origIds=edPodpisIzTermina(b);
+    var selIds=edPodpis(sel);
     var price,stext,sid,sname;
     if(selIds===origIds){
       price=parseFloat(b.total_price)||0; stext=b.services_text||b.service_name; sid=b.service_id; sname=b.service_name;
     } else {
-      price=parseFloat(sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0).toFixed(2));
-      stext=sel.map(function(s){return s.name;}).join(' + '); sid=sel[0].id; sname=sel[0].name;
+      price=parseFloat(sel.reduce(function(a,s){return a+(parseFloat(s.price)||0)*(s.kol||1);},0).toFixed(2));
+      stext=sel.map(function(s){return s.name+((s.kol||1)>1?(' ×'+s.kol):'');}).join(' + '); sid=sel[0].id; sname=sel[0].name;
     }
     var gapAfter=0,gapDuration=0,gapSvc=null;
     sel.forEach(function(s){var gd=parseInt(s.gap_duration_min)||0,ga=parseInt(s.gap_after_min)||0;if(gd>0&&ga>0){if(!gapSvc||gd>(parseInt(gapSvc.gap_duration_min)||0))gapSvc=s;}});
@@ -1777,27 +1786,73 @@ function buildNbServices(){
           + '<span class="nb-item-main"><span class="nb-item-name">'+esc(s.name)+'</span>'
           + (s.description?'<span class="nb-item-desc">'+esc(s.description)+'</span>':'')+'</span>'
           + '<span class="nb-dur">'+(s.duration_min||0)+' min</span>'
-          + '<span class="nb-price">'+eur(s.price)+'</span></label>';
+          + '<span class="nb-price">'+eur(s.price)+'</span></label>'
+          + (jeOtrok(s)?kolHtml('nb',s):'');
     });
     html+='</div></div></div>';
   });
   box.innerHTML=html;
   box.querySelectorAll('.nb-acc-trigger').forEach(function(btn){btn.addEventListener('click',function(){btn.closest('.nb-acc-item').classList.toggle('open');});});
   box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',updateNbSummary);});
+  kolPoveži('nb','nbServices',updateNbSummary);
+}
+/* ── ŠTEVILO OTROK pri otroških storitvah (enako kot pri spletnem naročanju) ── */
+var KOL={nb:{},ed:{}};
+function jeOtrok(s){ return (s.category||'')==='Otroci'; }
+function kolGet(p,id){ var v=parseInt(KOL[p][String(id)]); return (v&&v>0)?v:1; }
+function kolSet(p,id,v){ KOL[p][String(id)]=Math.min(9,Math.max(1,v)); }
+function kolHtml(p,s){
+  return '<div class="kol-vrsta" id="kol-'+p+'-'+s.id+'" data-sid="'+s.id+'" style="display:none">'
+    +'<span class="kol-lbl">Število otrok</span>'
+    +'<button type="button" class="kol-btn" data-d="-1" aria-label="Manj">−</button>'
+    +'<span class="kol-n">1</span>'
+    +'<button type="button" class="kol-btn" data-d="1" aria-label="Več">+</button></div>';
+}
+/* poveze stevce s potrditvenimi polji v danem obrazcu */
+function kolPoveži(p, boxId, osveži){
+  var box=document.getElementById(boxId); if(!box)return;
+  box.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    var st=document.getElementById('kol-'+p+'-'+cb.value);
+    if(!st)return;
+    function vidnost(){ st.style.display=cb.checked?'flex':'none'; if(!cb.checked)kolSet(p,cb.value,1), st.querySelector('.kol-n').textContent='1'; }
+    cb.addEventListener('change',function(){ vidnost(); osveži(); });
+    vidnost();
+  });
+  box.querySelectorAll('.kol-vrsta .kol-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.preventDefault(); e.stopPropagation();
+      var vr=btn.closest('.kol-vrsta'), sid=vr.getAttribute('data-sid');
+      kolSet(p, sid, kolGet(p,sid)+parseInt(btn.getAttribute('data-d')));
+      vr.querySelector('.kol-n').textContent=kolGet(p,sid);
+      osveži();
+    });
+  });
 }
 function nbSelected(){
   var ids=[];document.querySelectorAll('#nbServices input:checked').forEach(function(cb){ids.push(cb.value);});
-  return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;});
+  return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;})
+    .map(function(s){ var o=Object.assign({},s); o.kol=jeOtrok(s)?kolGet('nb',s.id):1; return o; });
 }
 function updateNbSummary(){
   var sel=nbSelected(),sumEl=document.getElementById('nbSummary');
   var sbx=document.getElementById('nbServices'); if(sbx&&sel.length)sbx.classList.remove('err');
   if(!sel.length){sumEl.textContent='Izberi vsaj eno storitev.';return;}
-  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
-  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0)*(s.kol||1);},0);
+  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0)*(s.kol||1);},0);
   var start=document.getElementById('nbTime').value,endTxt='';
   if(start&&dur){var sm=toMin(start)+dur;endTxt=pad(Math.floor(sm/60))+':'+pad(sm%60);}
   sumEl.innerHTML='Skupaj: <strong>'+dur+' min</strong> · <strong>'+eur(price)+'</strong>'+(endTxt?(' · konec ob <strong>'+endTxt+'</strong>'):'');
+}
+function edPodpis(arr){ return arr.map(function(s){return s.id+'x'+(s.kol||1);}).sort().join(','); }
+function edPodpisIzTermina(b){
+  var out=[];
+  String(b.services_text||b.service_name||'').split(' + ').forEach(function(tok){
+    var m=String(tok).match(/^(.*?)(?:\s*[×x]\s*(\d+))?\s*$/); if(!m)return;
+    var ime=(m[1]||'').trim().toLowerCase(), kol=parseInt(m[2])||1;
+    var sv=SERVICES.filter(function(s){return (s.name||'').toLowerCase()===ime;})[0];
+    if(sv) out.push(sv.id+'x'+kol);
+  });
+  return out.sort().join(',');
 }
 function edServiceMatchIds(b){
   var txt=b.services_text||b.service_name||'',ids=[];
@@ -1828,25 +1883,43 @@ function buildEdServices(preIds){
           + '<span class="nb-item-main"><span class="nb-item-name">'+esc(s.name)+'</span>'
           + (s.description?'<span class="nb-item-desc">'+esc(s.description)+'</span>':'')+'</span>'
           + '<span class="nb-dur">'+(s.duration_min||0)+' min</span>'
-          + '<span class="nb-price">'+eur(s.price)+'</span></label>';
+          + '<span class="nb-price">'+eur(s.price)+'</span></label>'
+          + (jeOtrok(s)?kolHtml('ed',s):'');
     });
     html+='</div></div></div>';
   });
   box.innerHTML=html;
   box.querySelectorAll('.nb-acc-trigger').forEach(function(btn){btn.addEventListener('click',function(){btn.closest('.nb-acc-item').classList.toggle('open');});});
   box.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',edSyncEnd);});
+  kolPoveži('ed','edServices',edSyncEnd);
+  /* pri urejanju pokazi ze vpisano stevilo otrok */
+  box.querySelectorAll('.kol-vrsta').forEach(function(vr){
+    var sid=vr.getAttribute('data-sid'), cb=box.querySelector('input[value="'+sid+'"]');
+    if(cb&&cb.checked){ vr.style.display='flex'; vr.querySelector('.kol-n').textContent=kolGet('ed',sid); }
+  });
 }
 function edSelected(){
   var ids=[];document.querySelectorAll('#edServices input:checked').forEach(function(cb){ids.push(cb.value);});
-  return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;});
+  return SERVICES.filter(function(s){return ids.indexOf(String(s.id))>=0;})
+    .map(function(s){ var o=Object.assign({},s); o.kol=jeOtrok(s)?kolGet('ed',s.id):1; return o; });
+}
+/* iz besedila rezervacije prebere ze vpisano stevilo otrok (npr. "Otrosko strizenje ×3") */
+function edKolIzTermina(b){
+  KOL.ed={};
+  String(b.services_text||'').split(' + ').forEach(function(tok){
+    var m=String(tok).match(/^(.*?)\s*[×x]\s*(\d+)\s*$/); if(!m)return;
+    var ime=m[1].trim().toLowerCase();
+    var sv=SERVICES.filter(function(s){return (s.name||'').toLowerCase()===ime;})[0];
+    if(sv) kolSet('ed', sv.id, parseInt(m[2])||1);
+  });
 }
 function edSyncEnd(){
   var stEl=document.getElementById('edTime'),endEl=document.getElementById('edEnd'); if(!stEl||!endEl)return;
   var st=stEl.value,sel=edSelected(),dur;
-  var origIds=EDBK?edServiceMatchIds(EDBK).slice().sort().join(','):'';
-  var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
+  var origIds=EDBK?edPodpisIzTermina(EDBK):'';
+  var selIds=edPodpis(sel);
   if(EDBK&&selIds===origIds&&parseInt(EDBK.total_duration_min)) dur=parseInt(EDBK.total_duration_min);
-  else dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
+  else dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0)*(s.kol||1);},0);
   if(st&&dur>0){var sm=toMin(st)+dur;endEl.value=pad(Math.floor(sm/60))+':'+pad(sm%60);}
   updateEdSummary();
 }
@@ -1854,13 +1927,14 @@ function updateEdSummary(){
   var sel=edSelected(),sumEl=document.getElementById('edSummary'); if(!sumEl)return;
   if(!sel.length){sumEl.textContent='Izberite vsaj eno storitev.';return;}
   var st=document.getElementById('edTime').value,en=document.getElementById('edEnd').value;
-  var origIds=EDBK?edServiceMatchIds(EDBK).slice().sort().join(','):'';
-  var selIds=sel.map(function(s){return String(s.id);}).slice().sort().join(',');
-  var price=(EDBK&&selIds===origIds)?(parseFloat(EDBK.total_price)||0):sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var origIds=EDBK?edPodpisIzTermina(EDBK):'';
+  var selIds=edPodpis(sel);
+  var price=(EDBK&&selIds===origIds)?(parseFloat(EDBK.total_price)||0):sel.reduce(function(a,s){return a+(parseFloat(s.price)||0)*(s.kol||1);},0);
   var dur=(st&&en)?(toMin(en)-toMin(st)):0;
   sumEl.innerHTML='Skupaj: <strong>'+(dur>0?dur:0)+' min</strong> · <strong>'+eur(price)+'</strong>'+(en?(' · konec ob <strong>'+en+'</strong>'):'');
 }
 function openNew(){
+  KOL.nb={};
   document.getElementById('nbDate').value=isoOf(cur);
   ['nbTime','nbName','nbPhone','nbEmail','nbNote'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('nbMsg').textContent='';document.getElementById('nbMsg').className='msg';
@@ -1925,13 +1999,14 @@ function saveNew(){
   if(!name){nameEl.classList.add('err');bad=true;}
   if(!phone){phoneEl.classList.add('err');bad=true;}
   if(bad){msg.textContent='Prosimo, izpolnite vsa obvezna polja.';msg.className='msg err';return;}
-  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0);},0);
-  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0);},0);
+  var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0)*(s.kol||1);},0);
+  var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0)*(s.kol||1);},0);
   var em=toMin(start)+dur,end=pad(Math.floor(em/60))+':'+pad(em%60);
   var gapAfter=0,gapDuration=0,gapSvc=null;
   sel.forEach(function(s){var gd=parseInt(s.gap_duration_min)||0,ga=parseInt(s.gap_after_min)||0;if(gd>0&&ga>0){if(!gapSvc||gd>(parseInt(gapSvc.gap_duration_min)||0))gapSvc=s;}});
   if(gapSvc){var ga=parseInt(gapSvc.gap_after_min)||0,gd=parseInt(gapSvc.gap_duration_min)||0;if(ga+gd<=dur){gapAfter=ga;gapDuration=gd;}}
-  var rec={service_id:sel[0].id,service_name:sel[0].name,services_text:sel.map(function(s){return s.name;}).join(' + '),
+  var rec={service_id:sel[0].id,service_name:sel[0].name,
+    services_text:sel.map(function(s){return s.name+((s.kol||1)>1?(' ×'+s.kol):'');}).join(' + '),
     total_price:parseFloat(price.toFixed(2)),total_duration_min:dur,gap_after_min:gapAfter,gap_duration_min:gapDuration,
     customer_name:name,customer_phone:phone||null,customer_email:email||null,
     booking_date:date,start_time:start,end_time:end,status:'potrjeno',note:note||null};
