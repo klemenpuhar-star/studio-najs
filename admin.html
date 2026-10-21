@@ -214,10 +214,12 @@ header .who{font-size:.74rem;opacity:.65}
 .stranke .search{width:100%;padding:.7rem .9rem;border:1.5px solid rgba(23,57,75,.15);border-radius:12px;font-family:var(--sans);font-size:.95rem;color:var(--navy);margin-bottom:1rem;background:#fff}
 .stranke .search:focus{outline:none;border-color:var(--coral)}
 .cust{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(23,57,75,.07);margin-bottom:.7rem;overflow:hidden}
-.cust-head{display:flex;align-items:flex-start;gap:.8rem;padding:.9rem 1.1rem;cursor:pointer}
-.cust-head .cust-name{font-weight:500}
-.cust-head .cust-sub{font-size:.8rem;opacity:.7}
-.cust-head .cust-meta{margin-left:auto;text-align:right;font-size:.76rem;opacity:.65;white-space:nowrap}
+.cust-head{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;cursor:pointer}
+.cust-info{flex:1;min-width:0;overflow:hidden}
+.cust-head .cust-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cust-head .cust-sub{font-size:.8rem;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cust-head .cust-meta{flex-shrink:0;margin-left:auto;text-align:right;font-size:.76rem;opacity:.65;white-space:nowrap}
+.cust-edit-btn{flex-shrink:0;white-space:nowrap}
 .cust-hist{border-top:1px solid #f0eee9;padding:.2rem 1.1rem .7rem}
 .hist-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;font-size:.84rem;cursor:pointer;border-bottom:1px solid #f6f3ee;flex-wrap:wrap}
 .hist-row:last-child{border-bottom:none}
@@ -468,7 +470,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v41-2026-10-21 (urejanje kontaktnih podatkov stranke pri Strankah) -->
+<!-- NAJS-BUILD: v42-2026-10-21 (poravnava gumbov Uredi/Shrani na desno, da niso obrezani) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -1549,10 +1551,10 @@ function izrisiIzdelke(box){
       var zalBadge = a.zaloga==null ? '' : (' <span class="bl-rn'+(a.zaloga<=0?' bl-rn-ni':'')+'">zaloga: '+a.zaloga+'</span>');
       var webBadge = a.prikazi_na_spletu ? ' <span class="bl-rn">na spletu</span>' : ' <span class="bl-rn bl-rn-ni">skrito</span>';
       var aktBadge = a.aktiven ? '' : ' <span class="bl-rn bl-rn-ni">neaktivno</span>';
-      return '<div class="bl-row"><div class="bl-l"><b>'+esc(a.naziv)+'</b>'
+      return '<div class="bl-row"><div class="bl-l" style="min-width:0;flex:1 1 auto"><b>'+esc(a.naziv)+'</b>'
         +(a.kategorija?(' · '+esc(a.kategorija)):'')+(a.velikost?(' · '+esc(a.velikost)):'')
         +'<div class="bl-svc">'+eur(a.cena)+webBadge+zalBadge+aktBadge+'</div></div>'
-        +'<div class="bl-r"><button class="act" data-edit="'+a.id+'">Uredi</button></div></div>';
+        +'<div class="bl-r" style="flex-shrink:0"><button class="act" data-edit="'+a.id+'">Uredi</button></div></div>';
     }).join('')+'</div>';
   }
   box.innerHTML=h;
@@ -1674,15 +1676,15 @@ function izrisiNarocila(box,vrstice){
       return '<option value="'+s[0]+'"'+(s[0]===o.status?' selected':'')+'>'+esc(s[1])+'</option>';
     }).join('')+'</select>';
     return '<div class="bl-row" style="align-items:flex-start;flex-wrap:wrap">'
-      +'<div class="bl-l" style="flex:1 1 260px">'
+      +'<div class="bl-l" style="flex:1 1 260px;min-width:0">'
       +'<b>'+esc(o.ime)+'</b> · '+esc(o.telefon)+(o.email?(' · '+esc(o.email)):'')
       +'<div class="bl-svc">'+izdelkiTxt+'</div>'
       +'<div class="bl-svc">'+dostavaTxt+' · '+placiloTxt+' · '+prettyDate(String(o.created_at).slice(0,10))+'</div>'
       +(o.nacin_dostave==='posta'?('<div class="obr-row" style="margin-top:.4rem"><label>Sledilna številka<input type="text" class="nar-sled" data-id="'+o.id+'" value="'+esc(o.sledilna_stevilka||'')+'"></label></div>'):'')
       +'</div>'
-      +'<div class="bl-r" style="flex-direction:column;align-items:flex-end;gap:.4rem">'
+      +'<div class="bl-r" style="flex-direction:column;align-items:flex-end;gap:.4rem;flex-shrink:0">'
       +'<b>'+eur(o.skupaj)+'</b>'+statusSel
-      +'<button class="act save" data-save="'+o.id+'">Shrani</button>'
+      +'<button class="act save" data-save="'+o.id+'" style="white-space:nowrap">Shrani</button>'
       +'</div></div>';
   }).join('')+'</div>';
   wrap.querySelectorAll('[data-save]').forEach(function(btn){
@@ -1720,7 +1722,11 @@ function refreshStrankeList(){
   if(!list.length){listEl.innerHTML='<div class="empty">Ni zadetkov.</div>';return;}
   var html='';
   list.slice(0,300).forEach(function(c,i){
-    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'"><div><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div><div class="cust-meta">'+(c.uvozena&&!c.visits?'<span class="uvoz-tag">uvožena</span>':obiski(c.visits))+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div><button type="button" class="act cust-edit-btn" data-ci="'+i+'" style="flex-shrink:0">✎ Uredi</button></div><div class="cust-edit-form hidden" id="custEdit'+i+'"></div><div class="cust-hist hidden"></div></div>';
+    html+='<div class="cust"><div class="cust-head" data-ci="'+i+'">'
+      +'<div class="cust-info"><div class="cust-name">'+esc(c.name||'—')+'</div><div class="cust-sub">'+esc(c.phone||'')+(c.email?(' · '+esc(c.email)):'')+'</div></div>'
+      +'<div class="cust-meta">'+(c.uvozena&&!c.visits?'<span class="uvoz-tag">uvožena</span>':obiski(c.visits))+(c.last?('<br>zadnji: '+prettyShort(c.last)):'')+'</div>'
+      +'<button type="button" class="act cust-edit-btn" data-ci="'+i+'">✎ Uredi</button>'
+      +'</div><div class="cust-edit-form hidden" id="custEdit'+i+'"></div><div class="cust-hist hidden"></div></div>';
   });
   listEl.innerHTML=html;
   listEl.querySelectorAll('.cust-edit-btn').forEach(function(btn){
