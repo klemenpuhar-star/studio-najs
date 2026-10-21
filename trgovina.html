@@ -1,0 +1,598 @@
+<!-- NAJS-TRGOVINA: v1-2026-10-21 (osnutek - se ne povezuje iz glavne strani, dokler ni koncano) -->
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trgovina – izdelki za nego las | Frizerski studio Najs</title>
+<meta name="description" content="Izdelki za nego las iz Frizerskega studia Najs – prevzem v salonu v Škofji Loki ali dostava po Sloveniji." />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="logo.png" />
+<link id="najsFonts" data-href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@font-face{font-family:'Stigma Serif Display';src:url('Stigma_Display_Typeface.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+:root {
+  --bez:   #e5ccb2;
+  --bez2:  #f4e9dc;
+  --navy:  #2c4251;
+  --roza:  #CE4B7B;
+  --coral: #d06666;
+  --serif: 'Stigma Serif Display', 'Cormorant Garamond', Georgia, serif;
+  --sans:  'Poppins', 'Jost', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bez); color: var(--navy); overflow-x: hidden; min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* ── HEADER (poenostavljen) ── */
+header.tg-hdr {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 5%;
+  background: rgba(234,215,193,0.94);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(23,57,75,0.10);
+}
+.tg-hdr-logo { height: 40px; }
+.tg-hdr-back { font-size: 0.8rem; letter-spacing: 0.08em; color: var(--navy); opacity: .75; }
+.tg-hdr-back:hover { opacity: 1; }
+.tg-hdr-cart {
+  position: relative; background: var(--navy); color: #fff; border: none; border-radius: 30px;
+  padding: 0.55rem 1.3rem; font-family: var(--sans); font-size: 0.8rem; letter-spacing: .06em;
+  cursor: pointer; transition: background .25s, transform .25s;
+}
+.tg-hdr-cart:hover { background: var(--roza); transform: translateY(-1px); }
+.tg-hdr-cart .tg-badge {
+  position: absolute; top: -8px; right: -8px; background: var(--coral); color: #fff;
+  border-radius: 50%; width: 20px; height: 20px; font-size: .68rem; display: flex;
+  align-items: center; justify-content: center; font-weight: 600;
+}
+
+/* ── HERO ── */
+.tg-hero { padding: 3.2rem 6% 2rem; text-align: center; }
+.tg-hero h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(2rem, 5vw, 3rem); color: var(--navy); margin-bottom: .8rem; }
+.tg-hero p { max-width: 620px; margin: 0 auto; font-size: .95rem; line-height: 1.7; opacity: .78; }
+.tg-hero .tg-badge-info {
+  display: inline-block; margin-top: 1.1rem; font-size: .76rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--coral); border: 1px solid rgba(206,102,102,.35); border-radius: 30px; padding: .4rem 1.1rem;
+}
+
+/* ── KATEGORIJE ── */
+.tg-cats { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; padding: 0 6% 2rem; }
+.tg-cat-btn {
+  background: #fff; border: 1.5px solid transparent; border-radius: 30px; padding: .5rem 1.2rem;
+  font-family: var(--sans); font-size: .8rem; letter-spacing: .04em; color: var(--navy); cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.tg-cat-btn.active { background: var(--navy); color: #fff; }
+.tg-cat-btn:hover:not(.active) { border-color: var(--coral); }
+
+/* ── IZDELKI ── */
+.tg-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.4rem;
+  padding: 0 6% 4rem; max-width: 1280px; margin: 0 auto;
+}
+.tg-card { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(23,57,75,.08); display: flex; flex-direction: column; }
+.tg-card-img { width: 100%; aspect-ratio: 1; background: var(--bez2) center/cover no-repeat; display: flex; align-items: center; justify-content: center; color: var(--coral); font-family: var(--serif); font-size: 1.3rem; }
+.tg-card-body { padding: 1.1rem 1.2rem 1.3rem; display: flex; flex-direction: column; flex: 1; }
+.tg-card-cat { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); margin-bottom: .3rem; }
+.tg-card-name { font-family: var(--serif); font-size: 1.15rem; color: var(--navy); line-height: 1.3; margin-bottom: .2rem; }
+.tg-card-size { font-size: .78rem; opacity: .6; margin-bottom: .5rem; }
+.tg-card-desc { font-size: .83rem; line-height: 1.55; opacity: .75; flex: 1; margin-bottom: .9rem; }
+.tg-card-foot { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.tg-card-price { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; color: var(--navy); }
+.tg-card-add {
+  background: var(--navy); color: #fff; border: none; border-radius: 30px; padding: .55rem 1.1rem;
+  font-family: var(--sans); font-size: .78rem; letter-spacing: .05em; cursor: pointer;
+  transition: background .25s, transform .25s;
+}
+.tg-card-add:hover { background: var(--roza); transform: translateY(-1px); }
+.tg-card-oos { font-size: .78rem; color: var(--coral); font-weight: 600; }
+
+.tg-empty, .tg-loading { text-align: center; padding: 4rem 1rem; opacity: .55; font-size: .95rem; }
+
+/* ── KOŠARICA / CHECKOUT (po vzoru bk-* iz glavne strani) ── */
+.tg-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(23,57,75,.55); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+  opacity: 0; pointer-events: none; transition: opacity .35s ease;
+}
+.tg-overlay.open { opacity: 1; pointer-events: all; }
+.tg-modal {
+  background: var(--bez2); border-radius: 24px; width: 100%; max-width: 560px;
+  max-height: 92vh; overflow-y: auto; overflow-x: hidden;
+  box-shadow: 0 24px 60px rgba(23,57,75,.22);
+  transform: translateY(24px) scale(.98); transition: transform .35s cubic-bezier(.22,1,.36,1);
+  scrollbar-width: none;
+}
+.tg-modal::-webkit-scrollbar { display: none; }
+.tg-overlay.open .tg-modal { transform: none; }
+.tg-head { position: sticky; top: 0; z-index: 10; background: var(--bez2); padding: 1.4rem 1.6rem 1rem; border-bottom: 1px solid rgba(23,57,75,.08); display: flex; justify-content: space-between; align-items: center; }
+.tg-modal-title { font-family: var(--serif); font-size: 1.3rem; font-weight: 300; color: var(--navy); }
+.tg-close { width: 32px; height: 32px; border-radius: 50%; background: rgba(23,57,75,.08); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--navy); }
+.tg-body { padding: 1.5rem 1.6rem; }
+.tg-step-label { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--coral); margin-bottom: .3rem; }
+.tg-step-title { font-family: var(--serif); font-size: 1.1rem; color: var(--navy); margin-bottom: 1.1rem; }
+
+.tg-item-row { display: flex; align-items: center; gap: .8rem; background: #fff; border-radius: 12px; padding: .7rem .9rem; margin-bottom: .6rem; }
+.tg-item-name { flex: 1; font-size: .88rem; color: var(--navy); }
+.tg-item-price { font-size: .8rem; opacity: .6; }
+.tg-qty { display: flex; align-items: center; gap: .4rem; }
+.tg-qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(23,57,75,.2); background: #fff; cursor: pointer; font-size: .9rem; color: var(--navy); }
+.tg-qty-n { min-width: 20px; text-align: center; font-size: .85rem; }
+.tg-item-rm { background: none; border: none; color: var(--coral); font-size: .8rem; cursor: pointer; margin-left: .3rem; }
+
+.tg-radio-row { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.1rem; }
+.tg-radio-opt { display: flex; align-items: flex-start; gap: .6rem; background: #fff; border: 1.5px solid transparent; border-radius: 12px; padding: .8rem 1rem; cursor: pointer; }
+.tg-radio-opt.selected { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(23,57,75,.08); }
+.tg-radio-opt input { margin-top: .2rem; accent-color: var(--navy); }
+.tg-radio-main { font-size: .9rem; color: var(--navy); font-weight: 500; }
+.tg-radio-sub { font-size: .78rem; opacity: .65; margin-top: .1rem; }
+
+.tg-field { margin-bottom: 1rem; }
+.tg-label { display: block; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--coral); margin-bottom: .35rem; }
+.tg-input, .tg-textarea {
+  width: 100%; background: #fff; border: 1.5px solid rgba(23,57,75,.2); border-radius: 10px;
+  padding: .65rem .9rem; font-family: var(--sans); font-size: .9rem; color: var(--navy); outline: none;
+}
+.tg-input:focus, .tg-textarea:focus { border-color: var(--navy); }
+.tg-textarea { resize: vertical; min-height: 60px; }
+
+.tg-summary { background: #fff; border-radius: 14px; padding: 1.1rem 1.2rem; margin-top: .5rem; }
+.tg-sum-row { display: flex; justify-content: space-between; gap: .5rem; padding: .4rem 0; border-bottom: 1px dotted rgba(23,57,75,.1); font-size: .87rem; }
+.tg-sum-row:last-child { border: none; font-weight: 600; }
+.tg-sum-key { color: var(--coral); }
+.tg-sum-val { color: var(--navy); text-align: right; }
+
+.tg-error { background: rgba(206,75,123,.08); border: 1px solid rgba(206,75,123,.25); border-radius: 10px; padding: .8rem 1rem; font-size: .85rem; color: var(--roza); margin-bottom: 1rem; display: none; }
+.tg-error.show { display: block; }
+
+.tg-foot { padding: 1rem 1.6rem 1.4rem; display: flex; gap: .8rem; justify-content: flex-end; border-top: 1px solid rgba(23,57,75,.08); background: var(--bez2); position: sticky; bottom: 0; }
+.tg-btn-back { background: none; border: 1.5px solid rgba(23,57,75,.25); border-radius: 30px; padding: .6rem 1.4rem; font-family: var(--sans); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; color: var(--navy); }
+.tg-btn-next { background: var(--navy); color: #fff; border: none; border-radius: 30px; padding: .6rem 1.6rem; font-family: var(--sans); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: background .25s, transform .25s; }
+.tg-btn-next:hover { background: var(--roza); transform: translateY(-1px); }
+.tg-btn-next:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+.tg-success { text-align: center; padding: 1rem 0; }
+.tg-success-icon { font-size: 3rem; margin-bottom: .6rem; }
+.tg-success-title { font-family: var(--serif); font-size: 1.3rem; color: var(--navy); margin-bottom: .6rem; }
+.tg-pay-box { background: #fff; border-radius: 14px; padding: 1.1rem 1.2rem; text-align: left; font-size: .88rem; line-height: 1.7; margin-top: .8rem; }
+.tg-pay-box strong { color: var(--navy); }
+
+footer.tg-ftr { padding: 2.4rem 6% 2.6rem; text-align: center; font-size: .78rem; opacity: .6; }
+footer.tg-ftr a { color: var(--coral); }
+
+/* ── Privolitev (poenostavljena, enak kljuc kot na glavni strani) ── */
+#najsPrivolaTg {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+  width: min(560px, 92vw); background: #fff; border-radius: 16px; padding: 1.1rem 1.3rem;
+  box-shadow: 0 16px 40px rgba(23,57,75,.22); z-index: 2000; display: none; font-size: .85rem; line-height: 1.6;
+}
+#najsPrivolaTg.show { display: block; }
+#najsPrivolaTg .npt-btns { display: flex; gap: .6rem; justify-content: flex-end; margin-top: .8rem; flex-wrap: wrap; }
+.npt-btn { border-radius: 30px; padding: .5rem 1.1rem; font-size: .78rem; cursor: pointer; border: none; font-family: var(--sans); }
+.npt-navy { background: var(--navy); color: #fff; }
+.npt-coral { background: var(--coral); color: #fff; }
+
+@media(max-width:480px){ .tg-hdr-back{ display:none; } }
+</style>
+</head>
+<body>
+
+<header class="tg-hdr">
+  <a href="index.html" style="display:flex;align-items:center;gap:.6rem">
+    <img src="logo.png" alt="Frizerski studio Najs" class="tg-hdr-logo" />
+  </a>
+  <a href="index.html" class="tg-hdr-back">← Nazaj na najs.si</a>
+  <button type="button" class="tg-hdr-cart" id="tgCartBtn">Košarica<span class="tg-badge" id="tgBadge" style="display:none">0</span></button>
+</header>
+
+<section class="tg-hero">
+  <h1>Izdelki za nego las</h1>
+  <p>Preparati, ki jih uporabljam tudi v salonu. Izberete lahko brezplačen prevzem v Škofji Loki ali dostavo po Sloveniji.</p>
+  <span class="tg-badge-info">Prevzem v salonu ali dostava s Pošto Slovenije</span>
+</section>
+
+<div class="tg-cats" id="tgCats"></div>
+<div id="tgGrid" class="tg-grid"><div class="tg-loading">Nalagam izdelke …</div></div>
+
+<footer class="tg-ftr">
+  © 2026 FRIZERSKI STUDIO NAJS, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka<br>
+  <a href="zasebnost.html">Pravilnik o zasebnosti</a> · <a href="piskotki.html">Politika piškotkov</a> · <a href="index.html">najs.si</a>
+</footer>
+
+<!-- ── KOŠARICA / NAROČILO ── -->
+<div class="tg-overlay" id="tgOverlay" role="dialog" aria-modal="true" aria-label="Košarica in naročilo">
+  <div class="tg-modal">
+    <div class="tg-head">
+      <span class="tg-modal-title" id="tgModalTitle">Košarica</span>
+      <button class="tg-close" id="tgClose" aria-label="Zapri">✕</button>
+    </div>
+    <div class="tg-body" id="tgBody"></div>
+    <div class="tg-foot" id="tgFoot"></div>
+  </div>
+</div>
+
+<!-- Poenostavljeno obvestilo o zasebnosti (deli isto nastavitev kot najs.si) -->
+<div id="najsPrivolaTg">
+  Ta stran za prikaz pisav naloži vsebino od Googla, ki ob tem prejme vaš IP naslov. Več v
+  <a href="piskotki.html">politiki piškotkov</a>.
+  <div class="npt-btns">
+    <button type="button" class="npt-btn npt-navy" onclick="najsPrivolaZavrniTg()">Zavrni</button>
+    <button type="button" class="npt-btn npt-coral" onclick="najsPrivolaSprejmiTg()">Sprejmi</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KLJUC='najs-privola';
+  function beri(){ try{ return localStorage.getItem(KLJUC); }catch(e){ return null; } }
+  function pisi(v){ try{ localStorage.setItem(KLJUC,v); }catch(e){} }
+  function naloziPisave(){
+    var l=document.getElementById('najsFonts');
+    if(l && l.dataset.href && !l.getAttribute('href')) l.setAttribute('href', l.dataset.href);
+  }
+  window.najsPrivolaSprejmiTg=function(){ pisi('sprejeto'); naloziPisave(); document.getElementById('najsPrivolaTg').classList.remove('show'); };
+  window.najsPrivolaZavrniTg=function(){ pisi('zavrnjeno'); document.getElementById('najsPrivolaTg').classList.remove('show'); };
+  var v=beri();
+  if(v==='sprejeto') naloziPisave();
+  else if(v!=='zavrnjeno') document.getElementById('najsPrivolaTg').classList.add('show');
+})();
+</script>
+
+<script>
+(function(){
+  var SB_URL = 'https://azqtgvxashunmmydkwop.supabase.co';
+  var SB_KEY = 'sb_publishable_Sjlg-Y5ve3QRSQY-6usn6g_tB6Tgdsg';
+  var sb = supabase.createClient(SB_URL, SB_KEY);
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function eur(n){ return (Math.round((Number(n)||0)*100)/100).toFixed(2).replace('.',',')+' €'; }
+
+  var KOS_KLJUC = 'najsTrgovinaKosarica';
+  var izdelki = [];          // vsi izdelki, naloženi iz baze
+  var nastavitve = {};       // nastavitve_trgovina (dostava, placilo)
+  var kosarica = {};         // { artikel_id: kolicina }
+  var aktivnaKat = null;
+  var korak = 1;             // 1 = pregled kosarice + dostava, 2 = podatki + placilo
+
+  function naloziKosarico(){
+    try { kosarica = JSON.parse(localStorage.getItem(KOS_KLJUC) || '{}') || {}; } catch(e){ kosarica = {}; }
+  }
+  function shraniKosarico(){
+    try { localStorage.setItem(KOS_KLJUC, JSON.stringify(kosarica)); } catch(e){}
+  }
+  naloziKosarico();
+
+  function stIzdelkov(){
+    var n=0; Object.keys(kosarica).forEach(function(k){ n += kosarica[k]; }); return n;
+  }
+  function posodobiBadge(){
+    var b=document.getElementById('tgBadge'); var n=stIzdelkov();
+    if(n>0){ b.style.display='flex'; b.textContent=n; } else { b.style.display='none'; }
+  }
+
+  function najdiIzdelek(id){ return izdelki.filter(function(a){ return a.id===id; })[0]; }
+
+  function vsotaKosarice(){
+    var v=0;
+    Object.keys(kosarica).forEach(function(id){
+      var a=najdiIzdelek(id); if(!a) return;
+      v += Number(a.cena||0) * kosarica[id];
+    });
+    return v;
+  }
+  function cenaDostave(nacin){
+    if(nacin==='prevzem') return 0;
+    var vsota=vsotaKosarice();
+    var prag = nastavitve.prag_brezplacna_dostava;
+    if(prag!=null && vsota >= prag) return 0;
+    return Number(nastavitve.cena_dostave || 0);
+  }
+
+  /* ── NALAGANJE IZDELKOV ── */
+  function naloziIzdelke(){
+    sb.from('artikli')
+      .select('id,naziv,cena,opis,slika_url,kategorija,velikost,zaloga')
+      .eq('aktiven', true).eq('prikazi_na_spletu', true)
+      .order('sort_order', { ascending: true })
+      .then(function(res){
+        var grid=document.getElementById('tgGrid');
+        if(res.error){
+          grid.innerHTML='<div class="tg-empty">Napaka pri nalaganju izdelkov. Poskusite kasneje ali pokličite 031 217 361.</div>';
+          return;
+        }
+        izdelki = res.data || [];
+        if(!izdelki.length){
+          grid.innerHTML='<div class="tg-empty">Trenutno pripravljamo ponudbo izdelkov. Kmalu bo na voljo tudi spletni nakup.</div>';
+          return;
+        }
+        izrisiKategorije();
+        izrisiMrezo();
+        posodobiBadge();
+      });
+  }
+
+  function kategorijeSeznam(){
+    var set=[], videne={};
+    izdelki.forEach(function(a){
+      var k = a.kategorija || 'Izdelki';
+      if(!videne[k]){ videne[k]=true; set.push(k); }
+    });
+    return set;
+  }
+
+  function izrisiKategorije(){
+    var kats = kategorijeSeznam();
+    var el=document.getElementById('tgCats');
+    if(kats.length<2){ el.innerHTML=''; return; }
+    var h='<button type="button" class="tg-cat-btn'+(aktivnaKat===null?' active':'')+'" data-k="">Vse</button>';
+    kats.forEach(function(k){
+      h+='<button type="button" class="tg-cat-btn'+(aktivnaKat===k?' active':'')+'" data-k="'+esc(k)+'">'+esc(k)+'</button>';
+    });
+    el.innerHTML=h;
+    el.querySelectorAll('.tg-cat-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        aktivnaKat = btn.getAttribute('data-k') || null;
+        izrisiKategorije(); izrisiMrezo();
+      });
+    });
+  }
+
+  function izrisiMrezo(){
+    var grid=document.getElementById('tgGrid');
+    var prikazani = izdelki.filter(function(a){
+      if(!aktivnaKat) return true;
+      return (a.kategorija || 'Izdelki') === aktivnaKat;
+    });
+    if(!prikazani.length){ grid.innerHTML='<div class="tg-empty">V tej kategoriji trenutno ni izdelkov.</div>'; return; }
+    var h='';
+    prikazani.forEach(function(a){
+      var zaNic = a.zaloga!=null && a.zaloga<=0;
+      var slika = a.slika_url ? ('<img src="'+esc(a.slika_url)+'" alt="'+esc(a.naziv)+'" style="width:100%;height:100%;object-fit:cover">') : esc((a.naziv||'?').slice(0,1));
+      h += '<div class="tg-card">'
+        + '<div class="tg-card-img">'+slika+'</div>'
+        + '<div class="tg-card-body">'
+        +   (a.kategorija ? '<div class="tg-card-cat">'+esc(a.kategorija)+'</div>' : '')
+        +   '<div class="tg-card-name">'+esc(a.naziv)+'</div>'
+        +   (a.velikost ? '<div class="tg-card-size">'+esc(a.velikost)+'</div>' : '')
+        +   (a.opis ? '<div class="tg-card-desc">'+esc(a.opis)+'</div>' : '<div class="tg-card-desc"></div>')
+        +   '<div class="tg-card-foot">'
+        +     '<span class="tg-card-price">'+eur(a.cena)+'</span>'
+        +     (zaNic ? '<span class="tg-card-oos">Trenutno ni na zalogi</span>'
+                      : '<button type="button" class="tg-card-add" data-id="'+esc(a.id)+'">+ Dodaj</button>')
+        +   '</div>'
+        + '</div></div>';
+    });
+    grid.innerHTML = h;
+    grid.querySelectorAll('.tg-card-add').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-id');
+        kosarica[id] = (kosarica[id]||0) + 1;
+        shraniKosarico(); posodobiBadge();
+        btn.textContent = 'Dodano ✓';
+        setTimeout(function(){ btn.textContent='+ Dodaj'; }, 900);
+      });
+    });
+  }
+
+  /* ── MODAL KOŠARICE / NAROČILA ── */
+  var overlay=document.getElementById('tgOverlay');
+  var body=document.getElementById('tgBody');
+  var foot=document.getElementById('tgFoot');
+  var title=document.getElementById('tgModalTitle');
+
+  function odpriModal(){ korak=1; state.dostava=null; state.placilo=null; overlay.classList.add('open'); izrisiKorak1(); document.body.style.overflow='hidden'; }
+  function zapriModal(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+  document.getElementById('tgCartBtn').addEventListener('click', odpriModal);
+  document.getElementById('tgClose').addEventListener('click', zapriModal);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) zapriModal(); });
+
+  var state = { dostava: null, placilo: null, kupec: {} };
+
+  function izrisiKorak1(){
+    title.textContent='Košarica';
+    var ids = Object.keys(kosarica).filter(function(id){ return kosarica[id]>0 && najdiIzdelek(id); });
+    if(!ids.length){
+      body.innerHTML = '<div class="tg-empty" style="padding:2rem 0">Košarica je prazna.</div>';
+      foot.innerHTML = '';
+      var zap=document.createElement('button'); zap.className='tg-btn-next'; zap.textContent='Nazaj na izdelke';
+      zap.addEventListener('click', zapriModal); foot.appendChild(zap);
+      return;
+    }
+    var h = '<div class="tg-step-label">Korak 1</div><div class="tg-step-title">Izdelki in dostava</div>';
+    ids.forEach(function(id){
+      var a=najdiIzdelek(id); var kol=kosarica[id];
+      h += '<div class="tg-item-row">'
+        + '<span class="tg-item-name">'+esc(a.naziv)+'<br><span class="tg-item-price">'+eur(a.cena)+' / kos</span></span>'
+        + '<div class="tg-qty">'
+        +   '<button type="button" class="tg-qty-btn" data-id="'+esc(id)+'" data-d="-1">−</button>'
+        +   '<span class="tg-qty-n">'+kol+'</span>'
+        +   '<button type="button" class="tg-qty-btn" data-id="'+esc(id)+'" data-d="1">+</button>'
+        + '</div>'
+        + '<button type="button" class="tg-item-rm" data-rm="'+esc(id)+'">Odstrani</button>'
+        + '</div>';
+    });
+
+    h += '<div class="tg-radio-row" style="margin-top:1.2rem">'
+      + radioOpt('dostava','prevzem', state.dostava==='prevzem', 'Prevzem v salonu', 'Cesta talcev 3B, Škofja Loka · brezplačno')
+      + radioOpt('dostava','posta', state.dostava==='posta', 'Dostava s Pošto Slovenije', dostavaOpis())
+      + '</div>';
+
+    if(state.dostava==='posta'){
+      h += '<div class="tg-field"><label class="tg-label">Naslov (ulica in hišna št.)</label><input class="tg-input" id="tgNaslov" value="'+esc(state.kupec.naslov||'')+'"></div>'
+         + '<div class="tg-field"><label class="tg-label">Poštna št. in kraj</label><input class="tg-input" id="tgPosta" value="'+esc(state.kupec.posta||'')+'" placeholder="npr. 4220 Škofja Loka"></div>';
+    }
+
+    h += '<div class="tg-summary">'
+      + '<div class="tg-sum-row"><span class="tg-sum-key">Izdelki</span><span class="tg-sum-val">'+eur(vsotaKosarice())+'</span></div>'
+      + '<div class="tg-sum-row"><span class="tg-sum-key">Dostava</span><span class="tg-sum-val">'+(state.dostava ? eur(cenaDostave(state.dostava)) : '—')+'</span></div>'
+      + '<div class="tg-sum-row"><span class="tg-sum-key">Skupaj</span><span class="tg-sum-val">'+(state.dostava ? eur(vsotaKosarice()+cenaDostave(state.dostava)) : '—')+'</span></div>'
+      + '</div>';
+
+    body.innerHTML = h;
+
+    body.querySelectorAll('.tg-qty-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id=btn.getAttribute('data-id'), d=parseInt(btn.getAttribute('data-d'),10);
+        kosarica[id] = Math.max(0, (kosarica[id]||0) + d);
+        if(kosarica[id]===0) delete kosarica[id];
+        shraniKosarico(); posodobiBadge(); izrisiKorak1();
+      });
+    });
+    body.querySelectorAll('[data-rm]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        delete kosarica[btn.getAttribute('data-rm')];
+        shraniKosarico(); posodobiBadge(); izrisiKorak1();
+      });
+    });
+    body.querySelectorAll('input[name="dostava"]').forEach(function(r){
+      r.addEventListener('change', function(){ state.dostava = r.value; izrisiKorak1(); });
+    });
+    var nIn=document.getElementById('tgNaslov'), pIn=document.getElementById('tgPosta');
+    if(nIn) nIn.addEventListener('input', function(){ state.kupec.naslov = nIn.value; });
+    if(pIn) pIn.addEventListener('input', function(){ state.kupec.posta = pIn.value; });
+
+    foot.innerHTML='';
+    var nx=document.createElement('button'); nx.className='tg-btn-next'; nx.textContent='Naprej →';
+    nx.disabled = !state.dostava || (state.dostava==='posta' && !(nIn&&nIn.value.trim() && pIn&&pIn.value.trim()));
+    nx.addEventListener('click', function(){
+      if(state.dostava==='posta'){
+        state.kupec.naslov = (document.getElementById('tgNaslov')||{}).value || state.kupec.naslov;
+        state.kupec.posta = (document.getElementById('tgPosta')||{}).value || state.kupec.posta;
+        if(!state.kupec.naslov || !state.kupec.posta.trim()){ return; }
+      }
+      korak=2; izrisiKorak2();
+    });
+    foot.appendChild(nx);
+  }
+
+  function radioOpt(name,val,checked,main,sub){
+    return '<label class="tg-radio-opt'+(checked?' selected':'')+'">'
+      + '<input type="radio" name="'+name+'" value="'+val+'"'+(checked?' checked':'')+'>'
+      + '<span><span class="tg-radio-main">'+esc(main)+'</span><br><span class="tg-radio-sub">'+esc(sub)+'</span></span>'
+      + '</label>';
+  }
+  function dostavaOpis(){
+    var cena = eur(nastavitve.cena_dostave||0);
+    var prag = nastavitve.prag_brezplacna_dostava;
+    return prag!=null ? (cena+' · brezplačno nad '+eur(prag)) : cena;
+  }
+
+  function izrisiKorak2(){
+    title.textContent='Vaši podatki';
+    var h = '<div class="tg-step-label">Korak 2</div><div class="tg-step-title">Podatki in plačilo</div>'
+      + '<div id="tgErr" class="tg-error"></div>'
+      + '<div class="tg-field"><label class="tg-label">Ime in priimek</label><input class="tg-input" id="tgIme" value="'+esc(state.kupec.ime||'')+'"></div>'
+      + '<div class="tg-field"><label class="tg-label">Telefon</label><input class="tg-input" id="tgTel" value="'+esc(state.kupec.telefon||'')+'"></div>'
+      + '<div class="tg-field"><label class="tg-label">E-pošta (za potrdilo naročila)</label><input class="tg-input" id="tgEmail" value="'+esc(state.kupec.email||'')+'"></div>'
+      + '<div class="tg-field"><label class="tg-label">Opomba (neobvezno)</label><textarea class="tg-textarea" id="tgOpomba">'+esc(state.kupec.opomba||'')+'</textarea></div>'
+      + '<div class="tg-radio-row">'
+      +   radioOpt('placilo','flik', state.placilo==='flik', 'Plačilo prek Flika', 'Po oddaji naročila prejmete številko za nakazilo prek Flika')
+      +   radioOpt('placilo','nakazilo', state.placilo==='nakazilo', 'Nakazilo na TRR', 'Po oddaji naročila prejmete podatke za navadno nakazilo')
+      + '</div>'
+      + '<div class="tg-summary">'
+      +   '<div class="tg-sum-row"><span class="tg-sum-key">Izdelki</span><span class="tg-sum-val">'+eur(vsotaKosarice())+'</span></div>'
+      +   '<div class="tg-sum-row"><span class="tg-sum-key">Dostava</span><span class="tg-sum-val">'+eur(cenaDostave(state.dostava))+'</span></div>'
+      +   '<div class="tg-sum-row"><span class="tg-sum-key">Skupaj za plačilo</span><span class="tg-sum-val">'+eur(vsotaKosarice()+cenaDostave(state.dostava))+'</span></div>'
+      + '</div>'
+      + '<p style="font-size:.76rem;opacity:.55;margin-top:1rem;line-height:1.6">Naročilo bomo pripravili, ko prejmemo vaše plačilo. Navodila za plačilo prejmete takoj po oddaji naročila in na e-pošto.</p>';
+    body.innerHTML = h;
+
+    body.querySelectorAll('input[name="placilo"]').forEach(function(r){
+      r.addEventListener('change', function(){ state.placilo = r.value; izrisiKorak2(); });
+    });
+    ['tgIme','tgTel','tgEmail','tgOpomba'].forEach(function(id){
+      document.getElementById(id).addEventListener('input', function(e){
+        var k = {tgIme:'ime',tgTel:'telefon',tgEmail:'email',tgOpomba:'opomba'}[id];
+        state.kupec[k] = e.target.value;
+      });
+    });
+
+    foot.innerHTML='';
+    var bk=document.createElement('button'); bk.className='tg-btn-back'; bk.textContent='← Nazaj';
+    bk.addEventListener('click', function(){ korak=1; izrisiKorak1(); });
+    foot.appendChild(bk);
+    var nx=document.createElement('button'); nx.className='tg-btn-next'; nx.textContent='Oddaj naročilo ✦';
+    nx.addEventListener('click', function(){ oddajNarocilo(nx); });
+    foot.appendChild(nx);
+  }
+
+  function oddajNarocilo(btn){
+    var err=document.getElementById('tgErr');
+    err.classList.remove('show'); err.textContent='';
+    if(!state.kupec.ime || !state.kupec.ime.trim() || !state.kupec.telefon || !state.kupec.telefon.trim()){
+      err.textContent='Prosimo, vnesite ime in telefonsko številko.'; err.classList.add('show'); return;
+    }
+    if(!state.placilo){
+      err.textContent='Prosimo, izberite način plačila.'; err.classList.add('show'); return;
+    }
+    btn.disabled=true; btn.textContent='Pošiljam …';
+
+    var izdelkiArr = Object.keys(kosarica).filter(function(id){ return kosarica[id]>0; }).map(function(id){
+      return { id: id, kolicina: kosarica[id] };
+    });
+
+    sb.rpc('ustvari_narocilo_trgovina', {
+      izdelki: izdelkiArr,
+      nacin_dostave: state.dostava,
+      nacin_placila: state.placilo,
+      ime: state.kupec.ime,
+      telefon: state.kupec.telefon,
+      epota: state.kupec.email || null,
+      naslov: state.kupec.naslov || null,
+      posta: state.kupec.posta || null,
+      opomba: state.kupec.opomba || null
+    }).then(function(res){
+      var r = res.data || {};
+      if(res.error || !r.ok){
+        var t='Prišlo je do napake. Pokličite nas na 031 217 361.';
+        if(r.napaka==='manjkajo-podatki') t='Prosimo, vnesite ime in telefonsko številko.';
+        else if(r.napaka==='manjka-naslov') t='Prosimo, vnesite naslov za dostavo.';
+        else if(r.napaka==='ni-zaloge') t='Izdelek "'+esc(r.izdelek||'')+'" trenutno ni na zalogi v zadostni količini.';
+        else if(r.napaka==='neveljaven-izdelek') t='Eden od izdelkov v košarici ni več na voljo. Posodobite stran in poskusite znova.';
+        else if(res.error) t='Prišlo je do napake: '+res.error.message;
+        err.textContent=t; err.classList.add('show');
+        btn.disabled=false; btn.textContent='Oddaj naročilo ✦';
+        return;
+      }
+      kosarica = {}; shraniKosarico(); posodobiBadge();
+      var placiloHtml = r.nacin_placila_html || '';
+      if(state.placilo==='flik'){
+        placiloHtml = '<strong>Plačilo prek Flika</strong><br>Na številko: <strong>'+esc(r.flik_stevilka||'(javimo vam jo po telefonu)')+'</strong><br>Znesek: <strong>'+eur(r.skupaj)+'</strong>';
+      } else {
+        placiloHtml = '<strong>Nakazilo na TRR</strong><br>TRR: <strong>'+esc(r.tr_racun||'(javimo vam ga po telefonu)')+'</strong><br>Prejemnik: '+esc(r.prejemnik||'Nataša Markuta s.p.')+'<br>Znesek: <strong>'+eur(r.skupaj)+'</strong>';
+      }
+      foot.innerHTML='';
+      title.textContent='Naročilo oddano';
+      body.innerHTML = '<div class="tg-success">'
+        + '<div class="tg-success-icon">✶</div>'
+        + '<div class="tg-success-title">Hvala za naročilo!</div>'
+        + '<p style="font-size:.9rem;opacity:.75">Takoj ko prejmemo plačilo, bomo naročilo pripravili'+(state.dostava==='posta' ? ' in poslali.' : ' za prevzem.')+'</p>'
+        + '<div class="tg-pay-box">'+placiloHtml+'</div>'
+        + (state.kupec.email ? '<p style="font-size:.8rem;opacity:.65;margin-top:.8rem">Potrdilo smo poslali tudi na '+esc(state.kupec.email)+'.</p>' : '')
+        + '</div>';
+      var cl=document.createElement('button'); cl.className='tg-btn-next'; cl.textContent='Zapri';
+      cl.style.margin='0 auto'; cl.style.display='block';
+      cl.addEventListener('click', zapriModal);
+      foot.appendChild(cl);
+    });
+  }
+
+  /* ── NASTAVITVE TRGOVINE (dostava, placilo) ── */
+  sb.from('nastavitve_trgovina').select('cena_dostave,prag_brezplacna_dostava').limit(1).then(function(r){
+    var n=(r.data||[])[0];
+    if(n) nastavitve = n;
+  });
+
+  naloziIzdelke();
+  posodobiBadge();
+})();
+</script>
+
+</body>
+</html>
