@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v8-2026-10-05 (izmenicni urnik: lihi/sodi teden) -->
+<!-- NAJS-NAROCILO: v9-2026-10-23 (zaprti slovenski prazniki v koledarju) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -129,8 +129,22 @@ function svcLabel(s){ var q=qtyOf(s); return s.name+(q>1?(' ×'+q):''); }
 function sumPrice(){ return selArr().reduce(function(a,s){ return a+(parseFloat(s.price)||0)*qtyOf(s); },0); }
 function sumDur(){ return selArr().reduce(function(a,s){ return a+(parseInt(s.duration_min)||0)*qtyOf(s); },0); }
 
+/* Slovenski dela prosti prazniki (datum -> naziv). Streznik (narocilo_popravi preko
+   najs_delovni_cas) to vedno preveri tudi sam, tole je le za pravilen prikaz tukaj. */
+var PRAZNIKI={};
+function nalozPraznike(){
+  sb.from('prazniki').select('datum,naziv').then(function(res){
+    if(res.error||!res.data) return;
+    var novi={};
+    res.data.forEach(function(r){ novi[r.datum]=r.naziv||'praznik'; });
+    PRAZNIKI=novi;
+    loadSlots();
+  });
+}
+
 /* Prosti termini (enaka logika kot na javni strani: vrzel + 4h vnaprej + 15-min mreza) */
 function calcFreeSlots(ds,dow,busyRaw,dur){
+  if(PRAZNIKI[ds]) return [];
   var dc=dcZa(ds);
   if(!dc||dc==='dogovor'||dc==='zaprto') return [];
   var wS=timeToMin(dc.start), wE=timeToMin(dc.end);
@@ -173,6 +187,7 @@ function init(){
       DCW=novi;
     }
   });
+  nalozPraznike();
   sb.from('services').select('id,name,description,price,category,sort_order,duration_min,gap_after_min,gap_duration_min')
     .eq('active',true).order('category').order('sort_order')
     .then(function(res){ SERVICES=res.data||[]; loadBooking(); });
@@ -341,6 +356,7 @@ function loadSlots(){
   if(!arr.length){ area.innerHTML='<div class="slotmsg">Najprej izberite storitev.</div>'; checkSave(); return; }
   var ds=di.value; var d=parseISO(ds); var dow=d.getDay();
   if(dow===0){ area.innerHTML='<div class="slotmsg">Nedelja smo zaprti.</div>'; checkSave(); return; }
+  if(PRAZNIKI[ds]){ area.innerHTML='<div class="slotmsg">Ta dan smo zaprti zaradi praznika ('+esc(PRAZNIKI[ds])+').</div>'; checkSave(); return; }
   if(dcZa(ds)==='dogovor'){ area.innerHTML='<div class="slotmsg">📞 Sobota je po dogovoru — pokličite <a class="tel" href="tel:+38631217361">031 217 361</a>.</div>'; checkSave(); return; }
   area.innerHTML='<div class="slotmsg">Preverjam proste ure…</div>';
   var dur=sumDur()||30;

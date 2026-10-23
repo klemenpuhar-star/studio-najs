@@ -916,7 +916,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v36-2026-10-18 (neposredna povezava do cenika za QR) -->
+<!-- NAJS-BUILD: v37-2026-10-23 (zaprti slovenski prazniki v koledarju) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1623,6 +1623,23 @@ function nalozDelovniCas(){
   }catch(e){ /* ob napaki ostanejo zasilne vrednosti */ }
 }
 nalozDelovniCas();
+
+/* Slovenski dela prosti prazniki (datum -> naziv). Prebrano iz tabele prazniki;
+   dokler se ne naloži, PRAZNIKI ostane prazen (koncno varovalko vedno izvede
+   streznik: ustvari_rezervacijo/narocilo_popravi preko najs_delovni_cas). */
+var PRAZNIKI = {};
+function nalozPraznike(){
+  try{
+    return sb.from('prazniki').select('datum,naziv').then(function(res){
+      if(res.error || !res.data) return;
+      var novi={};
+      res.data.forEach(function(r){ novi[r.datum]=r.naziv||'praznik'; });
+      PRAZNIKI=novi;
+      if(document.getElementById('dayStrip')) buildStrip();
+    });
+  }catch(e){}
+}
+nalozPraznike();
 function daysPerView(){ return window.innerWidth <= 600 ? 3 : 8; }
 var stripOffset = 0; // offset v dnevih (0 = danes)
 
@@ -1709,6 +1726,7 @@ function buildStrip(){
 
     if(past){ statusHtml='<div class="bk-day-status closed">preteklo</div>'; disClass='disabled'; }
     else if(dow===0){ statusHtml='<div class="bk-day-status closed">zaprto</div>'; disClass='disabled'; }
+    else if(PRAZNIKI[ds]){ statusHtml='<div class="bk-day-status closed">praznik</div>'; disClass='disabled'; }
     else if(dcZa(ds)==='dogovor'){ statusHtml='<div class="bk-day-status closed">po dogovoru</div>'; disClass='disabled'; }
     else if(status==='all'){ statusHtml='<div class="bk-day-status busy">vse zasedeno</div>'; disClass='disabled'; }
     else if(status==='free'){
@@ -1756,7 +1774,7 @@ function buildStrip(){
 }
 
 function prefetchDayStatus(ds, dow, isFuture){
-  if(!isFuture || dcZa(ds)==='dogovor' || !dcZa(ds)) return;
+  if(!isFuture || PRAZNIKI[ds] || dcZa(ds)==='dogovor' || !dcZa(ds)) return;
   var dur = getTotalDur();
   sb.rpc('zasedeni_intervali',{izbrani_datum:ds}).then(function(res){
     if(res.error) return;
@@ -1776,6 +1794,7 @@ function prefetchDayStatus(ds, dow, isFuture){
 }
 
 function calcFreeSlots(ds, dow, busyRaw, dur){
+  if(PRAZNIKI[ds]) return [];
   var dc = dcZa(ds);
   if(!dc || dc==='dogovor') return [];
   var wS = timeToMin(dc.start), wE = timeToMin(dc.end);
@@ -1830,6 +1849,7 @@ function loadSlotList(){
   var dow = state.date.getDay();
 
   if(dow===0){ area.innerHTML='<div class="bk-slot-msg">Nedelja smo zaprti.</div>'; return; }
+  if(PRAZNIKI[ds]){ area.innerHTML='<div class="bk-slot-msg">Ta dan smo zaprti zaradi praznika.</div>'; return; }
   if(dcZa(ds)==='dogovor'){
     area.innerHTML='<div class="bk-slot-msg">📞 <strong>Sobota je po dogovoru</strong><br/>'
       +'Pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</div>';

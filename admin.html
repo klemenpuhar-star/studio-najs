@@ -470,7 +470,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v42-2026-10-21 (poravnava gumbov Uredi/Shrani na desno, da niso obrezani) -->
+<!-- NAJS-BUILD: v43-2026-10-23 (zaprti slovenski prazniki v koledarju) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -683,12 +683,25 @@ function tedenVrsta(ds){
   var teden=Math.floor(dni/7);
   return (((teden%2)+2)%2===0) ? 1 : 2;
 }
+/* Slovenski dela prosti prazniki (datum -> naziv). */
+var PRAZNIKI={};
+function nalozPraznike(cb){
+  sb.from('prazniki').select('datum,naziv').then(function(res){
+    if(!res.error && res.data){
+      var novi={};
+      res.data.forEach(function(r){ novi[r.datum]=r.naziv||'praznik'; });
+      PRAZNIKI=novi;
+    }
+    if(cb) cb();
+  });
+}
 /* x je lahko Date, datum "YYYY-MM-DD" ali (zastarelo) stevilka dneva v tednu */
 function dayInfo(x){
   var dow, iso=null;
   if(x instanceof Date){ dow=x.getDay(); iso=isoOf(x); }
   else if(typeof x==='string'){ var p=x.split('-'); dow=new Date(+p[0],+p[1]-1,+p[2]).getDay(); iso=x; }
   else { dow=x; }
+  if(iso && PRAZNIKI[iso]) return {closed:true, praznik:PRAZNIKI[iso]};
   if(DCAS){
     if(iso){ var par=tedenVrsta(iso); if(DCAS[par]&&DCAS[par][dow]) return DCAS[par][dow]; }
     if(DCAS[0]&&DCAS[0][dow]) return DCAS[0][dow];
@@ -713,7 +726,7 @@ function nalozDelovniCas(cb){
 }
 
 /* AUTH */
-function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;nalozDelovniCas(function(){buildMini();loadServices(load);});}
+function showApp(s){loginView.classList.add('hidden');appView.classList.remove('hidden');document.getElementById('whoLabel').textContent=s.user.email;nalozPraznike(function(){nalozDelovniCas(function(){buildMini();loadServices(load);});});}
 function showLogin(){appView.classList.add('hidden');loginView.classList.remove('hidden');}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('password').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
@@ -1836,7 +1849,7 @@ function risiCrtoZdaj(days){
 function renderCal(days,bookings,blocks){
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
-  days.forEach(function(d){var info=dayInfo(d);var hcls=info.closed?'off':(info.arrangement?'arr':'');h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
+  days.forEach(function(d){var info=dayInfo(d);var hcls=info.closed?'off':(info.arrangement?'arr':'');var tt=info.praznik?' title="'+esc(info.praznik)+'"':'';h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"'+tt+'><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
