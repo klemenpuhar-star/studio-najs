@@ -73,6 +73,7 @@ header .who{font-size:.74rem;opacity:.65}
 .mini-day.out{opacity:.3}
 .mini-day.today{color:var(--coral);font-weight:600}
 .mini-day.sel{background:var(--navy);color:#fff}
+.mini-day.praznik{color:#b4714f;font-weight:700;text-decoration:underline;text-decoration-color:rgba(180,113,79,.4)}
 
 /* Časovni koledar */
 .cal-scroll{overflow-x:auto;background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(23,57,75,.08)}
@@ -87,6 +88,9 @@ header .who{font-size:.74rem;opacity:.65}
 @media(max-width:820px){.dayhead .dnum{font-size:.82rem}}
 .dayhead.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
 .dayhead.arr{background:rgba(206,126,111,.08)}
+.dayhead .praznik{font-size:.56rem;line-height:1.15;color:#b4714f;font-weight:600;margin-top:2px;
+  white-space:normal;overflow-wrap:break-word;padding:0 2px}
+@media(max-width:820px){.dayhead .praznik{font-size:.5rem}}
 .gutter{position:relative;height:624px}
 .gutter .hr{position:absolute;right:6px;font-size:.64rem;opacity:.5;transform:translateY(-50%)}
 .col{position:relative;height:624px;border-left:1px solid #f0eee9;background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px)}
@@ -126,7 +130,9 @@ header .who{font-size:.74rem;opacity:.65}
 .mcell.today{border-color:var(--coral);box-shadow:0 0 0 2px rgba(206,126,111,.2)}
 .mcell.off{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f2f2f2 6px,#f2f2f2 12px)}
 .mcell .mcount{position:absolute;right:.4rem;bottom:.4rem;background:var(--coral);color:#fff;font-size:.66rem;border-radius:999px;padding:.05rem .45rem}
-@media(max-width:560px){.mcell{min-height:54px;padding:.3rem}.mcell .mnum{font-size:.9rem}}
+.mcell .mpraznik{font-size:.6rem;line-height:1.15;color:#b4714f;font-weight:600;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:560px){.mcell{min-height:54px;padding:.3rem}.mcell .mnum{font-size:.9rem}.mcell .mpraznik{font-size:.52rem}}
 
 /* Nujni seznam */
 .cards{display:flex;flex-direction:column;gap:.8rem}
@@ -470,7 +476,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v43-2026-10-23 (zaprti slovenski prazniki v koledarju) -->
+<!-- NAJS-BUILD: v44-2026-10-23 (prazniki v koledarju tudi poimenovani, ne le zaprti) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -894,7 +900,9 @@ function miniMonthHTML(ref,withNav){
   ['Po','To','Sr','Če','Pe','So','Ne'].forEach(function(d){html+='<div class="mini-dow">'+d+'</div>';});
   cells.forEach(function(d){
     if(d.getMonth()!==ref.getMonth()){html+='<div class="mini-day empty"></div>';return;}
-    html+='<button class="mini-day'+(isoOf(d)===isoToday()?' today':'')+'" data-d="'+isoOf(d)+'">'+d.getDate()+'</button>';
+    var praznik=PRAZNIKI[isoOf(d)];
+    var tt=praznik?' title="'+esc(praznik)+'"':'';
+    html+='<button class="mini-day'+(isoOf(d)===isoToday()?' today':'')+(praznik?' praznik':'')+'" data-d="'+isoOf(d)+'"'+tt+'>'+d.getDate()+'</button>';
   });
   return html+'</div></div>';
 }
@@ -1849,7 +1857,7 @@ function risiCrtoZdaj(days){
 function renderCal(days,bookings,blocks){
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
   var h='<div class="cal '+(N>1?'multi':'')+'"><div class="cal-head" style="grid-template-columns:'+gc+'"><div></div>';
-  days.forEach(function(d){var info=dayInfo(d);var hcls=info.closed?'off':(info.arrangement?'arr':'');var tt=info.praznik?' title="'+esc(info.praznik)+'"':'';h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"'+tt+'><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div></div>';});
+  days.forEach(function(d){var info=dayInfo(d);var hcls=info.closed?'off':(info.arrangement?'arr':'');var tt=info.praznik?' title="'+esc(info.praznik)+'"':'';var pz=info.praznik?'<div class="praznik">'+esc(info.praznik)+'</div>':'';h+='<div class="dayhead '+hcls+(isoOf(d)===isoToday()?' today':'')+'"'+tt+'><div class="dow">'+(N===1?DOWF:DOW)[(d.getDay()+6)%7]+'</div><div class="dnum">'+pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+'</div>'+pz+'</div>';});
   h+='</div><div class="cal-body" style="grid-template-columns:'+gc+'"><div class="gutter" style="height:'+TOTAL+'px">';
   for(var hh=H0;hh<=H1;hh++){h+='<div class="hr" style="top:'+((hh-H0)*HOUR_PX)+'px">'+pad(hh)+':00</div>';}
   h+='</div>';
@@ -1912,9 +1920,11 @@ function renderMonth(cells,counts,dcats){
   DOW.forEach(function(d){h+='<div>'+d+'</div>';});
   h+='</div><div class="mgrid">';
   cells.forEach(function(d){
-    var iso=isoOf(d),out=d.getMonth()!==cur.getMonth(),c=counts[iso]||0,off=(d.getDay()===0);
+    var iso=isoOf(d),out=d.getMonth()!==cur.getMonth(),c=counts[iso]||0;
+    var praznik=PRAZNIKI[iso],off=(d.getDay()===0)||!!praznik;
     var dd=(dcats[iso]||[]).slice(0,12).map(function(col){return '<span class="mdot" style="background:'+col+'"></span>';}).join('');
-    h+='<button class="mcell'+(out?' out':'')+(iso===isoToday()?' today':'')+(off?' off':'')+'" data-d="'+iso+'"><span class="mnum">'+d.getDate()+'</span>'+(dd?'<div class="mdots">'+dd+'</div>':'')+(c?'<span class="mcount">'+c+'</span>':'')+'</button>';
+    var pz=praznik?'<div class="mpraznik" title="'+esc(praznik)+'">'+esc(praznik)+'</div>':'';
+    h+='<button class="mcell'+(out?' out':'')+(iso===isoToday()?' today':'')+(off?' off':'')+'" data-d="'+iso+'"><span class="mnum">'+d.getDate()+'</span>'+pz+(dd?'<div class="mdots">'+dd+'</div>':'')+(c?'<span class="mcount">'+c+'</span>':'')+'</button>';
   });
   h+='</div></div>';calScroll.innerHTML=h;
   calScroll.querySelectorAll('.mcell').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();});});
