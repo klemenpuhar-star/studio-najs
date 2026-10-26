@@ -96,7 +96,7 @@ header .who{font-size:.74rem;opacity:.65}
 .col{position:relative;height:624px;border-left:1px solid #f0eee9;background:repeating-linear-gradient(to bottom,transparent,transparent 51px,#f0f1f1 51px,#f0f1f1 52px)}
 .off-band{position:absolute;left:0;right:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(45deg,rgba(23,57,75,.035),rgba(23,57,75,.035) 7px,rgba(23,57,75,.07) 7px,rgba(23,57,75,.07) 14px)}
 .off-band.arr{background:repeating-linear-gradient(45deg,rgba(206,126,111,.06),rgba(206,126,111,.06) 7px,rgba(206,126,111,.12) 7px,rgba(206,126,111,.12) 14px)}
-.ev{position:absolute;left:3px;right:3px;z-index:2;border-radius:7px;padding:3px 7px;font-size:.7rem;line-height:1.2;cursor:pointer;overflow:hidden;border-left:4px solid var(--coral);background:#f3eee7;color:var(--navy)}
+.ev{position:absolute;left:3px;right:3px;z-index:2;border-radius:7px;padding:2px 7px;font-size:.7rem;line-height:1.12;cursor:pointer;overflow:hidden;border-left:4px solid var(--coral);background:#f3eee7;color:var(--navy)}
 .ev:hover{filter:brightness(.97);box-shadow:0 2px 8px rgba(23,57,75,.15)}
 .ev .ev-t{font-size:.62rem;opacity:.7}
 .ev .ev-n{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -449,13 +449,13 @@ header .who{font-size:.74rem;opacity:.65}
 .kol-btn:hover{ background:var(--coral); color:#fff }
 .kol-n{ min-width:24px; text-align:center; font-weight:700; color:var(--navy) }
 /* ── bolj berljive vrstice v koledarju ── */
-.ev{ font-size:.78rem; padding:4px 8px; border-radius:8px }
+.ev{ font-size:.78rem; padding:3px 8px; border-radius:8px }
 .ev-t{ font-size:.68rem; opacity:.75 }
 .ev-n{ font-size:.85rem; font-weight:600; letter-spacing:.005em }
 .ev-s{ font-size:.75rem; opacity:.8 }
 .hr{ font-size:.7rem; opacity:.6 }
 @media(max-width:820px){
-  .ev{ font-size:.74rem; padding:3px 6px }
+  .ev{ font-size:.74rem; padding:2px 6px }
   .ev-n{ font-size:.8rem }
   .ev-s{ font-size:.72rem }
 }
@@ -476,7 +476,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v44-2026-10-23 (prazniki v koledarju tudi poimenovani, ne le zaprti) -->
+<!-- NAJS-BUILD: v45-2026-10-26 (visji urni razmik v koledarju, da je ime stranke pri kratkih terminih berljivo) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -600,7 +600,7 @@ var sb=supabase.createClient(SB_URL,SB_KEY);
 var loginView=document.getElementById('loginView'),appView=document.getElementById('appView');
 var calScroll=document.getElementById('calScroll'),nujniList=document.getElementById('nujniList'),miniEl=document.getElementById('mini');
 
-var H0=0,H1=24,HOUR_PX=68,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
+var H0=0,H1=24,HOUR_PX=100,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var ZACETNA_URA=6, VIDNIH_UR=15;   /* ob odprtju vidno 6:00–21:00, pomik mogoc do polnoci */
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DOWF=['PONEDELJEK','TOREK','SREDA','ČETRTEK','PETEK','SOBOTA','NEDELJA'];
