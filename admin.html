@@ -476,7 +476,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v45-2026-10-26 (visji urni razmik v koledarju, da je ime stranke pri kratkih terminih berljivo) -->
+<!-- NAJS-BUILD: v46-2026-10-26 (urni razmik v koledarju se dodatno zvisan, da se vidita celotno ime in storitev) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -600,7 +600,7 @@ var sb=supabase.createClient(SB_URL,SB_KEY);
 var loginView=document.getElementById('loginView'),appView=document.getElementById('appView');
 var calScroll=document.getElementById('calScroll'),nujniList=document.getElementById('nujniList'),miniEl=document.getElementById('mini');
 
-var H0=0,H1=24,HOUR_PX=100,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
+var H0=0,H1=24,HOUR_PX=150,PXMIN=HOUR_PX/60,TOTAL=(H1-H0)*HOUR_PX;
 var ZACETNA_URA=6, VIDNIH_UR=15;   /* ob odprtju vidno 6:00–21:00, pomik mogoc do polnoci */
 var DOW=['PON','TOR','SRE','ČET','PET','SOB','NED'];
 var DOWF=['PONEDELJEK','TOREK','SREDA','ČETRTEK','PETEK','SOBOTA','NEDELJA'];
