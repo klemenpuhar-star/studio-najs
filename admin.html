@@ -476,7 +476,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v48-2026-10-27 (odstranjena omejitev visine koledarja na 1020px, da se na visjih/sirsih zaslonih razteza do dna) -->
+<!-- NAJS-BUILD: v49-2026-10-27 (visina koledarja se zdaj meri dejansko v JS - syncCalHeight() - namesto s fiksnim calc() odmikom, zato se zanesljivo razteza do dna ekrana ne glede na visino orodne vrstice) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -492,7 +492,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v48 · 27.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v49 · 27.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -940,7 +940,19 @@ function buildMini(){
   }
   MINI_BUILT=true; updateMiniSel();
 }
-window.addEventListener('resize',function(){ if(isMobile()!==lastMobile){buildMini();load();} else syncMiniHeight(); });
+window.addEventListener('resize',function(){ syncCalHeight(); if(isMobile()!==lastMobile){buildMini();load();} else syncMiniHeight(); });
+function syncCalHeight(){
+  /* visino drsnega koledarja merimo dejansko (getBoundingClientRect), namesto da ugibamo
+     s calc(100dvh - Npx) — visina orodne vrstice se spreminja (gumbi se ovijejo v 2 vrstici
+     na ozjih zaslonih), zato fiksen "magicni" odmik v CSS ni zanesljiv. */
+  if(!calScroll)return;
+  if(calScroll.classList.contains('brez-drsnika')){ calScroll.style.height=''; return; }
+  var top=calScroll.getBoundingClientRect().top;
+  var dnoRob=window.innerWidth<=820?10:18;
+  var h=Math.round(window.innerHeight-top-dnoRob);
+  if(h<260)h=260;
+  calScroll.style.height=h+'px';
+}
 function updateMiniSel(){
   if(!MINI_BUILT)return;
   var prev=miniEl.querySelector('.mini-day.sel'); if(prev)prev.classList.remove('sel');
@@ -986,6 +998,7 @@ function load(){
   if(!jeIzrisan) calScroll.innerHTML='<div class="empty">Nalagam …</div>';
   else calScroll.classList.add('osvezujem');
   calScroll.classList.remove('brez-drsnika');
+  syncCalHeight();
   Promise.all([
     sb.from('bookings').select('*').gte('booking_date',fromISO).lte('booking_date',toISO),
     sb.from('blocks').select('*').gte('block_date',fromISO).lte('block_date',toISO)
@@ -1002,6 +1015,7 @@ function loadMonth(){
   document.getElementById('rangeLabel').textContent=rangeText();
   var cells=monthGrid(cur);
   calScroll.innerHTML='<div class="empty">Nalagam …</div>';
+  syncCalHeight();
   sb.from('bookings').select('booking_date,status,service_id,services_text').gte('booking_date',isoOf(cells[0])).lte('booking_date',isoOf(cells[41])).then(function(res){
     var counts={},dcats={};
     if(!res.error)(res.data||[]).forEach(function(b){if(b.status!=='preklicano'){
@@ -1911,6 +1925,7 @@ function renderCal(days,bookings,blocks){
       openNewAt(colEl.getAttribute('data-date'), pad(Math.floor(mins/60))+':'+pad(mins%60));
     });
   });
+  syncCalHeight();
   syncMiniHeight();
 }
 
@@ -1928,6 +1943,7 @@ function renderMonth(cells,counts,dcats){
   });
   h+='</div></div>';calScroll.innerHTML=h;
   calScroll.querySelectorAll('.mcell').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-d').split('-');cur=new Date(+p[0],+p[1]-1,+p[2]);miniRef=new Date(cur);mode='day';setSeg('day');load();});});
+  syncCalHeight();
   syncMiniHeight();
 }
 
