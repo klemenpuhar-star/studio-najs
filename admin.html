@@ -428,7 +428,7 @@ header .who{font-size:.74rem;opacity:.65}
 .cal-scroll.osvezujem{ opacity:.55; transition:opacity .12s }
 .cal-scroll{ overscroll-behavior-y:contain; scroll-behavior:auto }
 /* dnevni/tedenski koledar: lasten navpicni drsnik (00:00–24:00, ob odprtju 6:00–21:00) */
-.cal-scroll{ overflow-y:auto; height:min(1020px, calc(100dvh - 215px));
+.cal-scroll{ overflow-y:auto; height:calc(100dvh - 215px);
   -webkit-overflow-scrolling:touch; overscroll-behavior:contain; scrollbar-width:thin; }
 .cal-scroll::-webkit-scrollbar{ width:10px; height:10px }
 .cal-scroll::-webkit-scrollbar-thumb{ background:rgba(44,66,81,.22); border-radius:999px;
@@ -476,7 +476,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v47-2026-10-27 (popravljena vidna oznaka razlicice v glavi, ki je bila doslej locena od te oznake in je zato se vedno kazala v39) -->
+<!-- NAJS-BUILD: v48-2026-10-27 (odstranjena omejitev visine koledarja na 1020px, da se na visjih/sirsih zaslonih razteza do dna) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -492,7 +492,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v47 · 27.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v48 · 27.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
