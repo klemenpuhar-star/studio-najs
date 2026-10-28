@@ -476,7 +476,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v49-2026-10-27 (visina koledarja se zdaj meri dejansko v JS - syncCalHeight() - namesto s fiksnim calc() odmikom, zato se zanesljivo razteza do dna ekrana ne glede na visino orodne vrstice) -->
+<!-- NAJS-BUILD: v50-2026-10-28 (namizni: stran se ne drsi vec, levi meseci imajo svoj drsnik, koledar sega do dna okna; telefon vrnjen na stanje pred v49) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -492,7 +492,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v49 · 27.10.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v50 · 28.10.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -941,17 +941,40 @@ function buildMini(){
   MINI_BUILT=true; updateMiniSel();
 }
 window.addEventListener('resize',function(){ syncCalHeight(); if(isMobile()!==lastMobile){buildMini();load();} else syncMiniHeight(); });
+var calFit=false;
 function syncCalHeight(){
-  /* visino drsnega koledarja merimo dejansko (getBoundingClientRect), namesto da ugibamo
-     s calc(100dvh - Npx) — visina orodne vrstice se spreminja (gumbi se ovijejo v 2 vrstici
-     na ozjih zaslonih), zato fiksen "magicni" odmik v CSS ni zanesljiv. */
+  /* NAMIZNI pogled koledarja (Dan/Teden/Mesec): stran se NE sme drseti kot celota.
+     Prej je 12 malih mesecev levo naredilo stran ~3000px visoko — ko se je stran
+     podrsala, je koledar odsel navzgor in spodaj je ostala prazna lisa.
+     Zdaj: levi stolpec mesecev ima svoj drsnik, koledar pa sega tocno do dna okna.
+     TELEFON (<=820px): nic ne spreminjamo — ostane kot prej (CSS calc(100dvh - 185px)). */
   if(!calScroll)return;
+  var wrapEl=document.querySelector('#appView .wrap');
+  var fit=!isMobile() && !calScroll.classList.contains('hidden') && !appView.classList.contains('hidden');
+  if(!fit){
+    calScroll.style.height='';
+    if(calFit){
+      calFit=false;
+      if(wrapEl)wrapEl.style.paddingBottom='';
+      miniEl.style.maxHeight=''; miniEl.style.overflowY='';
+    }
+    return;
+  }
+  calFit=true;
+  if(wrapEl)wrapEl.style.paddingBottom='0';
+  var rob=18, vh=window.innerHeight, sy=window.pageYOffset||0;
+  var mTop=miniEl.getBoundingClientRect().top+sy;
+  miniEl.style.maxHeight=Math.max(200,Math.round(vh-mTop-rob))+'px';
+  miniEl.style.overflowY='auto';
   if(calScroll.classList.contains('brez-drsnika')){ calScroll.style.height=''; return; }
-  var top=calScroll.getBoundingClientRect().top;
-  var dnoRob=window.innerWidth<=820?10:18;
-  var h=Math.round(window.innerHeight-top-dnoRob);
-  if(h<260)h=260;
-  calScroll.style.height=h+'px';
+  var top=calScroll.getBoundingClientRect().top+sy;
+  calScroll.style.height=Math.max(300,Math.round(vh-top-rob))+'px';
+}
+/* ce se orodna vrstica / legenda / obrazec za opravek spremeni po visini
+   (npr. pisava se nalozi, gumbi se prelomijo), visino koledarja takoj uskladimo */
+if(window.ResizeObserver){
+  var calRO=new ResizeObserver(function(){ syncCalHeight(); });
+  ['.toolbar','#catLegend','#blockForm','header'].forEach(function(s){ var e=document.querySelector('#appView '+s)||document.querySelector(s); if(e)calRO.observe(e); });
 }
 function updateMiniSel(){
   if(!MINI_BUILT)return;
@@ -961,10 +984,11 @@ function updateMiniSel(){
 function syncMiniHeight(){
   if(!MINI_BUILT)return;
   if(window.innerWidth<=820){ miniEl.style.height=''; miniEl.style.maxHeight=''; miniEl.style.overflow='visible'; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); return; }
-  miniEl.style.height=''; miniEl.style.maxHeight='';
+  miniEl.style.height='';
   miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';});
+  syncCalHeight();
 }
-function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; miniEl.style.overflow='visible'; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); }
+function resetMiniHeight(){ miniEl.style.height=''; miniEl.style.maxHeight=''; miniEl.style.overflow='visible'; miniEl.querySelectorAll('.mini').forEach(function(m){m.style.minHeight='';}); syncCalHeight(); }
 
 /* NALAGANJE */
 function daysForMode(){
