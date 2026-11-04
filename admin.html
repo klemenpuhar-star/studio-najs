@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="telefon.js?v=1" defer></script>
 <style>
 @font-face{font-family:'Stigma Serif Display';src:url('Stigma_Display_Typeface.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 :root{--bez:#e5ccb2;--bez2:#f4e9dc;--navy:#2c4251;--coral:#d06666;--serif:'Stigma Serif Display','Cormorant Garamond',Georgia,serif;--sans:'Poppins','Jost',sans-serif}
@@ -187,6 +188,12 @@ header .who{font-size:.74rem;opacity:.65}
 .nb-title{font-family:var(--serif);font-weight:300;font-size:1.6rem;margin-bottom:1rem}
 .nb-grid{display:flex;gap:1rem;flex-wrap:wrap}
 .nb-grid label{flex:1;min-width:140px}
+/* preverjanje telefonske stevilke (telefon.js) */
+.tel-msg{font-size:.78rem;line-height:1.4;margin:-.45rem 0 .8rem}
+.tel-msg:empty{display:none}
+.tel-napaka{color:#c0392b}
+.tel-opozorilo{color:#9a5b00;background:#fff4e0;border-radius:8px;padding:.45rem .65rem}
+.tel-ok{color:#3f8f5b}
 .pop-wide label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.8rem}
 .pop-wide input{display:block;width:100%;margin-top:.3rem;padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy)}
 .pop-wide input:focus{outline:none;border-color:var(--coral)}
@@ -479,7 +486,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v51-2026-11-03 - casovnica zmanjsana: 30-min termin tocno visine besedila, 92 px/uro racunalnik, 86 px/uro telefon, kratki termini ura v vrstici z imenom -->
+<!-- NAJS-BUILD: v52-2026-11-04 - preverjanje telefonske stevilke v novi rezervaciji in urejanju stranke, telefon.js, stranke zdruzene po zadnjih 8 stevkah -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -495,7 +502,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v51 · 3.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v52 · 4.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -572,6 +579,7 @@ header .who{font-size:.74rem;opacity:.65}
       <label>Ime in priimek<input type="text" id="nbName" list="custNames" placeholder="npr. Ana Novak"></label>
       <label>Telefon<input type="tel" id="nbPhone" placeholder="npr. 031 234 567"></label>
     </div>
+    <div class="tel-msg" id="nbPhoneMsg"></div>
     <label class="nb-full">E-pošta (neobvezno)<input type="email" id="nbEmail"></label>
     <label class="nb-full">Opomba (neobvezno)<input type="text" id="nbNote"></label>
     <datalist id="custNames"></datalist>
@@ -1084,7 +1092,7 @@ function prettyShort(iso){if(!iso)return '';var p=iso.split('-');return (+p[2])+
 function buildCustomers(rows){
   var map={};
   rows.forEach(function(b){
-    var ph=(b.customer_phone||'').replace(/\D/g,'');
+    var ph=telKljuc(b.customer_phone);   /* zadnjih 8 stevk: 040 123 456 = +386 40 123 456 */
     var key=ph||('n:'+(b.customer_name||'').toLowerCase().trim());
     if(!key||key==='n:')return;
     if(!map[key])map[key]={key:key,name:b.customer_name||'',phone:b.customer_phone||'',email:b.customer_email||'',bookings:[]};
@@ -1826,8 +1834,8 @@ function prikaziStrankaEditForma(box,c,onSaved){
     +'<div class="d-edit-hd">Uredi kontaktne podatke</div>'
     +'<div class="obr-row">'
     +'<label>Ime in priimek<input type="text" id="ceIme" value="'+esc(c.name||'')+'"></label>'
-    +'<label>Telefon<input type="text" id="ceTel" value="'+esc(c.phone||'')+'"></label>'
-    +'</div><div class="obr-row">'
+    +'<label>Telefon<input type="tel" id="ceTel" value="'+esc(c.phone||'')+'"></label>'
+    +'</div><div class="tel-msg" id="ceTelMsg"></div><div class="obr-row">'
     +'<label>E-pošta<input type="text" id="ceEmail" value="'+esc(c.email||'')+'"></label>'
     +'</div><div class="obr-row">'
     +'<label style="flex:1 0 100%">Opomba<input type="text" id="ceOpomba" value="'+esc(c.opomba||'')+'"></label>'
@@ -1835,6 +1843,7 @@ function prikaziStrankaEditForma(box,c,onSaved){
     +(c.bookings&&c.bookings.length?('<p style="font-size:.76rem;opacity:.6;margin:.2rem 0 .6rem">Popravek se shrani v imenik strank in v '+c.bookings.length+' obstoječ'+(c.bookings.length===1?'o':'ih')+' rezervacij'+(c.bookings.length===1?'o':'')+' te stranke (npr. za pravilne SMS opomnike).</p>'):'')
     +'<div class="obr-btns"><button class="act" id="ceCancel">Prekliči</button><button class="act save" id="ceSave">Shrani</button></div>'
     +'<div class="d-edit-msg" id="ceMsg"></div></div>';
+  if(window.NajsTel) NajsTel.povezi(document.getElementById('ceTel'), document.getElementById('ceTelMsg'));
   document.getElementById('ceCancel').addEventListener('click',function(){box.classList.add('hidden');box.innerHTML='';});
   document.getElementById('ceSave').addEventListener('click',function(){
     var btn=this, msg=document.getElementById('ceMsg');
@@ -1843,6 +1852,8 @@ function prikaziStrankaEditForma(box,c,onSaved){
     var email=document.getElementById('ceEmail').value.trim();
     var opomba=document.getElementById('ceOpomba').value.trim();
     if(!ime){msg.textContent='Vnesite ime.';msg.className='d-edit-msg err';return;}
+    var tp=adminTel(document.getElementById('ceTel'), document.getElementById('ceTelMsg'));
+    if(tp.ustavi) return; tel=tp.vrednost;
     btn.disabled=true; btn.textContent='Shranjujem …';
     var strankaPatch={ime:ime, telefon:tel||null, email:email||null, opomba:opomba||null};
     var p = c.strankaId
@@ -1864,6 +1875,21 @@ function prikaziStrankaEditForma(box,c,onSaved){
       });
     });
   });
+}
+/* Telefon v adminu: preveri s telefon.js. Pravilna stevilka -> zapis +386 …; napaka ali opozorilo
+   se pokaze pod poljem in ustavi SAMO prvi klik »Shrani« – Natasa lahko stevilko kljub temu shrani. */
+function adminTel(el,msgEl){
+  var v=(el.value||'').trim();
+  if(!window.NajsTel||!v) return {vrednost:v, ustavi:false};
+  var r=NajsTel.preveri(v);
+  if(r.stanje==='ok'){ el.value=r.zapis; NajsTel.prikazi(el,msgEl,r); return {vrednost:r.zapis, ustavi:false}; }
+  var kljuc=r.zapis||v;
+  if(el.dataset.potrjeno===kljuc) return {vrednost:kljuc, ustavi:false};
+  if(r.zapis) el.value=r.zapis;
+  NajsTel.prikazi(el,msgEl,r);
+  msgEl.textContent+=' Če je številka kljub temu pravilna, kliknite »Shrani« še enkrat.';
+  el.dataset.potrjeno=kljuc;
+  return {ustavi:true};
 }
 function populateCustDatalist(){
   var dl=document.getElementById('custNames'); if(!dl)return;
@@ -2306,6 +2332,9 @@ function openNew(){
   document.getElementById('nbDate').value=isoOf(cur);
   ['nbTime','nbName','nbPhone','nbEmail','nbNote'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('nbMsg').textContent='';document.getElementById('nbMsg').className='msg';
+  var nbTelMsg=document.getElementById('nbPhoneMsg'); nbTelMsg.textContent=''; nbTelMsg.className='tel-msg';
+  delete document.getElementById('nbPhone').dataset.potrjeno;
+  if(window.NajsTel) NajsTel.povezi(document.getElementById('nbPhone'), nbTelMsg);
   buildNbServices();
   document.getElementById('nbSummary').textContent='Izberi vsaj eno storitev.';
   document.getElementById('newbk').classList.remove('hidden');
@@ -2367,6 +2396,9 @@ function saveNew(){
   if(!name){nameEl.classList.add('err');bad=true;}
   if(!phone){phoneEl.classList.add('err');bad=true;}
   if(bad){msg.textContent='Prosimo, izpolnite vsa obvezna polja.';msg.className='msg err';return;}
+  var tp=adminTel(phoneEl, document.getElementById('nbPhoneMsg'));
+  if(tp.ustavi){msg.textContent='Preverite telefonsko številko (opozorilo pod poljem).';msg.className='msg err';return;}
+  phone=tp.vrednost; msg.textContent=''; msg.className='msg';
   var dur=sel.reduce(function(a,s){return a+(parseInt(s.duration_min)||0)*(s.kol||1);},0);
   var price=sel.reduce(function(a,s){return a+(parseFloat(s.price)||0)*(s.kol||1);},0);
   var em=toMin(start)+dur,end=pad(Math.floor(em/60))+':'+pad(em%60);

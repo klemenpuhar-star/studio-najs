@@ -20,6 +20,7 @@
   <!-- Googlove pisave se nalozijo sele po privolitvi obiskovalca (glej piskotki.html) -->
 <link id="najsFonts" data-href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="telefon.js?v=1" defer></script>
   <style>
     /* ── RESET ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -693,6 +694,12 @@
     .bk-input:focus, .bk-textarea:focus { border-color: var(--navy); }
     .bk-textarea { resize: vertical; min-height: 70px; }
     .bk-input.err, .bk-textarea.err { border-color: #d64545; box-shadow: 0 0 0 2px rgba(214,69,69,.15); }
+    /* preverjanje telefonske stevilke (telefon.js) */
+    .tel-msg { font-size: .8rem; line-height: 1.4; margin-top: .4rem; }
+    .tel-msg:empty { display: none; }
+    .tel-napaka { color: #c0392b; }
+    .tel-opozorilo { color: #9a5b00; background: #fff4e0; border-radius: 8px; padding: .45rem .65rem; }
+    .tel-ok { color: #3f8f5b; }
 
     /* Summary */
     .bk-summary {
@@ -916,7 +923,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v37-2026-10-23 (zaprti slovenski prazniki v koledarju) -->
+<!-- NAJS-BUILD: v38-2026-11-04 (preverjanje telefonske stevilke pri narocanju, telefon.js) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1976,12 +1983,15 @@ function renderStepCustomer(){
     +'<div class="bk-field"><label class="bk-label">Ime in priimek *</label>'
     +'<input class="bk-input" id="fName" type="text" placeholder="Maja Novak" oninput="this.classList.remove(\'err\')" value="'+esc(c.name||'')+'"></div>'
     +'<div class="bk-field"><label class="bk-label">Telefon *</label>'
-    +'<input class="bk-input" id="fPhone" type="tel" placeholder="+386 31 000 000" oninput="this.classList.remove(\'err\')" value="'+esc(c.phone||'')+'"></div>'
+    +'<input class="bk-input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="npr. 040 123 456" oninput="this.classList.remove(\'err\')" value="'+esc(c.phone||'')+'">'
+    +'<div class="tel-msg" id="fPhoneMsg"></div></div>'
     +'<div class="bk-field"><label class="bk-label">E-pošta</label>'
     +'<input class="bk-input" id="fEmail" type="email" placeholder="maja@email.si" value="'+esc(c.email||'')+'"></div>'
     +'<div class="bk-field"><label class="bk-label">Opomba</label>'
     +'<textarea class="bk-textarea" id="fNote" placeholder="Posebne želje ali vprašanja…">'+esc(c.note||'')+'</textarea></div>';
   foot.innerHTML='';
+  var telEl=document.getElementById('fPhone'), telMsg=document.getElementById('fPhoneMsg');
+  if(window.NajsTel) NajsTel.povezi(telEl, telMsg);
   var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
   bk.addEventListener('click',function(){ state.step=state.isNujni?2:3; renderStep(); });
   foot.appendChild(bk);
@@ -1996,6 +2006,23 @@ function renderStepCustomer(){
       if(!name) document.getElementById('fName').classList.add('err');
       if(!phone) document.getElementById('fPhone').classList.add('err');
       errEl.textContent='Prosimo, izpolnite vsa obvezna polja.'; errEl.classList.add('show'); return;
+    }
+    /* preverjanje telefonske stevilke: napaka ustavi, opozorilo (npr. stacionarna) ustavi samo prvic */
+    if(window.NajsTel){
+      if(!telEl._najsTel) NajsTel.povezi(telEl, telMsg);
+      var tr=NajsTel.preveri(phone);
+      if(tr.stanje==='napaka'){
+        NajsTel.prikazi(telEl, telMsg, tr); telEl.focus();
+        errEl.textContent='Preverite telefonsko številko.'; errEl.classList.add('show'); return;
+      }
+      var zePrikazano = telMsg.classList.contains('tel-opozorilo') && telEl.dataset.potrjeno===tr.zapis;
+      telEl.value=tr.zapis; phone=tr.zapis;
+      if(tr.stanje==='opozorilo' && !zePrikazano){
+        NajsTel.prikazi(telEl, telMsg, tr);
+        telMsg.textContent+=' Če je številka pravilna, kliknite »Pregled« še enkrat.';
+        telEl.dataset.potrjeno=tr.zapis; return;
+      }
+      errEl.classList.remove('show');
     }
     state.customer={name:name,phone:phone,email:document.getElementById('fEmail').value.trim(),note:document.getElementById('fNote').value.trim()};
     state.step=state.isNujni?4:5; renderStep();
