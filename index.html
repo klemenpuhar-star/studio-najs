@@ -471,10 +471,13 @@
     @media (max-width: 640px) {
       section { padding: 3.5rem 4%; }
       .seal { display: none; }
+    }
+    /* v44: meni ima 6 povezav – pod 860px ne gre vec v eno vrstico, zato tam meni s tremi crtami */
+    @media (max-width: 860px) {
       nav.desktop { display: none; }
       .hamburger { display: flex; }
     }
-    @media (min-width: 641px) {
+    @media (min-width: 861px) {
       nav.mobile { display: none !important; }
     }
 
@@ -1138,7 +1141,7 @@
       "name": "Ali strižete tudi otroke?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 15,00 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok."
+        "text": "Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 11,50 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok."
       }
     },
     {
@@ -1194,7 +1197,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v42-2026-11-06 (pogosta vprasanja: izdelki znamke Kemon, brez stavka o samponu) -->
+<!-- NAJS-BUILD: v44-2026-11-06 (znamka izdelkov povsod Kemon; Pogosta vprasanja v meniju; fantovsko strizenje 11,50 EUR) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1207,6 +1210,7 @@
     <a href="#cenik">Cenik</a>
     <a href="#galerija">Galerija</a>
     <a href="#onas">O nas</a>
+    <a href="#vprasanja">Vprašanja</a>
     <a href="#kontakt">Kontakt</a>
     <button class="btn-nav open-modal" type="button">Naroči se</button>
   </nav>
@@ -1221,6 +1225,7 @@
   <a href="#cenik">Cenik</a>
   <a href="#galerija">Galerija</a>
   <a href="#onas">O nas</a>
+  <a href="#vprasanja">Pogosta vprašanja</a>
   <a href="#kontakt">Kontakt</a>
   <button class="btn-nav open-modal" type="button">Naroči se</button>
 </nav>
@@ -1315,7 +1320,7 @@
       <p class="sec-label">O meni</p>
       <h2 class="sec-title" style="color:#fff;margin-bottom:1.5rem">Studio z dušo</h2>
       <p class="onas-p">Frizerski studio Najs je prostor, kjer se strast do las sreča z osebno pozornostjo. Z leti izkušenj in iskreno ljubeznijo do svojega poklica poskrbim, da vsak obisk postane prijetna izkušnja.</p>
-      <p class="onas-p">Delam z najboljšimi produkti znamke Actyva – naravnimi, nežnimi in učinkovitimi. Vsaka pričeska je prilagojena točno vašemu tipu las in slogu.</p>
+      <p class="onas-p">Delam z najboljšimi produkti znamke Kemon – naravnimi, nežnimi in učinkovitimi. Vsaka pričeska je prilagojena točno vašemu tipu las in slogu.</p>
       <p class="onas-p">Najdete me v Škofji Loki, kjer z veseljem pričakujem vsakega gosta – ženske, moške in otroke.</p>
       <div class="onas-storitve">
         <p class="onas-st-naslov">Kaj delam</p>
@@ -1378,7 +1383,7 @@
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Ali strižete tudi otroke?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
-      <p class="vpr-a">Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 15,00 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok.</p>
+      <p class="vpr-a">Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 11,50 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok.</p>
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Koliko stane barvanje las, pramena ali balayage?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
@@ -1493,6 +1498,7 @@
       <a href="#cenik">Cenik</a>
       <a href="#galerija">Galerija</a>
       <a href="#onas">O nas</a>
+      <a href="#vprasanja">Vprašanja</a>
       <a href="#kontakt">Kontakt</a>
       <a href="#narocanje">Naroči se</a>
     </nav>
