@@ -609,10 +609,46 @@ header .who{font-size:.74rem;opacity:.65}
   #detail .pop{ max-height:calc(100dvh - 1rem) }
   #detail #detailBody{ padding-bottom:calc(1.4rem + env(safe-area-inset-bottom,0px)) }
 }
+/* ══ Berljivost in enotnost admina (v55, 2026-11-05) ══════════════════════════
+   Sistem: najmanjse besedilo 11–12px, oznake in ure temnejse, temnejsa koralna za povezave
+   in glavni gumb; na telefonu polja 16px (iPhone ne poveca strani) in gumbi vsaj 40px.
+   Bloki terminov (.ev, .ev-t, .ev-n, .ev-s) NAMENOMA NISO spremenjeni – merilo casovnice
+   (v51: 92/86 px na uro) je izracunano tocno na njihovo velikost pisave. */
+:root{ --coral-txt:#a64848; --coral-gumb:#b85454; }
+.mini-dow{ font-size:.7rem; opacity:.75 }
+.dayhead .dow{ font-size:.72rem; opacity:.8 }
+.dayhead.today .dnum{ color:var(--coral-txt) }
+.gutter .hr{ font-size:.74rem; opacity:.85 }
+.badge{ font-size:.72rem }
+.badge.podogovoru{ color:var(--coral-txt) }
+header .who{ opacity:.8 }
+header .brand .brand-tag{ opacity:.75 }
+header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice mora biti berljiva */
+.pop-wide label, .nb-svc-label{ opacity:.85 }
+.pop .d-edit-row label{ opacity:.85 }
+.d-head-sub{ color:#5f6f79 }
+.pop .d-meta a{ color:#963f3f; font-weight:500 }
+.d-edit-hd, .pop .d-edit-hd{ color:var(--coral-txt) }
+.btn-main{ background:var(--coral-gumb) }
+.obr-open{ background:var(--coral-gumb)!important }
+.cust-head .cust-meta{ opacity:.82 }
+.cust-head .cust-sub{ opacity:.85 }
+.uvoz-tag{ color:#5a4936 }
+.vir-hd span{ opacity:.75 }
+@media (max-width:820px), (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]), select, textarea{ font-size:16px }
+  .act, .btn-ghost{ min-height:40px; font-size:.8rem }
+  .nav-btn{ width:40px; height:40px }
+  .seg button{ min-height:40px }
+  .mini-day{ height:2.35rem; font-size:.85rem }
+  .mini-nav{ min-width:40px; min-height:40px }
+  #detail .pop .x, .pop .x{ min-width:40px; min-height:40px }
+  .pop .x::after{ content:''; position:absolute; inset:-4px }
+}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v54-2026-11-05 - prikaz vira spletnih rezervacij (podrobnosti termina in povzetek pri Strankah) -->
+<!-- NAJS-BUILD: v55-2026-11-05 - berljivost admina: vecje drobne pisave, temnejse oznake, na telefonu polja 16px in gumbi 40px; bloki terminov nespremenjeni -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -628,7 +664,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v54 · 5.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v55 · 5.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
