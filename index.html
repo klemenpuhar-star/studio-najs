@@ -20,7 +20,123 @@
   <!-- Googlove pisave se nalozijo sele po privolitvi obiskovalca (glej piskotki.html) -->
 <link id="najsFonts" data-href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="telefon.js?v=1" defer></script>
+  <!-- preverjanje telefonskih stevilk: Googlova knjiznica (za tuje stevilke) s CDN + NAJS koda vgrajena tukaj,
+       da ne potrebujemo posebne datoteke. Ce se knjiznica ne nalozi, slovenske stevilke se vedno preverjamo. -->
+  <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.13.12/bundle/libphonenumber-max.js" defer></script>
+  <script>/* ══════════════════════════════════════════════════════════════════════
+     NAJS — preverjanje telefonskih stevilk (v1, 2026-11-04)
+     Uporablja: index.html (spletno narocanje), admin.html (nova rezervacija, urejanje stranke)
+     - Slovenske stevilke: lastna pravila (8 stevk za 0/+386), enoten zapis "+386 40 123 456".
+     - Tuje stevilke (+ ali 00 + koda drzave): Googlova knjiznica libphonenumber (zgoraj v datoteki).
+     - stanje: "ok" | "opozorilo" (stevilka obstaja, a npr. ne prejme SMS) | "napaka" (ne more obstajati)
+     Isto pretvorbo za slovenske stevilke dela tudi baza (funkcija najs_norm_tel), zato so
+     zapisi vedno enaki, ne glede na to, od kod pride stevilka.
+     ══════════════════════════════════════════════════════════════════════ */
+  (function(){
+    var MOBILNE=['30','31','40','41','49','51','64','65','68','69','70','71'];
+    var PRIMER='040 123 456';
+    var SMS_OPOZ='SMS potrditve in opomnika na to številko ne boste prejeli. Če imate mobilno številko, vpišite raje njo.';
+  
+    function lib(){ return window.libphonenumber || null; }
+    function stevk(n){ return n===1?'števko':(n===2?'števki':(n===3||n===4?'števke':'števk')); }
+    function zapisSI(nat){
+      if(MOBILNE.indexOf(nat.slice(0,2))>=0) return '+386 '+nat.slice(0,2)+' '+nat.slice(2,5)+' '+nat.slice(5);
+      return '+386 '+nat.slice(0,1)+' '+nat.slice(1,4)+' '+nat.slice(4,6)+' '+nat.slice(6);
+    }
+    function drzava(cc){
+      try{ return new Intl.DisplayNames(['sl'],{type:'region'}).of(cc) || cc; }catch(e){ return cc; }
+    }
+    function R(stanje,sporocilo,zapis,tip){ return {stanje:stanje,sporocilo:sporocilo||'',zapis:zapis||'',tip:tip||''}; }
+  
+    function tuja(intl){
+      if(intl.length<7) return R('napaka','Številka je prekratka. Preverite jo.');
+      if(intl.length>15) return R('napaka','Številka je predolga. Preverite jo.');
+      var L=lib();
+      if(!L) return R('ok','','+'+intl,'tuja');           /* knjiznica se ni nalozila: ne oviramo stranke */
+      var e164='+'+intl, dolz;
+      try{ dolz=L.validatePhoneNumberLength(e164); }catch(e){ dolz=null; }
+      if(dolz==='INVALID_COUNTRY') return R('napaka','Koda države na začetku številke (+'+intl.slice(0,3)+'…) ne obstaja. Preverite začetek številke.');
+      var p=null; try{ p=L.parsePhoneNumber(e164); }catch(e){ p=null; }
+      var ime=p&&p.country?('državo '+drzava(p.country)):'izbrano državo';
+      if(dolz==='TOO_SHORT') return R('napaka','Številka je prekratka za '+ime+'. Preverite jo.');
+      if(dolz==='TOO_LONG') return R('napaka','Številka je predolga za '+ime+'. Preverite jo.');
+      if(dolz==='INVALID_LENGTH'||!p) return R('napaka','Številka nima pravilne dolžine za '+ime+'. Preverite jo.');
+      var zapis=p.formatInternational();
+      if(!p.isValid()) return R('opozorilo','Številka verjetno ni pravilna – ne ustreza številkam za '+ime+' (prekratka ali napačen začetek). Preverite jo.',zapis,'tuja');
+      var t=p.getType();
+      if(t==='FIXED_LINE') return R('opozorilo','To je stacionarna številka. '+SMS_OPOZ,zapis,'stacionarna');
+      if(t&&t!=='MOBILE'&&t!=='FIXED_LINE_OR_MOBILE') return R('opozorilo','To ni običajna osebna številka. '+SMS_OPOZ,zapis,'posebna');
+      return R('ok','',zapis,(t==='MOBILE'?'mobilna · ':'')+drzava(p.country));
+    }
+  
+    function preveri(vnos){
+      var s=String(vnos==null?'':vnos).trim();
+      if(!s) return R('napaka','Vpišite telefonsko številko.');
+      if(/[^\d\s+()\-\/.]/.test(s)){
+        return R('napaka', /[oO]/.test(s)
+          ? 'V številki je črka »o« namesto ničle 0. Popravite jo.'
+          : 'Telefonska številka lahko vsebuje samo števke (in znake + ( ) - /).');
+      }
+      if((s.match(/\+/g)||[]).length>1 || (s.indexOf('+')>0)) return R('napaka','Znak + je lahko samo na začetku, npr. +386 40 123 456.');
+      var d=s.replace(/\D/g,''), intl=null, nat;
+      if(s.charAt(0)==='+') intl=d; else if(d.slice(0,2)==='00') intl=d.slice(2);
+      if(intl!==null){
+        if(intl.slice(0,3)!=='386') return tuja(intl);
+        nat=intl.slice(3);
+      } else if(d.slice(0,3)==='386' && (d.length===11||d.length===12)) nat=d.slice(3);
+      else if(d.charAt(0)==='0') nat=d.slice(1);
+      else nat=d;
+      if(nat.charAt(0)==='0') nat=nat.slice(1);
+      var brezKode=(intl===null);
+      if((nat.charAt(0)==='8'||nat.charAt(0)==='9') && nat.length<=8) return R('napaka','To je posebna številka (080/090), na katero vas ne moremo poklicati. Vpišite svojo mobilno ali domačo številko.');
+      if(nat.length<8){
+        var m=8-nat.length;
+        return R('napaka','Številki manjka '+m+' '+stevk(m)+'. Slovenske številke imajo 9 števk, npr. '+PRIMER+'.');
+      }
+      if(nat.length>8){
+        var v=nat.length-8;
+        return R('napaka','Številka ima '+v+' '+stevk(v)+' preveč. Slovenske številke imajo 9 števk, npr. '+PRIMER+'.'
+          +(brezKode?' Če je številka tuja, jo vpišite s kodo države, npr. +385 91 234 5678.':''));
+      }
+      var c1=nat.charAt(0), c2=nat.slice(0,2);
+      if(c1==='8'||c1==='9') return R('napaka','To je posebna številka (080/090), na katero vas ne moremo poklicati. Vpišite svojo mobilno ali domačo številko.');
+      if(!/^[1-7]/.test(nat)) return R('napaka','Ta številka ne obstaja. Preverite jo, npr. '+PRIMER+'.');
+      var zapis=zapisSI(nat);
+      if(MOBILNE.indexOf(c2)>=0) return R('ok','',zapis,'mobilna');
+      if(c1==='6') return R('opozorilo','Številka se začne z 0'+c2+', kar ni običajna slovenska številka. Preverite, ali je pravilna.',zapis,'neobicajna');
+      if(c2==='59') return R('opozorilo','To je internetna (VoIP) številka. '+SMS_OPOZ,zapis,'stacionarna');
+      return R('opozorilo','To je stacionarna številka. '+SMS_OPOZ,zapis,'stacionarna');
+    }
+  
+    /* Prikaz pod poljem. el = <input>, msg = element za sporocilo.
+       Preveri, ko stranka zapusti polje; med tipkanjem samo pocisti napako, ko je popravljena.
+       Ob uspehu polje prepise v enoten zapis (+386 40 123 456), da stranka vidi, kako smo jo razumeli. */
+    function prikazi(el,msg,r){
+      if(!msg) return;
+      el.classList.remove('err');
+      msg.className='tel-msg';
+      if(!r){ msg.textContent=''; return; }
+      if(r.stanje==='napaka'){ el.classList.add('err'); msg.classList.add('tel-napaka'); msg.textContent=r.sporocilo; }
+      else if(r.stanje==='opozorilo'){ msg.classList.add('tel-opozorilo'); msg.textContent='⚠ '+r.sporocilo; }
+      else { msg.classList.add('tel-ok'); msg.textContent='✓ '+r.zapis+(r.tip?' · '+r.tip:''); }
+    }
+    function povezi(el,msg){
+      if(!el||el._najsTel) return; el._najsTel=true;
+      el.addEventListener('blur',function(){
+        if(!el.value.trim()){ prikazi(el,msg,null); return; }
+        var r=preveri(el.value); prikazi(el,msg,r);
+        if(r.stanje!=='napaka' && r.zapis) el.value=r.zapis;
+      });
+      el.addEventListener('input',function(){
+        if(!msg||!msg.textContent) return;
+        var r=preveri(el.value);
+        if(r.stanje!=='napaka') prikazi(el,msg,r); else if(msg.classList.contains('tel-ok')||msg.classList.contains('tel-opozorilo')) prikazi(el,msg,null);
+      });
+    }
+  
+    window.NajsTel={ preveri:preveri, prikazi:prikazi, povezi:povezi, verzija:'v2-2026-11-04-vgrajeno' };
+  })();
+  </script>
   <style>
     /* ── RESET ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -864,6 +980,60 @@
 .ok-spodaj{ display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; }
 .ok-ocena{ font-size:1.75rem; font-weight:500; color:#202124; line-height:1; }
 .ok-mnenj{ font-size:.86rem; color:#80868b; }
+
+    /* ══ Pogosta vprasanja (v40) ══ */
+    #vprasanja { background: #fbf6f0; }
+    .vpr-inner { max-width: 760px; margin: 0 auto; }
+    .vpr-seznam { display: flex; flex-direction: column; gap: .7rem; }
+    .vpr-item { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(44,66,81,.06); border: 1px solid rgba(44,66,81,.06); }
+    .vpr-item summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 1rem;
+      padding: 1.05rem 1.3rem; min-height: 44px; }
+    .vpr-item summary::-webkit-details-marker { display: none; }
+    .vpr-q { flex: 1; font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--navy); line-height: 1.45; margin: 0; }
+    .vpr-ikona { width: 22px; height: 22px; flex-shrink: 0; position: relative; }
+    .vpr-ikona::before, .vpr-ikona::after { content: ''; position: absolute; left: 4px; right: 4px; top: 10px; height: 2px;
+      background: #a64848; border-radius: 2px; transition: transform .25s ease; }
+    .vpr-ikona::after { transform: rotate(90deg); }
+    .vpr-item[open] .vpr-ikona::after { transform: rotate(0deg); }
+    .vpr-a { padding: 0 1.3rem 1.2rem; margin: 0; font-size: .95rem; line-height: 1.75; color: rgba(23,57,75,.82); }
+    .vpr-item summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 14px; }
+    .vpr-dodatno { text-align: center; font-size: .9rem; color: rgba(23,57,75,.78); margin-top: 1.8rem; line-height: 1.7; }
+    .vpr-dodatno a { color: var(--navy); font-weight: 500; text-decoration: underline; text-decoration-color: var(--coral); text-underline-offset: 3px; }
+    @media (max-width: 600px) { .vpr-item summary { padding: .95rem 1.05rem; } .vpr-a { padding: 0 1.05rem 1.1rem; } .vpr-q { font-size: .97rem; } }
+    @media (prefers-reduced-motion: reduce) { .vpr-ikona::before, .vpr-ikona::after { transition: none; } }
+
+    /* ══ Naročanje na telefonu – dostopnost (v40, 2026-11-05) ══════════════════
+       Samo znotraj okna za naročanje (#bkOverlay). Barve in razporeditev ostanejo,
+       popravljeno je le: velikost pisave v poljih (iPhone se ne poveča vec ob dotiku),
+       velikost gumbov za prst (min. 44px), kontrast drobnega besedila, fokus za tipkovnico. */
+    #bkOverlay { --coral-txt: #a64848; }
+    #bkOverlay .bk-input, #bkOverlay .bk-textarea { font-size: 16px; }
+    #bkOverlay .bk-close { position: relative; }
+    #bkOverlay .bk-close::after,
+    #bkOverlay .bk-day-nav-btn::after { content: ''; position: absolute; inset: -8px; }
+    #bkOverlay .bk-day-nav-btn { position: relative; }
+    #bkOverlay .bk-btn-back, #bkOverlay .bk-btn-next { min-height: 44px; }
+    #bkOverlay .bk-chk-row { min-height: 44px; }
+    #bkOverlay .bk-chk-row input[type="checkbox"] { width: 18px; height: 18px; }
+    #bkOverlay .bk-step-label, #bkOverlay .bk-label, #bkOverlay .bk-chk-desc,
+    #bkOverlay .bk-sel-label, #bkOverlay .bk-sum-hd, #bkOverlay .bk-sum-key,
+    #bkOverlay .bk-day-status.avail, #bkOverlay .bk-macc-arr { color: var(--coral-txt); }
+    #bkOverlay .bk-chk-dur, #bkOverlay .bk-day-name, #bkOverlay .bk-day-mon { color: rgba(23,57,75,.75); }
+    #bkOverlay .bk-success-sub { opacity: .85; }
+    #bkOverlay .bk-sum-svc { color: rgba(23,57,75,.8); }
+    #bkOverlay .bk-slot-msg { color: rgba(23,57,75,.75); opacity: 1; }
+    #bkOverlay .bk-pogoj { font-size: .78rem; opacity: .75; margin-top: 1rem; line-height: 1.6; }
+    #bkOverlay .bk-tel-povezava { color: var(--navy); font-weight: 600; text-decoration: underline;
+      text-decoration-color: var(--coral); text-underline-offset: 3px;
+      display: inline-block; padding: .75rem .25rem; margin: -.75rem 0; }
+    #bkOverlay :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+    /* na telefonu (brez miške) gumb po dotiku ne ostane v »hover« barvi z manjšim kontrastom */
+    @media (hover: none) {
+      #bkOverlay .bk-btn-next:hover { background: var(--navy); transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #bkOverlay *, #bkOverlay *::before, #bkOverlay *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
 </style>
 <style id="cenik-overlay-css">
   /* Cenik prikazan kot loceni celozaslonski pogled (ne na domaci strani) */
@@ -896,6 +1066,7 @@
   "image": "https://najs.si/gal-1.jpg",
   "logo": "https://najs.si/logo.png",
   "telephone": "+386 31 217 361",
+  "email": "frizerskistudionajs@gmail.com",
   "priceRange": "€€",
   "currenciesAccepted": "EUR",
   "paymentAccepted": "Gotovina, kartica",
@@ -921,9 +1092,105 @@
   }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Kje je Frizerski studio Najs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Frizerski studio Najs je na naslovu Cesta talcev 3B, 4220 Škofja Loka. Salon vodi frizerka Nataša Markuta. Za vprašanja me pokličite na 031 217 361 ali pišite na frizerskistudionajs@gmail.com."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kako se naročim na frizerski termin?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Najhitreje prek spletnega naročanja na najs.si, ki deluje 24 ur na dan: izberete storitve, dan in uro, rezervacija pa je potrjena takoj. Termin lahko rezervirate najmanj 4 ure vnaprej. Naročite se lahko tudi po telefonu 031 217 361 ali po e-pošti."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kakšen je delovni čas salona?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Delam po dogovoru, zato so vse proste ure vedno vidne v spletnem naročanju na najs.si. Sobotni termini so po predhodnem dogovoru po telefonu, ob nedeljah in dela prostih praznikih je salon zaprt."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Koliko stane striženje?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Moško striženje stane 14,00 € brez umivanja in 19,00 € z umivanjem, striženje z mašinico 7,00 €. Žensko striženje brez umivanja stane 15,00 €, z umivanjem in fen frizuro pa od 33,00 € (kratek las) do 39,00 € (dolg las). Cene veljajo od 19. 10. 2026, celoten cenik je na najs.si."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ali strižete tudi otroke?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 15,00 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Koliko stane barvanje las, pramena ali balayage?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Barvanje narastka oziroma kratkih las stane 36,00 €, srednje dolgih las 39,00 € in dolgih las 48,00 €. Prameni z folijo stanejo od 55,00 € do 75,50 €, balayage pa od 78,00 € (srednje dolg las) do 88,50 € (dolg las). Barvanje in pramena se naročijo skupaj s striženjem ali fen frizuro."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Koliko časa traja obisk?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Moško striženje traja okoli 30 minut, žensko striženje z umivanjem in fen frizuro okoli 60 minut. Barvanje traja okoli eno uro, balayage od 150 do 160 minut. Natančen skupni čas za izbrane storitve vidite v spletnem naročanju, preden termin potrdite."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kako spremenim ali prekličem termin?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Po spletni rezervaciji dobite SMS (in e-pošto, če jo vpišete) s povezavo, prek katere termin sami spremenite ali prekličete do polnoči dan pred terminom. Pozneje me pokličite na 031 217 361."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ali dobim opomnik pred terminom?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Da. Dan pred terminom ob 18. uri vam pošljem SMS opomnik na mobilno številko, ki ste jo vpisali ob naročilu. Na stacionarno številko SMS ne more priti, zato ob naročilu vpišite mobilno številko."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kaj če potrebujem termin nujno?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "V spletnem naročanju izberite »Nujni termin« in opišite, kaj potrebujete. O zahtevi sem takoj obveščena in vas pokličem čim prej. Nujni termin se doplača: 20,00 € med tednom ter 50,00 € ob vikendih in praznikih."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Katere izdelke uporabljate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Delam z izdelki znamke Actyva (Kemon), ki so naravni, nežni in učinkoviti. Pri umivanju na primer uporabljam šampon Actyva Velian Complex."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
-<!-- NAJS-BUILD: v38-2026-11-04 (preverjanje telefonske stevilke pri narocanju, telefon.js) -->
+<!-- NAJS-BUILD: v40-2026-11-05 (narocanje na telefonu: pisava 16px v poljih, gumbi 44px, boljsi kontrast; pogosta vprasanja; zapis vira rezervacije) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1081,6 +1348,63 @@
   </div>
 </section>
 
+<!-- ══ POGOSTA VPRASANJA (v40) – besedilo in oznaka FAQPage nastaneta iz istega seznama ══ -->
+<section id="vprasanja" aria-labelledby="vpr-naslov">
+  <div class="vpr-inner">
+    <div class="sec-center reveal">
+      <p class="sec-label">Vprašanja</p>
+      <h2 class="sec-title" id="vpr-naslov">Pogosta vprašanja</h2>
+    </div>
+    <div class="vpr-seznam reveal">
+    <details class="vpr-item" open>
+      <summary><h3 class="vpr-q">Kje je Frizerski studio Najs?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Frizerski studio Najs je na naslovu Cesta talcev 3B, 4220 Škofja Loka. Salon vodi frizerka Nataša Markuta. Za vprašanja me pokličite na 031 217 361 ali pišite na frizerskistudionajs@gmail.com.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Kako se naročim na frizerski termin?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Najhitreje prek spletnega naročanja na najs.si, ki deluje 24 ur na dan: izberete storitve, dan in uro, rezervacija pa je potrjena takoj. Termin lahko rezervirate najmanj 4 ure vnaprej. Naročite se lahko tudi po telefonu 031 217 361 ali po e-pošti.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Kakšen je delovni čas salona?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Delam po dogovoru, zato so vse proste ure vedno vidne v spletnem naročanju na najs.si. Sobotni termini so po predhodnem dogovoru po telefonu, ob nedeljah in dela prostih praznikih je salon zaprt.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Koliko stane striženje?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Moško striženje stane 14,00 € brez umivanja in 19,00 € z umivanjem, striženje z mašinico 7,00 €. Žensko striženje brez umivanja stane 15,00 €, z umivanjem in fen frizuro pa od 33,00 € (kratek las) do 39,00 € (dolg las). Cene veljajo od 19. 10. 2026, celoten cenik je na najs.si.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Ali strižete tudi otroke?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 15,00 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Koliko stane barvanje las, pramena ali balayage?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Barvanje narastka oziroma kratkih las stane 36,00 €, srednje dolgih las 39,00 € in dolgih las 48,00 €. Prameni z folijo stanejo od 55,00 € do 75,50 €, balayage pa od 78,00 € (srednje dolg las) do 88,50 € (dolg las). Barvanje in pramena se naročijo skupaj s striženjem ali fen frizuro.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Koliko časa traja obisk?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Moško striženje traja okoli 30 minut, žensko striženje z umivanjem in fen frizuro okoli 60 minut. Barvanje traja okoli eno uro, balayage od 150 do 160 minut. Natančen skupni čas za izbrane storitve vidite v spletnem naročanju, preden termin potrdite.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Kako spremenim ali prekličem termin?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Po spletni rezervaciji dobite SMS (in e-pošto, če jo vpišete) s povezavo, prek katere termin sami spremenite ali prekličete do polnoči dan pred terminom. Pozneje me pokličite na 031 217 361.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Ali dobim opomnik pred terminom?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Da. Dan pred terminom ob 18. uri vam pošljem SMS opomnik na mobilno številko, ki ste jo vpisali ob naročilu. Na stacionarno številko SMS ne more priti, zato ob naročilu vpišite mobilno številko.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Kaj če potrebujem termin nujno?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">V spletnem naročanju izberite »Nujni termin« in opišite, kaj potrebujete. O zahtevi sem takoj obveščena in vas pokličem čim prej. Nujni termin se doplača: 20,00 € med tednom ter 50,00 € ob vikendih in praznikih.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Katere izdelke uporabljate?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Delam z izdelki znamke Actyva (Kemon), ki so naravni, nežni in učinkoviti. Pri umivanju na primer uporabljam šampon Actyva Velian Complex.</p>
+    </details>
+    </div>
+    <p class="vpr-dodatno reveal">Ne najdete odgovora? Pokličite me na <a href="tel:+38631217361">031 217 361</a> ali pišite na <a href="mailto:frizerskistudionajs@gmail.com">frizerskistudionajs@gmail.com</a>.</p>
+  </div>
+</section>
+
 <!-- ══ KONTAKT ═══════════════════════════════════════════════ -->
 <section id="kontakt">
   <div class="sec-center reveal">
@@ -1099,7 +1423,7 @@
       </div>
       <div class="k-item reveal" style="transition-delay:.14s">
         <span class="k-icon">✉️</span>
-        <div><p class="k-lbl">E-pošta</p><p class="k-val"><a href="mailto:frizerskistudonajs@gmail.com">frizerskistudonajs@gmail.com</a></p></div>
+        <div><p class="k-lbl">E-pošta</p><p class="k-val"><a href="mailto:frizerskistudionajs@gmail.com">frizerskistudionajs@gmail.com</a></p></div>
       </div>
       <div class="k-item reveal" style="transition-delay:.21s">
         <span class="k-icon">🕐</span>
@@ -1326,6 +1650,26 @@ var state = {
   isNujni: false,
   nujniNote: ''
 };
+
+/* ── VIR OBISKA (v40) ────────────────────────────────────────
+   Od kod je stranka prisla: oznaka v povezavi (?utm_source=instagram&utm_medium=organic&utm_campaign=bio)
+   ali stran, ki jo je poslala (Google, Instagram, Facebook, ChatGPT …). Prebere se ob odprtju strani,
+   NIC se ne shranjuje v brskalnik (ni piskotkov). Zapise se samo ob uspesni rezervaciji, v locenem klicu. */
+var VIR_OBISKA = (function(){
+  try{
+    var q = new URLSearchParams(location.search), cist = function(x){ return String(x||'').toLowerCase().replace(/[^a-z0-9_.-]/g,'').slice(0,30); };
+    if(q.get('utm_source')) return 'utm:'+cist(q.get('utm_source'))+'/'+cist(q.get('utm_medium'))+'/'+cist(q.get('utm_campaign'));
+    if(q.get('gclid')) return 'google-oglas';
+    var ref=''; try{ ref = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : ''; }catch(e){}
+    if(ref && ref.replace(/^www\./,'')===location.hostname.replace(/^www\./,'')) ref='';
+    if(q.get('fbclid') && !ref) return 'facebook';
+    if(!ref) return 'direktno';
+    var znani=[['instagram','instagram'],['facebook','facebook'],['fb.','facebook'],['messenger','facebook'],['google','google'],['bing','bing'],
+               ['chatgpt','chatgpt'],['openai','chatgpt'],['perplexity','perplexity'],['gemini','gemini'],['tiktok','tiktok'],['youtube','youtube'],['whatsapp','whatsapp']];
+    for(var i=0;i<znani.length;i++){ if(ref.indexOf(znani[i][0])>=0) return znani[i][1]; }
+    return 'ref:'+ref.slice(0,40);
+  }catch(e){ return ''; }
+})();
 
 /* ── HELPERS ─────────────────────────────────────────────── */
 function timeToMin(t){ var p=t.split(':'); return +p[0]*60+ +p[1]; }
@@ -1929,7 +2273,7 @@ function renderSummaryPanel(){
   if(state.slot) dateStr+=' ob '+state.slot.start;
 
   var h='<div class="bk-sum-hd">Povzetek</div>';
-  h+='<div class="bk-sum-date">'+(dateStr||'<span style="opacity:.4">Termin ni izbran</span>')+'</div>';
+  h+='<div class="bk-sum-date">'+(dateStr||'<span style="opacity:.75">Termin ni izbran</span>')+'</div>';
   selArr.forEach(function(sv){
     h+='<div class="bk-sum-svc"><span>'+esc(sv.name)+'</span>'
       +(sv.price?'<span>'+parseFloat(sv.price).toFixed(2).replace('.',',')+'€</span>':'')
@@ -1980,14 +2324,14 @@ function renderStepCustomer(){
   var c=state.customer;
   body.innerHTML='<div class="bk-step-label">Korak '+(state.isNujni?3:4)+'</div><div class="bk-step-title">Vaši podatki</div>'
     +'<div id="bkErr" class="bk-error"></div>'
-    +'<div class="bk-field"><label class="bk-label">Ime in priimek *</label>'
-    +'<input class="bk-input" id="fName" type="text" placeholder="Maja Novak" oninput="this.classList.remove(\'err\')" value="'+esc(c.name||'')+'"></div>'
-    +'<div class="bk-field"><label class="bk-label">Telefon *</label>'
+    +'<div class="bk-field"><label class="bk-label" for="fName">Ime in priimek *</label>'
+    +'<input class="bk-input" id="fName" type="text" autocomplete="name" autocapitalize="words" placeholder="Maja Novak" oninput="this.classList.remove(\'err\')" value="'+esc(c.name||'')+'"></div>'
+    +'<div class="bk-field"><label class="bk-label" for="fPhone">Telefon *</label>'
     +'<input class="bk-input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="npr. 040 123 456" oninput="this.classList.remove(\'err\')" value="'+esc(c.phone||'')+'">'
     +'<div class="tel-msg" id="fPhoneMsg"></div></div>'
-    +'<div class="bk-field"><label class="bk-label">E-pošta</label>'
-    +'<input class="bk-input" id="fEmail" type="email" placeholder="maja@email.si" value="'+esc(c.email||'')+'"></div>'
-    +'<div class="bk-field"><label class="bk-label">Opomba</label>'
+    +'<div class="bk-field"><label class="bk-label" for="fEmail">E-pošta</label>'
+    +'<input class="bk-input" id="fEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="maja@email.si" value="'+esc(c.email||'')+'"></div>'
+    +'<div class="bk-field"><label class="bk-label" for="fNote">Opomba</label>'
     +'<textarea class="bk-textarea" id="fNote" placeholder="Posebne želje ali vprašanja…">'+esc(c.note||'')+'</textarea></div>';
   foot.innerHTML='';
   var telEl=document.getElementById('fPhone'), telMsg=document.getElementById('fPhoneMsg');
@@ -2054,7 +2398,7 @@ function renderStepConfirm(){
   body.innerHTML='<div class="bk-step-label">Korak '+(state.isNujni?4:5)+'</div><div class="bk-step-title">Potrditev</div>'
     +'<div id="bkErr2" class="bk-error"></div>'
     +'<div class="bk-summary">'+rows+'</div>'
-    +'<p style="font-size:.78rem;opacity:.5;margin-top:1rem;line-height:1.6">S potrditvijo se strinjate, da nas pokličete v primeru odpovedi vsaj 2 uri pred terminom.</p>';
+    +'<p class="bk-pogoj">S potrditvijo se strinjate, da nas pokličete v primeru odpovedi vsaj 2 uri pred terminom.</p>';
 
   foot.innerHTML='';
   var bk=document.createElement('button'); bk.className='bk-btn-back'; bk.textContent='← Nazaj';
@@ -2122,6 +2466,8 @@ function submitBooking(btn){
       return;
     }
     mtoken = r.zeton;
+    /* vir obiska – locen klic; ce ne uspe, rezervacija ostane povsem nespremenjena */
+    try{ if(VIR_OBISKA && r.zeton) sb.rpc('najs_zabelezi_vir', { zeton: r.zeton, vir: VIR_OBISKA }).then(function(){}, function(){}); }catch(e){}
     foot.innerHTML = '';
     body.innerHTML = '<div class="bk-success">'
       + '<div class="bk-success-icon">✶</div>'
@@ -2131,7 +2477,7 @@ function submitBooking(btn){
           : 'Vaše naročilo je potrjeno. Vidimo se '+fmtDate(state.date)+' ob '+state.slot.start+'.')+'</p>'
       + ((state.isNujni || !(c.email)) ? '' :
           '<p class="bk-success-sub" style="font-size:.82rem">Na e-pošto ste prejeli potrditev s povezavo, prek katere lahko termin <strong>spremenite ali prekličete</strong>.</p>')
-      + '<br/><p class="bk-success-sub" style="font-size:.8rem">V primeru vprašanj pokličite <a href="tel:+38631217361" style="color:var(--coral)">031 217 361</a>.</p>'
+      + '<br/><p class="bk-success-sub" style="font-size:.8rem">V primeru vprašanj pokličite <a class="bk-tel-povezava" href="tel:+38631217361">031 217 361</a>.</p>'
       + '</div>';
     var cl = document.createElement('button');
     cl.className='bk-btn-next'; cl.textContent='Zapri';

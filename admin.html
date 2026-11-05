@@ -8,7 +8,123 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="telefon.js?v=1" defer></script>
+<!-- preverjanje telefonskih stevilk: Googlova knjiznica (za tuje stevilke) s CDN + NAJS koda vgrajena tukaj,
+     da ne potrebujemo posebne datoteke. Ce se knjiznica ne nalozi, slovenske stevilke se vedno preverjamo. -->
+<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.13.12/bundle/libphonenumber-max.js" defer></script>
+<script>/* ══════════════════════════════════════════════════════════════════════
+   NAJS — preverjanje telefonskih stevilk (v1, 2026-11-04)
+   Uporablja: index.html (spletno narocanje), admin.html (nova rezervacija, urejanje stranke)
+   - Slovenske stevilke: lastna pravila (8 stevk za 0/+386), enoten zapis "+386 40 123 456".
+   - Tuje stevilke (+ ali 00 + koda drzave): Googlova knjiznica libphonenumber (zgoraj v datoteki).
+   - stanje: "ok" | "opozorilo" (stevilka obstaja, a npr. ne prejme SMS) | "napaka" (ne more obstajati)
+   Isto pretvorbo za slovenske stevilke dela tudi baza (funkcija najs_norm_tel), zato so
+   zapisi vedno enaki, ne glede na to, od kod pride stevilka.
+   ══════════════════════════════════════════════════════════════════════ */
+(function(){
+  var MOBILNE=['30','31','40','41','49','51','64','65','68','69','70','71'];
+  var PRIMER='040 123 456';
+  var SMS_OPOZ='SMS potrditve in opomnika na to številko ne boste prejeli. Če imate mobilno številko, vpišite raje njo.';
+
+  function lib(){ return window.libphonenumber || null; }
+  function stevk(n){ return n===1?'števko':(n===2?'števki':(n===3||n===4?'števke':'števk')); }
+  function zapisSI(nat){
+    if(MOBILNE.indexOf(nat.slice(0,2))>=0) return '+386 '+nat.slice(0,2)+' '+nat.slice(2,5)+' '+nat.slice(5);
+    return '+386 '+nat.slice(0,1)+' '+nat.slice(1,4)+' '+nat.slice(4,6)+' '+nat.slice(6);
+  }
+  function drzava(cc){
+    try{ return new Intl.DisplayNames(['sl'],{type:'region'}).of(cc) || cc; }catch(e){ return cc; }
+  }
+  function R(stanje,sporocilo,zapis,tip){ return {stanje:stanje,sporocilo:sporocilo||'',zapis:zapis||'',tip:tip||''}; }
+
+  function tuja(intl){
+    if(intl.length<7) return R('napaka','Številka je prekratka. Preverite jo.');
+    if(intl.length>15) return R('napaka','Številka je predolga. Preverite jo.');
+    var L=lib();
+    if(!L) return R('ok','','+'+intl,'tuja');           /* knjiznica se ni nalozila: ne oviramo stranke */
+    var e164='+'+intl, dolz;
+    try{ dolz=L.validatePhoneNumberLength(e164); }catch(e){ dolz=null; }
+    if(dolz==='INVALID_COUNTRY') return R('napaka','Koda države na začetku številke (+'+intl.slice(0,3)+'…) ne obstaja. Preverite začetek številke.');
+    var p=null; try{ p=L.parsePhoneNumber(e164); }catch(e){ p=null; }
+    var ime=p&&p.country?('državo '+drzava(p.country)):'izbrano državo';
+    if(dolz==='TOO_SHORT') return R('napaka','Številka je prekratka za '+ime+'. Preverite jo.');
+    if(dolz==='TOO_LONG') return R('napaka','Številka je predolga za '+ime+'. Preverite jo.');
+    if(dolz==='INVALID_LENGTH'||!p) return R('napaka','Številka nima pravilne dolžine za '+ime+'. Preverite jo.');
+    var zapis=p.formatInternational();
+    if(!p.isValid()) return R('opozorilo','Številka verjetno ni pravilna – ne ustreza številkam za '+ime+' (prekratka ali napačen začetek). Preverite jo.',zapis,'tuja');
+    var t=p.getType();
+    if(t==='FIXED_LINE') return R('opozorilo','To je stacionarna številka. '+SMS_OPOZ,zapis,'stacionarna');
+    if(t&&t!=='MOBILE'&&t!=='FIXED_LINE_OR_MOBILE') return R('opozorilo','To ni običajna osebna številka. '+SMS_OPOZ,zapis,'posebna');
+    return R('ok','',zapis,(t==='MOBILE'?'mobilna · ':'')+drzava(p.country));
+  }
+
+  function preveri(vnos){
+    var s=String(vnos==null?'':vnos).trim();
+    if(!s) return R('napaka','Vpišite telefonsko številko.');
+    if(/[^\d\s+()\-\/.]/.test(s)){
+      return R('napaka', /[oO]/.test(s)
+        ? 'V številki je črka »o« namesto ničle 0. Popravite jo.'
+        : 'Telefonska številka lahko vsebuje samo števke (in znake + ( ) - /).');
+    }
+    if((s.match(/\+/g)||[]).length>1 || (s.indexOf('+')>0)) return R('napaka','Znak + je lahko samo na začetku, npr. +386 40 123 456.');
+    var d=s.replace(/\D/g,''), intl=null, nat;
+    if(s.charAt(0)==='+') intl=d; else if(d.slice(0,2)==='00') intl=d.slice(2);
+    if(intl!==null){
+      if(intl.slice(0,3)!=='386') return tuja(intl);
+      nat=intl.slice(3);
+    } else if(d.slice(0,3)==='386' && (d.length===11||d.length===12)) nat=d.slice(3);
+    else if(d.charAt(0)==='0') nat=d.slice(1);
+    else nat=d;
+    if(nat.charAt(0)==='0') nat=nat.slice(1);
+    var brezKode=(intl===null);
+    if((nat.charAt(0)==='8'||nat.charAt(0)==='9') && nat.length<=8) return R('napaka','To je posebna številka (080/090), na katero vas ne moremo poklicati. Vpišite svojo mobilno ali domačo številko.');
+    if(nat.length<8){
+      var m=8-nat.length;
+      return R('napaka','Številki manjka '+m+' '+stevk(m)+'. Slovenske številke imajo 9 števk, npr. '+PRIMER+'.');
+    }
+    if(nat.length>8){
+      var v=nat.length-8;
+      return R('napaka','Številka ima '+v+' '+stevk(v)+' preveč. Slovenske številke imajo 9 števk, npr. '+PRIMER+'.'
+        +(brezKode?' Če je številka tuja, jo vpišite s kodo države, npr. +385 91 234 5678.':''));
+    }
+    var c1=nat.charAt(0), c2=nat.slice(0,2);
+    if(c1==='8'||c1==='9') return R('napaka','To je posebna številka (080/090), na katero vas ne moremo poklicati. Vpišite svojo mobilno ali domačo številko.');
+    if(!/^[1-7]/.test(nat)) return R('napaka','Ta številka ne obstaja. Preverite jo, npr. '+PRIMER+'.');
+    var zapis=zapisSI(nat);
+    if(MOBILNE.indexOf(c2)>=0) return R('ok','',zapis,'mobilna');
+    if(c1==='6') return R('opozorilo','Številka se začne z 0'+c2+', kar ni običajna slovenska številka. Preverite, ali je pravilna.',zapis,'neobicajna');
+    if(c2==='59') return R('opozorilo','To je internetna (VoIP) številka. '+SMS_OPOZ,zapis,'stacionarna');
+    return R('opozorilo','To je stacionarna številka. '+SMS_OPOZ,zapis,'stacionarna');
+  }
+
+  /* Prikaz pod poljem. el = <input>, msg = element za sporocilo.
+     Preveri, ko stranka zapusti polje; med tipkanjem samo pocisti napako, ko je popravljena.
+     Ob uspehu polje prepise v enoten zapis (+386 40 123 456), da stranka vidi, kako smo jo razumeli. */
+  function prikazi(el,msg,r){
+    if(!msg) return;
+    el.classList.remove('err');
+    msg.className='tel-msg';
+    if(!r){ msg.textContent=''; return; }
+    if(r.stanje==='napaka'){ el.classList.add('err'); msg.classList.add('tel-napaka'); msg.textContent=r.sporocilo; }
+    else if(r.stanje==='opozorilo'){ msg.classList.add('tel-opozorilo'); msg.textContent='⚠ '+r.sporocilo; }
+    else { msg.classList.add('tel-ok'); msg.textContent='✓ '+r.zapis+(r.tip?' · '+r.tip:''); }
+  }
+  function povezi(el,msg){
+    if(!el||el._najsTel) return; el._najsTel=true;
+    el.addEventListener('blur',function(){
+      if(!el.value.trim()){ prikazi(el,msg,null); return; }
+      var r=preveri(el.value); prikazi(el,msg,r);
+      if(r.stanje!=='napaka' && r.zapis) el.value=r.zapis;
+    });
+    el.addEventListener('input',function(){
+      if(!msg||!msg.textContent) return;
+      var r=preveri(el.value);
+      if(r.stanje!=='napaka') prikazi(el,msg,r); else if(msg.classList.contains('tel-ok')||msg.classList.contains('tel-opozorilo')) prikazi(el,msg,null);
+    });
+  }
+
+  window.NajsTel={ preveri:preveri, prikazi:prikazi, povezi:povezi, verzija:'v2-2026-11-04-vgrajeno' };
+})();
+</script>
 <style>
 @font-face{font-family:'Stigma Serif Display';src:url('Stigma_Display_Typeface.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 :root{--bez:#e5ccb2;--bez2:#f4e9dc;--navy:#2c4251;--coral:#d06666;--serif:'Stigma Serif Display','Cormorant Garamond',Georgia,serif;--sans:'Poppins','Jost',sans-serif}
@@ -194,6 +310,16 @@ header .who{font-size:.74rem;opacity:.65}
 .tel-napaka{color:#c0392b}
 .tel-opozorilo{color:#9a5b00;background:#fff4e0;border-radius:8px;padding:.45rem .65rem}
 .tel-ok{color:#3f8f5b}
+/* povzetek virov spletnih rezervacij (Stranke) */
+.vir-box{background:#fff;border-radius:12px;padding:.85rem 1rem;margin:0 0 1rem;box-shadow:0 1px 6px rgba(44,66,81,.06)}
+.vir-hd{font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:.55rem}
+.vir-hd span{font-weight:400;opacity:.6}
+.vir-vr{display:flex;align-items:center;gap:.6rem;font-size:.82rem;padding:.18rem 0}
+.vir-ime{flex:0 0 42%;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vir-trak{flex:1;height:8px;background:#f1ebe4;border-radius:999px;overflow:hidden}
+.vir-trak i{display:block;height:100%;background:var(--coral);border-radius:999px}
+.vir-st{flex:0 0 2.2rem;text-align:right;font-weight:600;color:var(--navy)}
+.vir-prazno{font-size:.8rem;opacity:.65}
 .pop-wide label{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:.8rem}
 .pop-wide input{display:block;width:100%;margin-top:.3rem;padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);color:var(--navy)}
 .pop-wide input:focus{outline:none;border-color:var(--coral)}
@@ -486,7 +612,7 @@ header .who{font-size:.74rem;opacity:.65}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v52-2026-11-04 - preverjanje telefonske stevilke v novi rezervaciji in urejanju stranke, telefon.js, stranke zdruzene po zadnjih 8 stevkah -->
+<!-- NAJS-BUILD: v54-2026-11-05 - prikaz vira spletnih rezervacij (podrobnosti termina in povzetek pri Strankah) -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -502,7 +628,7 @@ header .who{font-size:.74rem;opacity:.65}
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v52 · 4.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v54 · 5.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1111,9 +1237,10 @@ function buildCustomers(rows){
   return arr;
 }
 function loadCustomersThen(cb){
-  var q1=sb.from('bookings').select('id,customer_name,customer_phone,customer_email,booking_date,start_time,end_time,total_duration_min,services_text,service_name,total_price,status,note,gap_after_min,gap_duration_min').order('booking_date',{ascending:false,nullsFirst:false});
+  var q1=sb.from('bookings').select('id,customer_name,customer_phone,customer_email,booking_date,start_time,end_time,total_duration_min,services_text,service_name,total_price,status,note,gap_after_min,gap_duration_min,vir,created_at').order('booking_date',{ascending:false,nullsFirst:false});
   var q2=sb.from('stranke').select('id,ime,telefon,email,opomba,vir,created_at');
   Promise.all([q1,q2]).then(function(r){
+    VIR_VRSTICE=r[0].error?[]:(r[0].data||[]);
     CUSTOMERS=r[0].error?[]:buildCustomers(r[0].data||[]);
     if(!r[1].error) mergeStranke(r[1].data||[]);
     if(cb)cb();
@@ -1788,7 +1915,38 @@ function loadStranke(){
   box.innerHTML='<div class="uvoz-bar"><input class="search" id="custSearch" placeholder="Išči po imenu ali telefonu …"><button type="button" class="btn uvoz-btn" id="uvozBtn">⇅ Uvoz / izvoz</button></div><div id="custList"><div class="empty">Nalagam …</div></div>';
   document.getElementById('uvozBtn').addEventListener('click',openUvozIzvoz);
   document.getElementById('custSearch').addEventListener('input',refreshStrankeList);
-  loadCustomersThen(refreshStrankeList);
+  var vp=document.createElement('div'); vp.id='virPovzetek'; box.insertBefore(vp, box.firstChild);
+  loadCustomersThen(function(){ refreshStrankeList(); try{ risiVirPovzetek(); }catch(e){} });
+}
+/* ── VIR SPLETNIH REZERVACIJ (v54) ──
+   bookings.vir zapise spletna stran ob uspesni rezervaciji (funkcija najs_zabelezi_vir).
+   Rezervacije, vnesene v adminu, vira nimajo. */
+var VIR_VRSTICE=[];
+function virOznaka(v){
+  v=String(v||''); if(!v) return '';
+  var IME={instagram:'Instagram',facebook:'Facebook',google:'Google iskanje','google-oglas':'Google oglas',bing:'Bing',chatgpt:'ChatGPT',perplexity:'Perplexity',
+           gemini:'Gemini',tiktok:'TikTok',youtube:'YouTube',whatsapp:'WhatsApp',qr:'QR koda',sms:'SMS',email:'E-pošta',direktno:'Neposredno (zaznamek, vpisan naslov, SMS povezava)'};
+  var KAMP={bio:'bio',profil:'profil',gbp:'Google zemljevid',story:'zgodba',objava:'objava',vizitka:'vizitka'};
+  if(v.indexOf('utm:')===0){
+    var d=v.slice(4).split('/'), src=d[0]||'', kamp=d[2]||'';
+    var ime=IME[src]||(src.charAt(0).toUpperCase()+src.slice(1));
+    if(src==='google'&&kamp==='gbp') return 'Google zemljevid / profil podjetja';
+    return ime+(kamp?(' ('+(KAMP[kamp]||kamp.replace(/_/g,' '))+')'):'');
+  }
+  if(v.indexOf('ref:')===0) return 'povezava s strani '+v.slice(4);
+  return IME[v]||v;
+}
+function risiVirPovzetek(){
+  var el=document.getElementById('virPovzetek'); if(!el) return;
+  var meja=new Date(Date.now()-90*864e5).toISOString(), st={}, skupaj=0;
+  VIR_VRSTICE.forEach(function(b){ if(!b.vir||(b.created_at&&b.created_at<meja)) return;
+    var k=virOznaka(b.vir).replace(/ \(.*\)$/,''); st[k]=(st[k]||0)+1; skupaj++; });
+  var vrste=Object.keys(st).sort(function(a,b){return st[b]-st[a];});
+  el.innerHTML='<div class="vir-box"><div class="vir-hd">Od kod pridejo spletne rezervacije <span>· zadnjih 90 dni</span></div>'
+    +(skupaj ? vrste.map(function(k){ var pct=Math.round(st[k]*100/skupaj);
+        return '<div class="vir-vr"><span class="vir-ime">'+esc(k)+'</span><span class="vir-trak"><i style="width:'+Math.max(pct,3)+'%"></i></span><span class="vir-st">'+st[k]+'</span></div>'; }).join('')
+      : '<div class="vir-prazno">Še ni podatkov. Vir se zapisuje pri spletnih rezervacijah od 5. 11. 2026.</div>')
+    +'</div>';
 }
 function refreshStrankeList(){
   var listEl=document.getElementById('custList'); if(!listEl)return;
@@ -2056,6 +2214,7 @@ function openDetail(b){
     +'<div class="d-svc">'+esc(b.services_text||b.service_name||'—')+'</div>'
     +'<div class="d-meta">'+(b.customer_phone?('📞 <a href="tel:'+esc(b.customer_phone)+'">'+esc(b.customer_phone)+'</a>'):'')+(b.customer_email?('<br>✉️ '+esc(b.customer_email)):'')+'</div>'
     +(b.note?('<div class="d-note">'+esc(b.note)+'</div>'):'')+gap
+    +(b.vir?('<div class="d-meta" style="opacity:.75">🔗 Prišla prek: '+esc(virOznaka(b.vir))+'</div>'):'')
     +'<div class="d-row"><span class="price">'+eur(b.total_price)+'</span>'+badge(b.status)+'</div>'
     +'<div class="d-edit">'
       +'<div class="d-edit-hd">Uredi termin in storitve</div>'
