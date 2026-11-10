@@ -1004,6 +1004,7 @@
     .vpr-item[open] .vpr-ikona::after { transform: rotate(0deg); }
     .vpr-a { padding: 0 1.3rem 1.2rem; margin: 0; font-size: .95rem; line-height: 1.75; color: rgba(23,57,75,.82); }
     .vpr-item summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 14px; }
+    .vpr-a a { color: var(--navy); font-weight: 500; text-decoration: underline; text-decoration-color: var(--coral); text-underline-offset: 3px; }
     .vpr-dodatno { text-align: center; font-size: .9rem; color: rgba(23,57,75,.78); margin-top: 1.8rem; line-height: 1.7; }
     .vpr-dodatno a { color: var(--navy); font-weight: 500; text-decoration: underline; text-decoration-color: var(--coral); text-underline-offset: 3px; }
     @media (max-width: 600px) { .vpr-item summary { padding: .95rem 1.05rem; } .vpr-a { padding: 0 1.05rem 1.1rem; } .vpr-q { font-size: .97rem; } }
@@ -1146,7 +1147,7 @@
       "name": "Koliko stane striženje?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Moško striženje stane 14,00 € brez umivanja in 19,00 € z umivanjem, striženje z mašinico 7,00 €. Žensko striženje brez umivanja stane 15,00 €, z umivanjem in fen frizuro pa od 33,00 € (kratek las) do 39,00 € (dolg las). Cene veljajo od 19. 10. 2026, celoten cenik je na najs.si."
+        "text": "Cene vseh storitev so v ceniku na najs.si na spletni strani, ki je vedno posodobljen. Skupno ceno izbranih storitev vidite tudi v spletnem naročanju, preden termin potrdite."
       }
     },
     {
@@ -1154,7 +1155,7 @@
       "name": "Ali strižete tudi otroke?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 11,50 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok."
+        "text": "Da, strižem otroke vseh starosti – od najmlajših do fantovskega in dekliškega striženja. V spletnem naročanju lahko v enem terminu naročite več otrok. Cene so v ceniku na najs.si."
       }
     },
     {
@@ -1162,7 +1163,7 @@
       "name": "Koliko stane barvanje las, pramena ali balayage?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Barvanje narastka oziroma kratkih las stane 36,00 €, srednje dolgih las 39,00 € in dolgih las 48,00 €. Prameni z folijo stanejo od 55,00 € do 75,50 €, balayage pa od 78,00 € (srednje dolg las) do 88,50 € (dolg las). Barvanje in pramena se naročijo skupaj s striženjem ali fen frizuro."
+        "text": "Cena je odvisna od dolžine las in izbrane storitve. Vse cene za barvanje, pramene in balayage so v ceniku na najs.si. Barvanje in pramena se naročijo skupaj s striženjem ali fen frizuro."
       }
     },
     {
@@ -1202,7 +1203,7 @@
       "name": "Kaj če potrebujem termin nujno?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "V spletnem naročanju izberite »Nujni termin« in opišite, kaj potrebujete. O zahtevi sem takoj obveščena in vas pokličem čim prej. Nujni termin se doplača: 20,00 € med tednom ter 50,00 € ob vikendih in praznikih."
+        "text": "V spletnem naročanju izberite »Nujni termin« in opišite, kaj potrebujete. O zahtevi sem takoj obveščena in vas pokličem čim prej. Nujni termin se doplača – znesek je v ceniku na najs.si pod »Nujni termin«."
       }
     },
     {
@@ -1218,7 +1219,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v45-2026-11-09 (Pogosta vprasanja: brezplacno parkirisce, placilo; oznaka salona: Google profil, zemljevid, brezplacno parkirisce, delovni cas po dogovoru) -->
+<!-- NAJS-BUILD: v46-2026-11-10 (Pogosta vprasanja brez tocnih cen - povezava na cenik) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1404,15 +1405,15 @@
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Koliko stane striženje?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
-      <p class="vpr-a">Moško striženje stane 14,00 € brez umivanja in 19,00 € z umivanjem, striženje z mašinico 7,00 €. Žensko striženje brez umivanja stane 15,00 €, z umivanjem in fen frizuro pa od 33,00 € (kratek las) do 39,00 € (dolg las). Cene veljajo od 19. 10. 2026, celoten cenik je na najs.si.</p>
+      <p class="vpr-a">Cene vseh storitev so v <a href="#cenik">ceniku</a> na spletni strani, ki je vedno posodobljen. Skupno ceno izbranih storitev vidite tudi v spletnem naročanju, preden termin potrdite.</p>
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Ali strižete tudi otroke?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
-      <p class="vpr-a">Da, strižem otroke vseh starosti. Baby striženje stane 5,00 €, otroško striženje do 6 let 7,50 €, fantovsko striženje (6–14 let) 11,50 €, dekliško striženje pa 12,00 € brez umivanja ali 20,00 € z umivanjem. V spletnem naročanju lahko v enem terminu naročite več otrok.</p>
+      <p class="vpr-a">Da, strižem otroke vseh starosti – od najmlajših do fantovskega in dekliškega striženja. V spletnem naročanju lahko v enem terminu naročite več otrok. Cene so v <a href="#cenik">ceniku</a>.</p>
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Koliko stane barvanje las, pramena ali balayage?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
-      <p class="vpr-a">Barvanje narastka oziroma kratkih las stane 36,00 €, srednje dolgih las 39,00 € in dolgih las 48,00 €. Prameni z folijo stanejo od 55,00 € do 75,50 €, balayage pa od 78,00 € (srednje dolg las) do 88,50 € (dolg las). Barvanje in pramena se naročijo skupaj s striženjem ali fen frizuro.</p>
+      <p class="vpr-a">Cena je odvisna od dolžine las in izbrane storitve. Vse cene za barvanje, pramene in balayage so v <a href="#cenik">ceniku</a>. Barvanje in pramena se naročijo skupaj s striženjem ali fen frizuro.</p>
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Kako lahko plačam?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
@@ -1432,7 +1433,7 @@
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Kaj če potrebujem termin nujno?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
-      <p class="vpr-a">V spletnem naročanju izberite »Nujni termin« in opišite, kaj potrebujete. O zahtevi sem takoj obveščena in vas pokličem čim prej. Nujni termin se doplača: 20,00 € med tednom ter 50,00 € ob vikendih in praznikih.</p>
+      <p class="vpr-a">V spletnem naročanju izberite »Nujni termin« in opišite, kaj potrebujete. O zahtevi sem takoj obveščena in vas pokličem čim prej. Nujni termin se doplača – znesek je v <a href="#cenik">ceniku</a> pod »Nujni termin«.</p>
     </details>
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Katere izdelke uporabljate?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
