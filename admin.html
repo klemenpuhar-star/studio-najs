@@ -648,7 +648,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v55-2026-11-05 - berljivost admina: vecje drobne pisave, temnejse oznake, na telefonu polja 16px in gumbi 40px; bloki terminov nespremenjeni -->
+<!-- NAJS-BUILD: v56-2026-11-10 - koledar: termini, ki se casovno prekrivajo, so drug ob drugem - prvi levo, naslednji desno -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -664,7 +664,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v55 · 5.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v56 · 10.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -2121,6 +2121,27 @@ function risiCrtoZdaj(days){
   nariši();
   CRTA_TIMER=setInterval(nariši, 60000);              /* osvezi vsako minuto */
 }
+/* v56: termini, ki se casovno prekrivajo, se izpisejo drug ob drugem (prvi levo, naslednji desno),
+   vsak na svoji uri. Skupina = vsi termini, ki se med seboj (tudi posredno) prekrivajo; v skupini
+   dobi vsak termin prvi prosti stolpec, sirina stolpca = 100 % / stevilo stolpcev v skupini. */
+function razporediStolpce(items){
+  var out={}; if(!items.length) return out;
+  items.sort(function(a,b){ return a.s-b.s || b.e-a.e; });
+  var skupina=[], konecSk=-1, stolpci=[];
+  function zakljuci(){ var n=stolpci.length; skupina.forEach(function(it){ out[it.k]={c:it.c,n:n}; }); skupina=[]; stolpci=[]; }
+  items.forEach(function(it){
+    if(skupina.length && it.s>=konecSk) zakljuci();
+    var c=0; while(c<stolpci.length && stolpci[c]>it.s) c++;
+    stolpci[c]=it.e; it.c=c; skupina.push(it);
+    konecSk = skupina.length===1 ? it.e : Math.max(konecSk, it.e);
+  });
+  zakljuci();
+  return out;
+}
+function stolpecSlog(L){
+  if(!L || L.n<2) return '';
+  return 'left:calc('+(L.c*100/L.n)+'% + 2px);right:auto;width:calc('+(100/L.n)+'% - 4px);';
+}
 function renderCal(days,bookings,blocks){
   nastaviMerilo();
   cache={};blockCache={};var N=days.length;var gw=isMobile()?44:64;var gc=gw+'px repeat('+N+',1fr)';
@@ -2134,13 +2155,23 @@ function renderCal(days,bookings,blocks){
     if(info.closed)col+='<div class="off-band closed" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.arrangement)col+='<div class="off-band arr" style="top:0;height:'+TOTAL+'px"></div>';
     else if(info.h){if(info.h[0]>H0)col+='<div class="off-band closed" style="top:0;height:'+((info.h[0]-H0)*HOUR_PX)+'px"></div>';if(info.h[1]<H1)col+='<div class="off-band closed" style="top:'+((info.h[1]-H0)*HOUR_PX)+'px;height:'+((H1-info.h[1])*HOUR_PX)+'px"></div>';}
+    var dnevni=[];
+    bookings.filter(function(b){return b.booking_date===di;}).forEach(function(b){
+      var s=toMin(b.start_time),e=toMin(b.end_time)||(s+(b.total_duration_min||30));
+      dnevni.push({k:'b'+b.id,s:s,e:Math.max(e,s+20/PXMIN)});
+    });
+    blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
+      var s=toMin(bl.start_time),e=toMin(bl.end_time);
+      dnevni.push({k:'k'+bl.id,s:s,e:Math.max(e,s+18/PXMIN)});
+    });
+    var RAZ=razporediStolpce(dnevni);
     bookings.filter(function(b){return b.booking_date===di;}).forEach(function(b){
       cache[b.id]=b;var s=toMin(b.start_time),e=toMin(b.end_time)||(s+(b.total_duration_min||30));
       var top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,20);
       var cls=({'potrjeno':'potrjeno','opravljeno':'opravljeno','preklicano':'preklicano'})[b.status]||'';
       var cc=evStyle(b);
       var kratek=(e-s)<30;
-      col+='<div class="ev '+cls+(kratek?' kratek':'')+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px;background:'+cc.bg+';border-left-color:'+cc.bd+'"><span class="ev-st '+stKey(b.status)+'"></span>'
+      col+='<div class="ev '+cls+(kratek?' kratek':'')+'" data-bid="'+b.id+'" style="top:'+top+'px;height:'+hgt+'px;'+stolpecSlog(RAZ['b'+b.id])+'background:'+cc.bg+';border-left-color:'+cc.bd+'"><span class="ev-st '+stKey(b.status)+'"></span>'
         +(kratek
           ? '<div class="ev-n"><span class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</span>'+esc(b.customer_name||'—')+'</div>'
           : '<div class="ev-t">'+hm(b.start_time)+'–'+hm(b.end_time)+'</div><div class="ev-n">'+esc(b.customer_name||'—')+'</div>')
@@ -2149,7 +2180,7 @@ function renderCal(days,bookings,blocks){
     blocks.filter(function(bl){return bl.block_date===di;}).forEach(function(bl){
       blockCache[bl.id]=bl;
       var s=toMin(bl.start_time),e=toMin(bl.end_time),top=(s-H0*60)*PXMIN,hgt=Math.max((e-s)*PXMIN,18);
-      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">'+esc(bl.note||'Opravek')+'</div>'+(bl.note?'<div class="ev-s">opravek</div>':'')+'</div>';
+      col+='<div class="ev block" data-blk="'+bl.id+'" style="top:'+top+'px;height:'+hgt+'px;'+stolpecSlog(RAZ['k'+bl.id])+'"><div class="ev-t">'+hm(bl.start_time)+'–'+hm(bl.end_time)+'</div><div class="ev-n">'+esc(bl.note||'Opravek')+'</div>'+(bl.note?'<div class="ev-s">opravek</div>':'')+'</div>';
     });
     col+='</div>';h+=col;
   });
