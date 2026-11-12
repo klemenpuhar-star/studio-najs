@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v5-2026-11-12 (linije, certifikati, ključne sestavine) -->
+<!-- NAJS-TRGOVINA: v6-2026-11-12 (pravi logotip v glavi) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -33,9 +33,8 @@ img{max-width:100%;display:block}
   padding-top:env(safe-area-inset-top,0)}
 .glava-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
 .znamka{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.znamka img{width:40px;height:40px;object-fit:contain}
-.znamka b{font-family:var(--serif);font-weight:400;font-size:1.35rem;letter-spacing:.01em}
-.znamka span{display:block;font-size:.72rem;color:var(--siva);margin-top:-3px}
+.znamka img{height:52px;width:auto;object-fit:contain}
+.znamka-oznaka{font-size:.78rem;color:var(--siva);padding-left:12px;border-left:1px solid var(--crta);line-height:1.3}
 .iskanje{flex:1;max-width:460px;margin-left:auto;position:relative}
 .iskanje input{width:100%;height:44px;border:1.5px solid var(--crta);background:var(--belo);border-radius:999px;
   padding:0 16px 0 42px;font-size:16px}
@@ -256,7 +255,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 }
 @media (max-width:640px){
   .glava-in{gap:10px;padding:8px 14px;flex-wrap:wrap}
-  .znamka span{display:none}
+  .znamka-oznaka{display:none}
+  .znamka img{height:46px}
   .nazaj{display:none}
   .iskanje{order:3;flex-basis:100%;max-width:none;margin:0 0 4px}
   .gumb-kosarica{margin-left:auto}
@@ -302,8 +302,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 <header class="glava">
   <div class="glava-in">
     <a class="znamka" href="https://najs.si/" aria-label="Frizerski studio Najs – domača stran">
-      <img src="logo.png" alt="">
-      <div><b>Najs</b><span>Trgovina z nego las</span></div>
+      <img src="logo.png" alt="Frizerski studio Najs">
+      <span class="znamka-oznaka">Trgovina z nego las</span>
     </a>
     <a class="nazaj" href="https://najs.si/">Nazaj na spletno stran</a>
     <div class="iskanje" role="search">
