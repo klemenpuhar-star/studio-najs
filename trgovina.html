@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v10-2026-11-12 (pregled: besedila dostave, povezava na piškotke) -->
+<!-- NAJS-TRGOVINA: v11-2026-11-12 (pogoji poslovanja, DDV ni obracunan) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -440,8 +440,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 
 <footer class="noga">
   <div class="noga-in">
-    <div>FRIZERSKI STUDIO NAJS, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka · Davčna št. 54499453</div>
-    <div><a href="https://najs.si/">Spletna stran</a> &nbsp; <a href="zasebnost.html">Zasebnost</a> &nbsp; <a href="piskotki.html">Piškotki</a> &nbsp; <a href="tel:+38631217361">031 217 361</a></div>
+    <div>FRIZERSKI STUDIO NAJS, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka · Davčna št. 54499453<br>Cene so končne. DDV ni obračunan na podlagi prvega odstavka 94. člena ZDDV-1.</div>
+    <div><a href="https://najs.si/">Spletna stran</a> &nbsp; <a href="pogoji.html">Pogoji poslovanja</a> &nbsp; <a href="zasebnost.html">Zasebnost</a> &nbsp; <a href="piskotki.html">Piškotki</a> &nbsp; <a href="tel:+38631217361">031 217 361</a></div>
   </div>
 </footer>
 
@@ -917,7 +917,7 @@ function korak1(){
   });
   t.innerHTML=h;
   d.innerHTML='<div class="vsota"><span>Izdelki</span><span>'+eur(vsotaIzdelkov())+'</span></div>'
-    +'<div class="drobno" style="margin-top:2px">Dostavo izberete v naslednjem koraku – prevzem v salonu je brezplačen.</div>'
+    +'<div class="drobno" style="margin-top:2px">Cene so končne, DDV ni obračunan (94. člen ZDDV-1). Dostavo izberete v naslednjem koraku – prevzem v salonu je brezplačen.</div>'
     +'<button type="button" class="gumb-glavni" data-naprej>Naprej na dostavo in podatke</button>'
     +'<button type="button" class="gumb-drugi" data-nadaljuj-nakup>Nadaljuj z nakupom</button>';
 }
@@ -941,7 +941,7 @@ function korak2(){
    +'<label class="izbira"><input type="radio" name="placilo" value="nakazilo"'+(P.placilo==='nakazilo'?' checked':'')+'><div><b>Bančno nakazilo</b><small>Podatke za nakazilo prejmete po oddaji naročila.</small></div></label>'
    +'</div></fieldset>'
    +'<div class="polje"><label for="f_opomba">Sporočilo <small>(neobvezno)</small></label><textarea id="f_opomba" name="opomba">'+esc(P.opomba)+'</textarea></div>'
-   +'<p class="drobno">Vaše podatke uporabim samo za izvedbo naročila. <a href="zasebnost.html" target="_blank" rel="noopener">Varstvo podatkov</a></p>'
+   +'<p class="drobno">Z oddajo naročila potrjujete, da ste prebrali <a href="pogoji.html" target="_blank" rel="noopener">splošne pogoje poslovanja</a>, vključno s pravico do odstopa v 14 dneh. Vaše podatke uporabim samo za izvedbo naročila (<a href="zasebnost.html" target="_blank" rel="noopener">varstvo podatkov</a>).</p>'
    +'<div class="opozorilo" id="napakaNar" role="alert"></div>'
    +'</form>';
   t.innerHTML=h; povzetek2();
