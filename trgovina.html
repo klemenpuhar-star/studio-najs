@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v7-2026-11-12 (jasen gumb na spletno stran, brez pripisa ob logotipu) -->
+<!-- NAJS-TRGOVINA: v8-2026-11-12 (Actyva: vegansko, številke, eko oznake) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -297,6 +297,25 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 .zakaj p{margin:0;line-height:1.55;font-size:.92rem}
 .zakaj strong{font-weight:600;color:var(--navy)}
 @media (max-width:760px){ .lin-mreza{grid-template-columns:1fr} .linije{padding:0 14px} }
+/* ── Actyva: vegansko in odgovorno ── */
+.lin-kartica.siroka{grid-column:1/-1}
+.stevilke{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:4px 0 16px}
+.stevilka{background:var(--ozadje);border-radius:var(--r-mal);padding:14px 14px 12px;min-width:0}
+.stevilka b{display:block;font-family:var(--serif);font-weight:400;font-size:2rem;line-height:1;color:var(--koral-txt)}
+.stevilka span{display:block;font-weight:600;font-size:.86rem;margin-top:4px}
+.stevilka small{display:block;color:var(--siva);font-size:.76rem;line-height:1.45;margin-top:3px}
+.eko{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 16px}
+.eko li{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.eko svg{flex-shrink:0;color:#3f7a5a;background:#eef4ef;border-radius:50%;padding:7px;box-sizing:content-box}
+.eko b{display:block;font-size:.84rem;font-weight:600;line-height:1.3}
+.eko small{display:block;font-size:.74rem;color:var(--siva);line-height:1.35}
+.eko.kratko{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 12px}
+.eko.kratko svg{padding:5px}
+.eko.kratko b{font-weight:500;font-size:.78rem;padding-top:4px}
+.znacka-vegan{position:absolute;right:10px;top:10px;display:inline-flex;align-items:center;gap:4px;background:#eef4ef;color:#2f6448;
+  font-size:.7rem;font-weight:600;padding:4px 9px 4px 7px;border-radius:999px}
+@media (max-width:860px){ .stevilke{grid-template-columns:repeat(2,minmax(0,1fr))} .eko{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:420px){ .stevilka b{font-size:1.7rem} .eko{grid-template-columns:minmax(0,1fr)} }
 </style>
 </head>
 <body>
@@ -341,6 +360,7 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 
   <section class="linije" aria-labelledby="linNaslov">
     <h2 id="linNaslov">Kaj je Actyva in kaj Kemon Hair Care?</h2>
+    <p class="pod">Actyva je certificirano veganska linija, ki skrbi tudi za naravo – od polj, kjer rastejo njene rastline, do embalaže.</p>
     <div class="lin-mreza" id="linMreza"></div>
   </section>
 
@@ -414,12 +434,28 @@ function brezSum(t){return String(t||'').toLowerCase().normalize('NFD').replace(
 var LINIJA={'Actyva (Kemon)':'Kemon Actyva','Kemon Hair Care':'Kemon Hair Care','Kemon Hair Style':'Kemon Hair Style','Yo Cond (Kemon)':'Kemon Yo Cond','Krtače':'Olivia Garden'};
 var VRSTE=['Šamponi','Balzami in maske','Nega brez izpiranja','Olja in serumi','Nega lasišča','Oblikovanje','Barvni balzami','Krtače','Za roke'];
 var ISO='Kemon izdeluje s certifikati ISO 9001, ISO 14001, ISO 22716 (dobra proizvodna praksa v kozmetiki) in ISO 45001.';
+var IKONE={
+  vegan:'<path d="M5 19C5 10 11 5 19 5c0 8-5 14-14 14z"/><path d="M5 19l8-8"/>',
+  recikl:'<path d="M20 12a8 8 0 0 1-13.6 5.7L4 15"/><path d="M4 20v-5h5"/><path d="M4 12a8 8 0 0 1 13.6-5.7L20 9"/><path d="M20 4v5h-5"/>',
+  vrecka:'<path d="M8 3h8"/><path d="M9 3v3l-3 4v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-9l-3-4V3"/><path d="M9 14h6"/>',
+  papir:'<path d="M12 3 7 10h3l-4 6h12l-4-6h3z"/><path d="M12 16v5"/>',
+  alu:'<path d="M9 3h6v3l1 2v11l-2 2h-4l-2-2V8l1-2z"/><path d="M9 11h6"/>',
+  derma:'<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/><path d="M9.5 14.5l1.8 1.8 3.4-3.6"/>'
+};
+function ikona(k,vel){ return '<svg width="'+(vel||22)+'" height="'+(vel||22)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IKONE[k]||'')+'</svg>'; }
 var LINIJE_INFO={
   'Actyva (Kemon)':{ime:'Kemon Actyva',
     uvod:'Profesionalna linija, ki jo od leta 1978 razvija italijanska družinska tovarna Kemon iz Umbrije. Združuje znanost in naravo: v vsakem izdelku je patentirani Velian Complex iz štirih zdravilnih rastlin, ki jih Kemon ekološko goji na svojih poljih.',
     znacke:['Green & Clean Cosmetics (ICEA)','ICEA Vegan','Do 98 % sestavin naravnega izvora','Dermatološko testirano','Patentirani Velian Complex'],
     brez:'SLES, SLS, parabenov, PPD, resorcinola, petrolatuma in parafinskih olj, triklosana, MIT/MCI, nanomaterialov ter sestavin živalskega izvora in GSO',
-    dodatno:'Stekleničke so iz 50 % recikliranega PE. Velikost 100 ml je priročna za na pot ali za prvi preizkus.'},
+    dodatno:'Velikost 100 ml je priročna za na pot ali za prvi preizkus.',
+    stevilke:[['100 %','vegansko','Brez surovin živalskega izvora in GSO – v sestavinah in v celotni proizvodnji (certifikat ICEA Vegan).'],
+              ['28 ha','ekoloških polj','Na njih Kemon sam goji zdravilne rastline za Velian Complex.'],
+              ['50 %','reciklirane plastike','v stekleničkah Actyva.'],
+              ['65 %','manj plastike','pri 1000 ml vrečki za ponovno polnjenje v primerjavi z litrsko steklenico.']],
+    eko:[['vegan','Vegansko','certifikat ICEA Vegan'],['recikl','Reciklirana plastika','stekleničke 50 % iz recikliranega PE'],
+         ['vrecka','Vrečke za polnjenje','65 % manj plastike'],['papir','Reciklirani papir','ali papir s certifikatom FSC'],
+         ['alu','Reciklirani aluminij','tube za barve'],['derma','Dermatološko testirano','varno za lasišče']]},
   'Kemon Hair Care':{ime:'Kemon Hair Care',
     uvod:'Mlada in sveža linija za vsakodnevno nego, s prijetnimi dišavami in lahkimi teksturami. Vsaka podlinija ima svojo ključno sestavino – od fermentirane riževe vode za kodre do karitejevega masla za suhe lase ter ginsenga in kofeina za šibke lase.',
     znacke:['Ključna sestavina za vsako potrebo','Embalaža iz do 50 % recikliranih materialov','Otroška linija: do 92 % naravnih sestavin, testirana na občutljivi koži'],
@@ -498,6 +534,12 @@ function linijaHtml(k, kratko){
   var L=LINIJE_INFO[k]; if(!L) return '';
   var h='<div class="lin-glava"><h3>'+esc(L.ime)+'</h3></div><p class="lin-uvod">'+esc(L.uvod)+'</p>';
   h+='<ul class="znacke">'+L.znacke.map(function(z){ return '<li>'+esc(z)+'</li>'; }).join('')+'</ul>';
+  if(L.stevilke && !kratko){
+    h+='<div class="stevilke">'+L.stevilke.map(function(x){ return '<div class="stevilka"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span><small>'+esc(x[2])+'</small></div>'; }).join('')+'</div>';
+  }
+  if(L.eko){
+    h+='<ul class="eko'+(kratko?' kratko':'')+'">'+L.eko.map(function(x){ return '<li>'+ikona(x[0],kratko?18:24)+'<div><b>'+esc(x[1])+'</b>'+(kratko?'':'<small>'+esc(x[2])+'</small>')+'</div></li>'; }).join('')+'</ul>';
+  }
   if(L.brez) h+='<p class="lin-brez"><b>Brez:</b> '+esc(L.brez)+'.</p>';
   if(!kratko){ h+='<p class="lin-drobno">'+esc(L.dodatno)+' '+esc(ISO)+'</p>';
     h+='<button type="button" class="lin-gumb" data-linija="'+esc(LINIJA[k]||k)+'">Pokaži izdelke '+esc(L.ime)+'</button>'; }
@@ -505,7 +547,7 @@ function linijaHtml(k, kratko){
 }
 function zgradiLinije(){
   var m=$('#linMreza'); if(!m) return;
-  m.innerHTML=Object.keys(LINIJE_INFO).map(function(k){ return '<article class="lin-kartica">'+linijaHtml(k,false)+'</article>'; }).join('');
+  m.innerHTML=Object.keys(LINIJE_INFO).map(function(k){ return '<article class="lin-kartica'+(LINIJE_INFO[k].stevilke?' siroka':'')+'">'+linijaHtml(k,false)+'</article>'; }).join('');
   m.addEventListener('click',function(e){
     var b=e.target.closest('[data-linija]'); if(!b) return;
     F.linija=b.dataset.linija; $('#linija').value=F.linija; izrisi();
@@ -569,7 +611,7 @@ function prikaznoIme(c,a){
 function karticaHtml(c){
   var a=PO_ID[c.izbrana], im=prikaznoIme(c,a), h='';
   h+='<article class="kartica" data-k="'+esc(c.kljuc)+'">';
-  h+='<button type="button" class="k-slika" data-odpri aria-label="Podrobnosti: '+esc(im.ime)+'">'+slikaHtml(a)+(c.priporoceno?'<span class="znacka">Priporočam</span>':'')+'</button>';
+  h+='<button type="button" class="k-slika" data-odpri aria-label="Podrobnosti: '+esc(im.ime)+'">'+slikaHtml(a)+(c.priporoceno?'<span class="znacka">Priporočam</span>':'')+(c.kategorija==='Actyva (Kemon)'?'<span class="znacka-vegan">'+ikona('vegan',14)+'Vegansko</span>':'')+'</button>';
   h+='<div class="k-linija">'+esc(LINIJA[c.kategorija]||c.kategorija)+'</div>';
   h+='<button type="button" class="k-ime" data-odpri>'+esc(im.ime)+(im.pod?'<small>'+esc(im.pod)+'</small>':'')+'</button>';
   if(a.kljucna_sestavina && a.kljucna_sestavina!=='Velian Complex') h+='<div class="k-sest">'+esc(a.kljucna_sestavina)+'</div>';
@@ -652,7 +694,9 @@ function risiOkno(){
   if(a.zakaj) h+='<div class="zakaj"><span>Zakaj deluje</span><p>'+krepko(a.zakaj)+'</p></div>';
   if(a.opis) h+='<p class="o-opis">'+esc(a.opis)+'</p>';
   var LI=LINIJE_INFO[c.kategorija];
-  if(LI){ h+='<ul class="znacke male">'+LI.znacke.map(function(z){ return '<li>'+esc(z)+'</li>'; }).join('')+'</ul>';
+  if(LI&&LI.eko){ h+='<ul class="eko kratko">'+LI.eko.map(function(x){ return '<li>'+ikona(x[0],18)+'<div><b>'+esc(x[1])+'</b></div></li>'; }).join('')+'</ul>';
+          if(LI.brez) h+='<p class="lin-brez">Brez '+esc(LI.brez)+'.</p>'; }
+  else if(LI){ h+='<ul class="znacke male">'+LI.znacke.map(function(z){ return '<li>'+esc(z)+'</li>'; }).join('')+'</ul>';
           if(LI.brez) h+='<p class="lin-brez">Brez '+esc(LI.brez)+'.</p>'; }
   if(a.potrebe&&a.potrebe.length) h+='<div class="o-oznake" aria-label="Primerno za">'+a.potrebe.map(function(p){ return '<span>'+esc(p)+'</span>'; }).join('')+'</div>';
   h+='<div class="o-nakup"><div class="kolicina"><button type="button" data-okol="-1" aria-label="Manj">−</button><output id="oKol">'+O_KOL+'</output><button type="button" data-okol="1" aria-label="Več">+</button></div>'
