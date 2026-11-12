@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v6-2026-11-12 (pravi logotip v glavi) -->
+<!-- NAJS-TRGOVINA: v7-2026-11-12 (jasen gumb na spletno stran, brez pripisa ob logotipu) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -34,7 +34,6 @@ img{max-width:100%;display:block}
 .glava-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
 .znamka{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .znamka img{height:52px;width:auto;object-fit:contain}
-.znamka-oznaka{font-size:.78rem;color:var(--siva);padding-left:12px;border-left:1px solid var(--crta);line-height:1.3}
 .iskanje{flex:1;max-width:460px;margin-left:auto;position:relative}
 .iskanje input{width:100%;height:44px;border:1.5px solid var(--crta);background:var(--belo);border-radius:999px;
   padding:0 16px 0 42px;font-size:16px}
@@ -45,8 +44,10 @@ img{max-width:100%;display:block}
 .gumb-kosarica .st{min-width:22px;height:22px;border-radius:11px;background:var(--koral);font-size:.78rem;
   display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
 .gumb-kosarica .st[data-0]{background:rgba(255,255,255,.18)}
-.nazaj{font-size:.85rem;color:var(--siva);text-decoration:none;white-space:nowrap}
-.nazaj:hover{color:var(--koral-txt)}
+.nazaj{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px 0 10px;border:1.5px solid var(--crta);border-radius:999px;
+  background:var(--belo);color:var(--navy);font-size:.86rem;font-weight:500;text-decoration:none;white-space:nowrap;flex-shrink:0}
+.nazaj:hover{border-color:var(--navy)}
+.nazaj-kratko{display:none}
 
 /* ── uvod ── */
 .uvod{max-width:1200px;margin:0 auto;padding:44px 20px 8px;display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:end}
@@ -255,9 +256,10 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 }
 @media (max-width:640px){
   .glava-in{gap:10px;padding:8px 14px;flex-wrap:wrap}
-  .znamka-oznaka{display:none}
   .znamka img{height:46px}
-  .nazaj{display:none}
+  .nazaj{height:38px;padding:0 12px 0 8px}
+  .nazaj-dolgo{display:none}
+  .nazaj-kratko{display:inline}
   .iskanje{order:3;flex-basis:100%;max-width:none;margin:0 0 4px}
   .gumb-kosarica{margin-left:auto}
   .gumb-kosarica .besedilo{display:none}
@@ -303,9 +305,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
   <div class="glava-in">
     <a class="znamka" href="https://najs.si/" aria-label="Frizerski studio Najs – domača stran">
       <img src="logo.png" alt="Frizerski studio Najs">
-      <span class="znamka-oznaka">Trgovina z nego las</span>
     </a>
-    <a class="nazaj" href="https://najs.si/">Nazaj na spletno stran</a>
+    <a class="nazaj" href="https://najs.si/"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span class="nazaj-dolgo">Na spletno stran</span><span class="nazaj-kratko">Domov</span></a>
     <div class="iskanje" role="search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <label class="skrito" for="isci">Išči izdelke</label>
