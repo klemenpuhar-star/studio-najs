@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v9-2026-11-12 (krajša pot do izdelkov, iskalnik s predlogi) -->
+<!-- NAJS-TRGOVINA: v10-2026-11-12 (pregled: besedila dostave, povezava na piškotke) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -441,7 +441,7 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 <footer class="noga">
   <div class="noga-in">
     <div>FRIZERSKI STUDIO NAJS, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka · Davčna št. 54499453</div>
-    <div><a href="https://najs.si/">Spletna stran</a> &nbsp; <a href="zasebnost.html">Zasebnost</a> &nbsp; <a href="tel:+38631217361">031 217 361</a></div>
+    <div><a href="https://najs.si/">Spletna stran</a> &nbsp; <a href="zasebnost.html">Zasebnost</a> &nbsp; <a href="piskotki.html">Piškotki</a> &nbsp; <a href="tel:+38631217361">031 217 361</a></div>
   </div>
 </footer>
 
@@ -926,7 +926,7 @@ function korak2(){
   var h='<form id="obrazec" novalidate>'
    +'<fieldset><legend>Kako želite prejeti izdelke?</legend><div class="izbira-kartic">'
    +'<label class="izbira"><input type="radio" name="dostava" value="prevzem"'+(P.dostava==='prevzem'?' checked':'')+'><div><b>Prevzem v salonu – brezplačno</b><small>Cesta talcev 3B, Škofja Loka. Obvestim vas, ko je naročilo pripravljeno.</small></div></label>'
-   +'<label class="izbira"><input type="radio" name="dostava" value="posta"'+(P.dostava==='posta'?' checked':'')+'><div><b>Dostava po pošti – '+(NAST.prag&&vsotaIzdelkov()>=NAST.prag?'brezplačno':eur(NAST.cena_dostave))+'</b><small>Pošljem v 2–3 delovnih dneh po prejemu plačila.</small></div></label>'
+   +'<label class="izbira"><input type="radio" name="dostava" value="posta"'+(P.dostava==='posta'?' checked':'')+'><div><b>Dostava po pošti – '+(NAST.prag&&vsotaIzdelkov()>=NAST.prag?'brezplačno':eur(NAST.cena_dostave))+'</b><small>Paket pošljem po prejemu plačila.</small></div></label>'
    +'</div></fieldset>'
    +'<fieldset><legend>Vaši podatki</legend>'
    +polje('ime','Ime in priimek','text',P.ime,'name','Vpišite ime in priimek.')
@@ -1013,9 +1013,9 @@ function korak3(d,P,vsebina){
   }
   var dost=P.dostava==='prevzem'
     ? 'Ko bo naročilo pripravljeno, vas obvestim – prevzamete ga v salonu na Cesti talcev 3B v Škofji Loki.'
-    : 'Paket pošljem v 2–3 delovnih dneh po prejemu plačila na naslov '+esc(P.naslov)+', '+esc(P.posta)+'.';
+    : 'Paket pošljem po prejemu plačila na naslov '+esc(P.naslov)+', '+esc(P.posta)+'.';
   $('#pTelo').innerHTML='<div class="uspeh"><div class="kljukica"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2c4251" stroke-width="2.2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>'
-    +'<h3>Hvala, naročilo je oddano</h3><p>Številka naročila: <b>'+sklic+'</b>'+(P.email?'<br>Potrdilo sem poslala na '+esc(P.email)+'.':'')+'</p>'
+    +'<h3>Hvala, naročilo je oddano</h3><p>Številka naročila: <b>'+sklic+'</b>'+(P.email?'<br>Potrdilo z navodili za plačilo prejmete na '+esc(P.email)+'.':'')+'</p>'
     +nav+'<p>'+dost+'</p><p>Če imate vprašanje, me pokličite na <a href="tel:+38631217361">031 217 361</a>.</p></div>';
   $('#pDno').innerHTML='<button type="button" class="gumb-glavni" data-nadaljuj-nakup>Nazaj v trgovino</button>';
 }
