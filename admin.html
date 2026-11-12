@@ -645,10 +645,54 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
   #detail .pop .x, .pop .x{ min-width:40px; min-height:40px }
   .pop .x::after{ content:''; position:absolute; inset:-4px }
 }
+/* ══ Izdelki: iskalnik, filtri, sličice, celoten obrazec (v57, 2026-11-12) ══ */
+.iz-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin:.2rem 0 .6rem}
+.iz-bar input,.iz-bar select{padding:.55rem .7rem;border:1.5px solid rgba(23,57,75,.15);border-radius:10px;font-family:var(--sans);font-size:.85rem;color:var(--navy);background:#fff}
+.iz-bar input{flex:2 1 220px}.iz-bar select{flex:1 1 150px}
+.iz-stevec{font-size:.8rem;color:#5f6f79;margin:0 0 .5rem}
+.iz-opoz{color:#a6602a}
+.iz-row{justify-content:flex-start;gap:.8rem}
+.iz-thumb{flex:0 0 52px;width:52px;height:52px;border-radius:10px;object-fit:contain;background:#faf7f3;border:1px solid #f0e7dc}
+.iz-thumb-ni{display:flex;align-items:center;justify-content:center;font-size:.62rem;color:#a6602a;text-align:center;line-height:1.1;background:#fdf3e8;border-style:dashed}
+.iz-cena{color:var(--navy);margin-right:.2rem}
+.iz-pika{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;vertical-align:-1px;margin-right:.25rem;border:1px solid rgba(0,0,0,.12)}
+.bl-rn.iz-prip{background:#fbeaea;color:var(--coral-txt)}
+.bl-rn.iz-man{background:#fdf0e1;color:#8a4f1e}
+.iz-gumbi{flex-shrink:0;gap:.4rem}
+.iz-form{margin-bottom:1rem;border:1.5px solid #efe2d3}
+.iz-sek{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--navy);margin:1rem 0 .45rem;padding-top:.7rem;border-top:1px solid #efe6da}
+.iz-sek span{font-weight:400;text-transform:none;letter-spacing:0;color:#7c8a93}
+.iz-form select,.iz-form textarea{padding:.5rem;border:1px solid #e7e0d8;border-radius:9px;font-family:inherit;font-size:.92rem;color:var(--navy);background:#fff}
+.iz-form textarea{resize:vertical;line-height:1.45}
+.iz-kljukice{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;margin:.3rem 0 .2rem}
+.iz-kljukice label{display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--navy);cursor:pointer}
+.iz-potrebe{display:flex;flex-wrap:wrap;gap:.4rem}
+.iz-chip{display:inline-flex;align-items:center;padding:.4rem .75rem;border:1.5px solid #e7e0d8;border-radius:999px;background:#fff;font-size:.8rem;color:var(--navy);cursor:pointer;user-select:none}
+.iz-chip input{position:absolute;opacity:0;pointer-events:none}
+.iz-chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.iz-predogled{background:#fbf4ee;border-left:3px solid var(--coral);border-radius:0 9px 9px 0;padding:.55rem .8rem;margin:.1rem 0 .4rem}
+.iz-predogled span{display:block;font-size:.72rem;font-weight:600;color:var(--coral-txt);margin-bottom:2px}
+.iz-predogled p{margin:0;font-size:.88rem;line-height:1.5;color:var(--navy)}
+.iz-predogled strong{font-weight:600}
+.iz-slika-vrsta{display:flex;gap:.7rem;align-items:flex-end}
+.iz-slika-vrsta img{flex:0 0 72px;width:72px;height:72px;object-fit:contain;background:#fff;border:1px solid #efe6da;border-radius:10px}
+.iz-slika-vrsta label{flex:1;display:flex;flex-direction:column;gap:.2rem;font-size:.76rem;color:#7c8a93}
+.iz-slika-vrsta input{padding:.5rem;border:1px solid #e7e0d8;border-radius:9px;font-family:inherit;font-size:.92rem;color:var(--navy)}
+.iz-barvna{margin-top:1rem;padding-top:.7rem;border-top:1px solid #efe6da}
+.iz-barvna summary{cursor:pointer;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--navy);margin-bottom:.4rem}
+.iz-namig{font-size:.78rem;color:#5f6f79;background:#fff;border-radius:8px;padding:.45rem .6rem;margin:.3rem 0 .5rem}
+.iz-hex{display:flex;gap:.4rem;align-items:center}
+.iz-hex input[type=color]{width:44px;height:38px;padding:2px;border:1px solid #e7e0d8;border-radius:9px;background:#fff;flex:0 0 44px}
+.iz-hex input[type=text]{flex:1;min-width:0}
+@media(max-width:600px){
+  .iz-row{display:grid;grid-template-columns:44px 1fr;gap:.35rem .7rem;align-items:start}
+  .iz-gumbi{grid-column:1/-1;justify-content:flex-end}
+  .iz-thumb{width:44px;height:44px}
+}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v56-2026-11-10 - koledar: termini, ki se casovno prekrivajo, so drug ob drugem - prvi levo, naslednji desno -->
+<!-- NAJS-BUILD: v57-2026-11-12 - izdelki: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -664,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v56 · 10.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v57 · 12.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1766,8 +1810,30 @@ function blIzvoz(){
   });
 }
 
-/* ═══ IZDELKI (spletna trgovina) ═══════════════════════════ */
-var IZD_CACHE=[];
+/* ═══ IZDELKI (spletna trgovina) ═══════════════════════════
+   v57: obrazec ureja vsa polja, ki jih uporablja trgovina.html (vrsta, potrebe, priporoceno,
+   kljucna_sestavina, zakaj, skupina/barva/barva_hex, sort_order); seznam ima iskalnik, filtre,
+   sličice, opozorila o manjkajočih podatkih in gumb »Podvoji« (nova velikost ali odtenek).
+   Seznama VRSTE in POTREBE morata ostati enaka kot v trgovina.html. */
+var IZD_CACHE=[], IZD_F={q:'',kat:'',vrsta:'',manjka:''};
+var IZD_VRSTE=['Šamponi','Balzami in maske','Nega brez izpiranja','Olja in serumi','Nega lasišča','Oblikovanje','Barvni balzami','Krtače','Za roke'];
+var IZD_POTREBE=['Barvani lasje','Blond in sivi lasje','Suhi in poškodovani lasje','Tanki lasje in volumen','Kodrasti lasje',
+  'Neukrotljivi in krepavi lasje','Mastno lasišče','Prhljaj','Izpadanje las','Občutljivo lasišče','Zaščita pred toploto',
+  'Poletje in sonce','Za otroke','Vsakodnevna nega'];
+function izdManjka(a){
+  var m=[];
+  if(!a.slika_url) m.push('slika');
+  if(!a.vrsta) m.push('vrsta');
+  if(!a.opis) m.push('opis');
+  if((!a.potrebe||!a.potrebe.length) && ['Oblikovanje','Za roke','Krtače'].indexOf(a.vrsta)<0) m.push('potrebe');  /* izdelki za oblikovanje, roke in krtače potreb nimajo */
+  if(!a.velikost&&!a.barva&&a.vrsta!=='Krtače') m.push('velikost');
+  return m;
+}
+function izdUnikatne(polje){
+  var s={}; IZD_CACHE.forEach(function(a){ if(a[polje]) s[a[polje]]=1; });
+  return Object.keys(s).sort(function(x,y){return x.localeCompare(y,'sl');});
+}
+function izdKrepko(t){ return esc(t||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); }
 function loadIzdelki(){
   calScroll.classList.add('hidden'); nujniList.classList.add('hidden');
   document.getElementById('strankeView').classList.add('hidden');
@@ -1782,64 +1848,176 @@ function loadIzdelki(){
   });
 }
 function izrisiIzdelke(box){
+  var opt=function(v,t,sel){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(t)+'</option>';};
+  var vrste=IZD_VRSTE.concat(izdUnikatne('vrsta').filter(function(v){return IZD_VRSTE.indexOf(v)<0;}));
   var h='<div class="bl-actions"><button class="btn bl-add" id="izNov">➕ Nov izdelek</button></div>'
-    +'<div id="izForm"></div>';
-  if(!IZD_CACHE.length){ h+='<div class="empty">Še ni izdelkov. Dodajte prvega zgoraj.</div>'; }
-  else {
-    h+='<div class="bl-list">'+IZD_CACHE.map(function(a){
-      var zalBadge = a.zaloga==null ? '' : (' <span class="bl-rn'+(a.zaloga<=0?' bl-rn-ni':'')+'">zaloga: '+a.zaloga+'</span>');
-      var webBadge = a.prikazi_na_spletu ? ' <span class="bl-rn">na spletu</span>' : ' <span class="bl-rn bl-rn-ni">skrito</span>';
-      var aktBadge = a.aktiven ? '' : ' <span class="bl-rn bl-rn-ni">neaktivno</span>';
-      return '<div class="bl-row"><div class="bl-l" style="min-width:0;flex:1 1 auto"><b>'+esc(a.naziv)+'</b>'
-        +(a.kategorija?(' · '+esc(a.kategorija)):'')+(a.velikost?(' · '+esc(a.velikost)):'')
-        +'<div class="bl-svc">'+eur(a.cena)+webBadge+zalBadge+aktBadge+'</div></div>'
-        +'<div class="bl-r" style="flex-shrink:0"><button class="act" data-edit="'+a.id+'">Uredi</button></div></div>';
-    }).join('')+'</div>';
-  }
+    +'<div id="izForm"></div>'
+    +'<div class="iz-bar">'
+    +'<input type="search" id="izQ" placeholder="Išči po nazivu, liniji, sestavini …" value="'+esc(IZD_F.q)+'">'
+    +'<select id="izFKat">'+opt('','Vse linije',IZD_F.kat)+izdUnikatne('kategorija').map(function(k){return opt(k,k,IZD_F.kat);}).join('')+'</select>'
+    +'<select id="izFVrsta">'+opt('','Vse vrste',IZD_F.vrsta)+opt('-','— brez vrste —',IZD_F.vrsta)+vrste.map(function(k){return opt(k,k,IZD_F.vrsta);}).join('')+'</select>'
+    +'<select id="izFManjka">'+opt('','Vsi izdelki',IZD_F.manjka)+opt('kaj','⚠ Manjkajo podatki',IZD_F.manjka)
+      +opt('slika','Brez slike',IZD_F.manjka)+opt('opis','Brez opisa',IZD_F.manjka)+opt('potrebe','Brez potreb',IZD_F.manjka)
+      +opt('skrito','Skrito s spleta',IZD_F.manjka)+opt('prip','Priporočam',IZD_F.manjka)+'</select>'
+    +'</div><div id="izSeznam"></div>';
   box.innerHTML=h;
   document.getElementById('izNov').addEventListener('click',function(){ izdelekForma(null); });
-  box.querySelectorAll('[data-edit]').forEach(function(btn){
+  var nastavi=function(){
+    IZD_F.q=document.getElementById('izQ').value; IZD_F.kat=document.getElementById('izFKat').value;
+    IZD_F.vrsta=document.getElementById('izFVrsta').value; IZD_F.manjka=document.getElementById('izFManjka').value;
+    izrisiSeznamIzdelkov();
+  };
+  document.getElementById('izQ').addEventListener('input',nastavi);
+  ['izFKat','izFVrsta','izFManjka'].forEach(function(id){ document.getElementById(id).addEventListener('change',nastavi); });
+  izrisiSeznamIzdelkov();
+}
+function izrisiSeznamIzdelkov(){
+  var el=document.getElementById('izSeznam'); if(!el)return;
+  if(!IZD_CACHE.length){ el.innerHTML='<div class="empty">Še ni izdelkov. Dodajte prvega zgoraj.</div>'; return; }
+  var q=brezSum(IZD_F.q);
+  var vidni=IZD_CACHE.filter(function(a){
+    if(IZD_F.kat && a.kategorija!==IZD_F.kat) return false;
+    if(IZD_F.vrsta==='-' ? !!a.vrsta : (IZD_F.vrsta && a.vrsta!==IZD_F.vrsta)) return false;
+    var m=izdManjka(a);
+    if(IZD_F.manjka==='kaj' && !m.length) return false;
+    if(['slika','opis','potrebe'].indexOf(IZD_F.manjka)>=0 && m.indexOf(IZD_F.manjka)<0) return false;
+    if(IZD_F.manjka==='skrito' && a.prikazi_na_spletu) return false;
+    if(IZD_F.manjka==='prip' && !a.priporoceno) return false;
+    if(q){
+      var t=brezSum([a.naziv,a.kategorija,a.vrsta,a.velikost,a.skupina,a.barva,a.kljucna_sestavina].join(' '));
+      if(q.split(/\s+/).some(function(w){return t.indexOf(w)<0;})) return false;
+    }
+    return true;
+  });
+  var nManjka=IZD_CACHE.filter(function(a){return izdManjka(a).length;}).length;
+  var h='<div class="iz-stevec">Prikazano <b>'+vidni.length+'</b> od '+IZD_CACHE.length+' izdelkov'
+    +(nManjka?' · <span class="iz-opoz">⚠ '+nManjka+' z manjkajočimi podatki</span>':'')+'</div>';
+  if(!vidni.length){ el.innerHTML=h+'<div class="empty">Ni izdelkov za izbrane filtre.</div>'; return; }
+  h+='<div class="bl-list">'+vidni.map(function(a){
+    var m=izdManjka(a);
+    var zalBadge = a.zaloga==null ? '' : (' <span class="bl-rn'+(a.zaloga<=0?' bl-rn-ni':'')+'">zaloga: '+a.zaloga+'</span>');
+    var webBadge = a.prikazi_na_spletu ? ' <span class="bl-rn">na spletu</span>' : ' <span class="bl-rn bl-rn-ni">skrito</span>';
+    var aktBadge = a.aktiven ? '' : ' <span class="bl-rn bl-rn-ni">neaktivno</span>';
+    var pripBadge = a.priporoceno ? ' <span class="bl-rn iz-prip">★ Priporočam</span>' : '';
+    var manjBadge = m.length ? ' <span class="bl-rn iz-man">⚠ manjka: '+m.join(', ')+'</span>' : '';
+    var slika = a.slika_url ? '<img class="iz-thumb" src="'+esc(a.slika_url)+'" alt="" loading="lazy">'
+      : '<div class="iz-thumb iz-thumb-ni">ni slike</div>';
+    var barva = a.barva ? (' · <span class="iz-pika" style="background:'+esc(a.barva_hex||'#ccc')+'"></span>'+esc(a.barva)) : '';
+    var pod=[a.kategorija,a.vrsta,a.velikost].filter(Boolean).map(esc).join(' · ');
+    return '<div class="bl-row iz-row">'+slika
+      +'<div class="bl-l" style="min-width:0;flex:1 1 auto"><b>'+esc(a.naziv)+'</b>'
+      +'<div class="bl-svc">'+pod+barva+'</div>'
+      +'<div class="bl-svc"><b class="iz-cena">'+eur(a.cena)+'</b>'+webBadge+pripBadge+zalBadge+aktBadge+manjBadge+'</div></div>'
+      +'<div class="bl-r iz-gumbi"><button class="act" data-edit="'+a.id+'">Uredi</button>'
+      +'<button class="act" data-dup="'+a.id+'" title="Nov izdelek s temi podatki – spremeni samo velikost/odtenek in ceno">Podvoji</button></div></div>';
+  }).join('')+'</div>';
+  el.innerHTML=h;
+  var najdi=function(id){return IZD_CACHE.filter(function(x){return x.id===id;})[0];};
+  el.querySelectorAll('[data-edit]').forEach(function(btn){
+    btn.addEventListener('click',function(){ izdelekForma(najdi(btn.getAttribute('data-edit'))||null); });
+  });
+  el.querySelectorAll('[data-dup]').forEach(function(btn){
     btn.addEventListener('click',function(){
-      var a=IZD_CACHE.filter(function(x){return x.id===btn.getAttribute('data-edit');})[0];
-      izdelekForma(a||null);
+      var a=najdi(btn.getAttribute('data-dup')); if(!a)return;
+      var k={}; Object.keys(a).forEach(function(x){k[x]=a[x];});
+      delete k.id; delete k.created_at; k.potrebe=(a.potrebe||[]).slice();
+      izdelekForma(k,'kopija');
     });
   });
 }
-function izdelekForma(a){
+function izdelekForma(a,nacin){
   var box=document.getElementById('izForm'); if(!box)return;
   a=a||{};
-  box.innerHTML='<div class="obr-form"><div class="d-edit-hd">'+(a.id?'Uredi izdelek':'Nov izdelek')+'</div>'
+  var naslov = a.id ? 'Uredi izdelek' : (nacin==='kopija' ? 'Nov izdelek – kopija »'+esc(a.naziv||'')+'«' : 'Nov izdelek');
+  var vrste=IZD_VRSTE.concat(izdUnikatne('vrsta').filter(function(v){return IZD_VRSTE.indexOf(v)<0;}));
+  var potr=a.potrebe||[];
+  var vsePotrebe=IZD_POTREBE.concat(potr.filter(function(p){return IZD_POTREBE.indexOf(p)<0;}));
+  var jeBarvna=!!(a.skupina||a.barva);
+  var hex=/^#[0-9a-f]{6}$/i.test(a.barva_hex||'')?a.barva_hex:'#c98b6b';
+  box.innerHTML='<div class="obr-form iz-form"><div class="d-edit-hd">'+naslov+'</div>'
+    +(nacin==='kopija'?'<div class="iz-namig">'+(jeBarvna
+      ? 'Vsi podatki so prepisani. Spremeni naziv, ime odtenka, barvo krogca in sliko (spodaj), nato shrani. Odtenek ostane na isti kartici, ker ima enako skupino.'
+      : 'Vsi podatki so prepisani. Spremeni velikost, ceno in sliko, nato shrani. Trgovina izdelke z enakim nazivom in linijo prikaže kot eno kartico z izbiro velikosti.')+'</div>':'')
+    +'<div class="iz-sek">Osnovno</div>'
     +'<div class="obr-row">'
-    +'<label>Naziv<input type="text" id="izNaziv" value="'+esc(a.naziv||'')+'"></label>'
-    +'<label>Kategorija<input type="text" id="izKat" value="'+esc(a.kategorija||'')+'" placeholder="npr. Šampon"></label>'
+    +'<label style="flex:2 1 260px">Naziv<input type="text" id="izNaziv" value="'+esc(a.naziv||'')+'"></label>'
+    +'<label>Linija<input type="text" id="izKat" list="izKatList" value="'+esc(a.kategorija||'')+'" placeholder="npr. Actyva (Kemon)"></label>'
+    +'<datalist id="izKatList">'+izdUnikatne('kategorija').map(function(k){return '<option value="'+esc(k)+'">';}).join('')+'</datalist>'
+    +'</div><div class="obr-row">'
+    +'<label>Vrsta (zavihek v trgovini)<select id="izVrsta"><option value="">— izberi —</option>'
+      +vrste.map(function(v){return '<option'+(v===a.vrsta?' selected':'')+'>'+esc(v)+'</option>';}).join('')+'</select></label>'
     +'<label>Velikost<input type="text" id="izVel" value="'+esc(a.velikost||'')+'" placeholder="npr. 250 ml"></label>'
+    +'<label>Cena (€)<input type="text" id="izCena" inputmode="decimal" value="'+(a.cena!=null?(parseFloat(a.cena)||0).toFixed(2).replace('.',','):'')+'"></label>'
     +'</div><div class="obr-row">'
-    +'<label>Cena (€)<input type="text" id="izCena" value="'+(a.cena!=null?esc(a.cena):'')+'"></label>'
-    +'<label>Zaloga (pusti prazno = ne sledimo)<input type="text" id="izZaloga" value="'+(a.zaloga!=null?esc(a.zaloga):'')+'"></label>'
-    +'</div><div class="obr-row">'
-    +'<label style="flex:1 0 100%">Opis (izviren, ne prepisan s konkurenčnih strani)<textarea id="izOpis" rows="3" style="padding:.5rem;border:1px solid #e7e0d8;border-radius:9px;font-family:inherit;font-size:.9rem;color:var(--navy)">'+esc(a.opis||'')+'</textarea></label>'
-    +'</div><div class="obr-row">'
-    +'<label style="flex:1 0 100%">Pot do slike (Klemen jo naloži v mapo izdelki/ na GitHubu, npr. izdelki/sampon-250.jpg)<input type="text" id="izSlika" value="'+esc(a.slika_url||'')+'"></label>'
-    +'</div><div class="obr-row">'
-    +'<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="izSpletu" style="width:auto"'+(a.prikazi_na_spletu?' checked':'')+'> Prikaži na spletni strani</label>'
-    +'<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="izAktiven" style="width:auto"'+(a.aktiven!==false?' checked':'')+'> Aktiven (v prodaji)</label>'
+    +'<label>Zaloga (prazno = ne sledimo)<input type="text" id="izZaloga" inputmode="numeric" value="'+(a.zaloga!=null?esc(a.zaloga):'')+'"></label>'
+    +'<label>Vrstni red (manjše = prej)<input type="text" id="izSort" inputmode="numeric" value="'+(a.sort_order!=null?esc(a.sort_order):'')+'"></label>'
     +'</div>'
+    +'<div class="iz-kljukice">'
+    +'<label><input type="checkbox" id="izSpletu"'+(a.prikazi_na_spletu?' checked':'')+'> Prikaži na spletni strani</label>'
+    +'<label><input type="checkbox" id="izAktiven"'+(a.aktiven!==false?' checked':'')+'> Aktiven (v prodaji)</label>'
+    +'<label><input type="checkbox" id="izPrip"'+(a.priporoceno?' checked':'')+'> ★ Priporočam (značka v trgovini)</label>'
+    +'</div>'
+    +'<div class="iz-sek">Kaj potrebujejo vaši lasje? <span>(izberi vse, kar velja)</span></div>'
+    +'<div class="iz-potrebe" id="izPotrebe">'+vsePotrebe.map(function(p){
+        return '<label class="iz-chip'+(potr.indexOf(p)>=0?' on':'')+'"><input type="checkbox" value="'+esc(p)+'"'+(potr.indexOf(p)>=0?' checked':'')+'>'+esc(p)+'</label>';
+      }).join('')+'</div>'
+    +'<div class="iz-sek">Opis in »Zakaj deluje«</div>'
+    +'<div class="obr-row"><label style="flex:1 0 100%">Opis (s svojimi besedami, po katalogu)<textarea id="izOpis" rows="3">'+esc(a.opis||'')+'</textarea></label></div>'
+    +'<div class="obr-row"><label style="flex:1 0 100%">Ključna sestavina<input type="text" id="izKljuc" value="'+esc(a.kljucna_sestavina||'')+'" placeholder="npr. Velian Complex"></label></div>'
+    +'<div class="obr-row"><label style="flex:1 0 100%">Zakaj deluje – besedo med **zvezdicami** trgovina izpiše krepko<textarea id="izZakaj" rows="3">'+esc(a.zakaj||'')+'</textarea></label></div>'
+    +'<div class="iz-predogled" id="izZakajPre"></div>'
+    +'<div class="iz-sek">Slika</div>'
+    +'<div class="iz-slika-vrsta"><img id="izSlikaPre" alt="">'
+    +'<label>Ime datoteke (Klemen jo naloži v koren repozitorija, npr. kemon-actyva-volume-250.webp)<input type="text" id="izSlika" value="'+esc(a.slika_url||'')+'"></label></div>'
+    +'<details class="iz-barvna"'+(jeBarvna?' open':'')+'><summary>Barvna različica (Yo Cond, krtače …)</summary>'
+    +'<div class="iz-namig">Izdelki z enako skupino so v trgovini ena kartica z barvnimi krogci. Za navadne izdelke pusti prazno.</div>'
+    +'<div class="obr-row">'
+    +'<label>Skupina<input type="text" id="izSkup" list="izSkupList" value="'+esc(a.skupina||'')+'" placeholder="npr. Yo Cond"></label>'
+    +'<datalist id="izSkupList">'+izdUnikatne('skupina').map(function(k){return '<option value="'+esc(k)+'">';}).join('')+'</datalist>'
+    +'<label>Ime odtenka/barve<input type="text" id="izBarva" value="'+esc(a.barva||'')+'" placeholder="npr. Bakrena"></label>'
+    +'<label>Barva krogca<span class="iz-hex"><input type="color" id="izHexPick" value="'+hex+'"><input type="text" id="izHex" value="'+esc(a.barva_hex||'')+'" placeholder="#c98b6b"></span></label>'
+    +'</div></details>'
     +'<div class="obr-btns"><button class="act" id="izCancel">Prekliči</button><button class="act save" id="izSave">Shrani</button></div>'
     +'<div class="d-edit-msg" id="izMsg"></div></div>';
+  /* žive povezave v obrazcu */
+  var zakaj=document.getElementById('izZakaj'), pre=document.getElementById('izZakajPre');
+  var osveziZakaj=function(){ pre.innerHTML = zakaj.value.trim() ? '<span>Zakaj deluje – predogled</span><p>'+izdKrepko(zakaj.value)+'</p>' : ''; pre.style.display=zakaj.value.trim()?'':'none'; };
+  zakaj.addEventListener('input',osveziZakaj); osveziZakaj();
+  var slika=document.getElementById('izSlika'), sPre=document.getElementById('izSlikaPre');
+  var osveziSliko=function(){ var v=slika.value.trim(); sPre.style.visibility=v?'visible':'hidden'; if(v) sPre.src=v; };
+  slika.addEventListener('input',osveziSliko); sPre.addEventListener('error',function(){sPre.style.visibility='hidden';}); osveziSliko();
+  box.querySelectorAll('.iz-chip input').forEach(function(c){ c.addEventListener('change',function(){ c.parentNode.classList.toggle('on',c.checked); }); });
+  var pick=document.getElementById('izHexPick'), hexT=document.getElementById('izHex');
+  pick.addEventListener('input',function(){ hexT.value=pick.value; });
+  hexT.addEventListener('input',function(){ if(/^#[0-9a-f]{6}$/i.test(hexT.value.trim())) pick.value=hexT.value.trim(); });
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+  if(nacin==='kopija'){ var v=document.getElementById(jeBarvna?'izNaziv':'izVel'); v.focus(); v.select(); }
   document.getElementById('izCancel').addEventListener('click',function(){box.innerHTML='';});
   document.getElementById('izSave').addEventListener('click',function(){
     var btn=this, msg=document.getElementById('izMsg');
     var naziv=document.getElementById('izNaziv').value.trim();
     if(!naziv){msg.textContent='Vnesite naziv izdelka.';msg.className='d-edit-msg err';return;}
-    var zalVal=document.getElementById('izZaloga').value.trim();
+    var zalVal=document.getElementById('izZaloga').value.trim(), sortVal=document.getElementById('izSort').value.trim();
+    var hexVal=document.getElementById('izHex').value.trim();
+    if(hexVal && !/^#[0-9a-f]{6}$/i.test(hexVal)){msg.textContent='Barva krogca mora biti v obliki #rrggbb (npr. #c98b6b).';msg.className='d-edit-msg err';return;}
+    var potrebe=[]; box.querySelectorAll('.iz-chip input:checked').forEach(function(c){potrebe.push(c.value);});
     var vrstica={
       naziv:naziv,
       kategorija:document.getElementById('izKat').value.trim()||null,
+      vrsta:document.getElementById('izVrsta').value||null,
       velikost:document.getElementById('izVel').value.trim()||null,
       cena:stevilo(document.getElementById('izCena').value),
       zaloga: zalVal===''?null:(parseInt(zalVal,10)||0),
+      sort_order: sortVal===''?null:(parseInt(sortVal,10)||0),
       opis:document.getElementById('izOpis').value.trim()||null,
+      kljucna_sestavina:document.getElementById('izKljuc').value.trim()||null,
+      zakaj:document.getElementById('izZakaj').value.trim()||null,
+      potrebe:potrebe,
+      priporoceno:document.getElementById('izPrip').checked,
       slika_url:document.getElementById('izSlika').value.trim()||null,
+      skupina:document.getElementById('izSkup').value.trim()||null,
+      barva:document.getElementById('izBarva').value.trim()||null,
+      barva_hex:hexVal||null,
       prikazi_na_spletu:document.getElementById('izSpletu').checked,
       aktiven:document.getElementById('izAktiven').checked
     };
