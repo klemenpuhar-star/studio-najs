@@ -692,7 +692,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v58-2026-11-14 - izdelki: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v59-2026-11-14 - narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v58 · 14.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v59 · 14.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -2055,11 +2055,16 @@ function izrisiNastavitveTrg(box,n){
     +'<label>Cena dostave (€)<input type="text" id="ntCena" value="'+(n.cena_dostave!=null?esc(n.cena_dostave):'')+'"></label>'
     +'<label>Brezplačna dostava nad (€)<input type="text" id="ntPrag" value="'+(n.prag_brezplacna_dostava!=null?esc(n.prag_brezplacna_dostava):'')+'"></label>'
     +'</div><div class="obr-row">'
-    +'<label>Flik – številka<input type="text" id="ntFlik" value="'+esc(n.flik_stevilka||'')+'"></label>'
-    +'<label>TRR za nakazilo<input type="text" id="ntTrr" value="'+esc(n.tr_racun||'')+'"></label>'
+    +'<label>TRR (IBAN) za nakazilo<input type="text" id="ntTrr" value="'+esc(n.tr_racun||'')+'"></label>'
+    +'<label>Prejemnik nakazila<input type="text" id="ntPrejemnik" value="'+esc(n.prejemnik||'')+'"></label>'
     +'</div><div class="obr-row">'
-    +'<label style="flex:1 0 100%">Prejemnik nakazila<input type="text" id="ntPrejemnik" value="'+esc(n.prejemnik||'')+'"></label>'
+    +'<label>Naslov prejemnika (ulica)<input type="text" id="ntUlica" value="'+esc(n.prejemnik_ulica||'')+'" placeholder="Forme 37"></label>'
+    +'<label>Pošta in kraj prejemnika<input type="text" id="ntKraj" value="'+esc(n.prejemnik_kraj||'')+'" placeholder="4209 Žabnica"></label>'
+    +'</div><div class="obr-row">'
+    +'<label>Doplačilo za povzetje (€) – prazno = povzetje ni na voljo<input type="text" id="ntPovzetje" value="'+(n.doplacilo_povzetje!=null?esc(n.doplacilo_povzetje):'')+'"></label>'
+    +'<label>Flik – številka (prazno = Flik se v trgovini ne prikaže)<input type="text" id="ntFlik" value="'+esc(n.flik_stevilka||'')+'"></label>'
     +'</div>'
+    +'<div class="bl-svc" style="margin:-.2rem 0 .3rem">Ti podatki se izpišejo v QR kodi (UPN QR) na potrditvi naročila in v e-pošti stranki.</div>'
     +'<div class="obr-btns"><button class="act save" id="ntSave">Shrani nastavitve</button></div>'
     +'<div class="d-edit-msg" id="ntMsg"></div></div>'
     +'<div id="narFormWrap"></div>';
@@ -2071,8 +2076,13 @@ function izrisiNastavitveTrg(box,n){
       prag_brezplacna_dostava: document.getElementById('ntPrag').value.trim()===''?null:stevilo(document.getElementById('ntPrag').value),
       flik_stevilka:document.getElementById('ntFlik').value.trim()||null,
       tr_racun:document.getElementById('ntTrr').value.trim()||null,
-      prejemnik:document.getElementById('ntPrejemnik').value.trim()||null
+      prejemnik:document.getElementById('ntPrejemnik').value.trim()||null,
+      prejemnik_ulica:document.getElementById('ntUlica').value.trim()||null,
+      prejemnik_kraj:document.getElementById('ntKraj').value.trim()||null,
+      doplacilo_povzetje: document.getElementById('ntPovzetje').value.trim()===''?null:stevilo(document.getElementById('ntPovzetje').value)
     };
+    var iban=String(vrstica.tr_racun||'').replace(/\s/g,'').toUpperCase();
+    if(iban && !/^SI56\d{15}$/.test(iban)){msg.textContent='TRR mora biti slovenski IBAN (SI56 in 15 številk).';msg.className='d-edit-msg err';return;}
     btn.disabled=true; btn.textContent='Shranjujem …';
     sb.from('nastavitve_trgovina').upsert([vrstica]).then(function(res){
       btn.disabled=false; btn.textContent='Shrani nastavitve';
@@ -2088,7 +2098,7 @@ function izrisiNarocila(box,vrstice){
     var postavke=Array.isArray(o.postavke)?o.postavke:[];
     var izdelkiTxt=postavke.map(function(p){return esc(p.naziv)+' ×'+p.kolicina;}).join(', ');
     var dostavaTxt = o.nacin_dostave==='posta' ? ('Pošta: '+esc(o.naslov||'')+', '+esc(o.posta||'')) : 'Prevzem v salonu';
-    var placiloTxt = o.nacin_placila==='flik' ? 'Flik' : 'Nakazilo';
+    var placiloTxt = o.nacin_placila==='flik' ? 'Flik' : o.nacin_placila==='povzetje' ? ('<b>Po povzetju</b>'+(Number(o.doplacilo)?' (+'+eur(o.doplacilo)+')':'')) : 'Nakazilo';
     var statusSel='<select class="nar-status" data-id="'+o.id+'">'+STATUSI_TRG.map(function(s){
       return '<option value="'+s[0]+'"'+(s[0]===o.status?' selected':'')+'>'+esc(s[1])+'</option>';
     }).join('')+'</select>';
