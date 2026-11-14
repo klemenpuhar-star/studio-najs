@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v11-2026-11-12 (pogoji poslovanja, DDV ni obracunan) -->
+<!-- NAJS-TRGOVINA: v12-2026-11-14 (vrsta Dodatki - prazna steklenica brez oznake vegansko) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -485,7 +485,7 @@ function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){retur
 function eur(n){return (Number(n)||0).toFixed(2).replace('.',',')+' €';}
 function brezSum(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 var LINIJA={'Actyva (Kemon)':'Kemon Actyva','Kemon Hair Care':'Kemon Hair Care','Kemon Hair Style':'Kemon Hair Style','Yo Cond (Kemon)':'Kemon Yo Cond','Krtače':'Olivia Garden'};
-var VRSTE=['Šamponi','Balzami in maske','Nega brez izpiranja','Olja in serumi','Nega lasišča','Oblikovanje','Barvni balzami','Krtače','Za roke'];
+var VRSTE=['Šamponi','Balzami in maske','Nega brez izpiranja','Olja in serumi','Nega lasišča','Oblikovanje','Barvni balzami','Krtače','Za roke','Dodatki'];
 var ISO='Kemon izdeluje s certifikati ISO 9001, ISO 14001, ISO 22716 (dobra proizvodna praksa v kozmetiki) in ISO 45001.';
 var IKONE={
   vegan:'<path d="M5 19C5 10 11 5 19 5c0 8-5 14-14 14z"/><path d="M5 19l8-8"/>',
@@ -738,7 +738,7 @@ function prikaznoIme(c,a){
 function karticaHtml(c){
   var a=PO_ID[c.izbrana], im=prikaznoIme(c,a), h='';
   h+='<article class="kartica" data-k="'+esc(c.kljuc)+'">';
-  h+='<button type="button" class="k-slika" data-odpri aria-label="Podrobnosti: '+esc(im.ime)+'">'+slikaHtml(a)+(c.priporoceno?'<span class="znacka">Priporočam</span>':'')+(c.kategorija==='Actyva (Kemon)'?'<span class="znacka-vegan">'+ikona('vegan',14)+'Vegansko</span>':'')+'</button>';
+  h+='<button type="button" class="k-slika" data-odpri aria-label="Podrobnosti: '+esc(im.ime)+'">'+slikaHtml(a)+(c.priporoceno?'<span class="znacka">Priporočam</span>':'')+(c.kategorija==='Actyva (Kemon)'&&!c.vrste['Dodatki']?'<span class="znacka-vegan">'+ikona('vegan',14)+'Vegansko</span>':'')+'</button>';
   h+='<div class="k-linija">'+esc(LINIJA[c.kategorija]||c.kategorija)+'</div>';
   h+='<button type="button" class="k-ime" data-odpri>'+esc(im.ime)+(im.pod?'<small>'+esc(im.pod)+'</small>':'')+'</button>';
   if(a.kljucna_sestavina && a.kljucna_sestavina!=='Velian Complex') h+='<div class="k-sest">'+esc(a.kljucna_sestavina)+'</div>';
@@ -821,7 +821,8 @@ function risiOkno(){
   if(a.zakaj) h+='<div class="zakaj"><span>Zakaj deluje</span><p>'+krepko(a.zakaj)+'</p></div>';
   if(a.opis) h+='<p class="o-opis">'+esc(a.opis)+'</p>';
   var LI=LINIJE_INFO[c.kategorija];
-  if(LI&&LI.eko){ h+='<ul class="eko kratko">'+LI.eko.map(function(x){ return '<li>'+ikona(x[0],18)+'<div><b>'+esc(x[1])+'</b></div></li>'; }).join('')+'</ul>';
+  if(LI&&LI.eko&&!c.vrste['Dodatki']){   /* v12: dodatki (npr. prazna steklenica) niso kozmetika – brez oznak vegansko/embalaža */
+     h+='<ul class="eko kratko">'+LI.eko.map(function(x){ return '<li>'+ikona(x[0],18)+'<div><b>'+esc(x[1])+'</b></div></li>'; }).join('')+'</ul>';
           if(LI.brez) h+='<p class="lin-brez">Brez '+esc(LI.brez)+'.</p>'; }
   else if(LI){ h+='<ul class="znacke male">'+LI.znacke.map(function(z){ return '<li>'+esc(z)+'</li>'; }).join('')+'</ul>';
           if(LI.brez) h+='<p class="lin-brez">Brez '+esc(LI.brez)+'.</p>'; }

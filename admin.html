@@ -692,7 +692,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v57-2026-11-12 - izdelki: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v58-2026-11-14 - izdelki: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v57 · 12.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v58 · 14.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1816,7 +1816,7 @@ function blIzvoz(){
    sličice, opozorila o manjkajočih podatkih in gumb »Podvoji« (nova velikost ali odtenek).
    Seznama VRSTE in POTREBE morata ostati enaka kot v trgovina.html. */
 var IZD_CACHE=[], IZD_F={q:'',kat:'',vrsta:'',manjka:''};
-var IZD_VRSTE=['Šamponi','Balzami in maske','Nega brez izpiranja','Olja in serumi','Nega lasišča','Oblikovanje','Barvni balzami','Krtače','Za roke'];
+var IZD_VRSTE=['Šamponi','Balzami in maske','Nega brez izpiranja','Olja in serumi','Nega lasišča','Oblikovanje','Barvni balzami','Krtače','Za roke','Dodatki'];
 var IZD_POTREBE=['Barvani lasje','Blond in sivi lasje','Suhi in poškodovani lasje','Tanki lasje in volumen','Kodrasti lasje',
   'Neukrotljivi in krepavi lasje','Mastno lasišče','Prhljaj','Izpadanje las','Občutljivo lasišče','Zaščita pred toploto',
   'Poletje in sonce','Za otroke','Vsakodnevna nega'];
@@ -1825,7 +1825,7 @@ function izdManjka(a){
   if(!a.slika_url) m.push('slika');
   if(!a.vrsta) m.push('vrsta');
   if(!a.opis) m.push('opis');
-  if((!a.potrebe||!a.potrebe.length) && ['Oblikovanje','Za roke','Krtače'].indexOf(a.vrsta)<0) m.push('potrebe');  /* izdelki za oblikovanje, roke in krtače potreb nimajo */
+  if((!a.potrebe||!a.potrebe.length) && ['Oblikovanje','Za roke','Krtače','Dodatki'].indexOf(a.vrsta)<0) m.push('potrebe');  /* izdelki za oblikovanje, roke in krtače potreb nimajo */
   if(!a.velikost&&!a.barva&&a.vrsta!=='Krtače') m.push('velikost');
   return m;
 }
