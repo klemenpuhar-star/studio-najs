@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v13-2026-11-14 (placilo z UPN QR kodo, po povzetju z doplacilom, Flik samo ce je vpisan) -->
+<!-- NAJS-TRGOVINA: v14-2026-11-14 (spustni meni situacij las namesto linij; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -421,8 +421,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
     <div class="vrstica2">
       <div class="aktivni"><span class="stevec" id="stevec" aria-live="polite"></span><span id="aktivniF"></span></div>
       <div class="izbire">
-        <label class="skrito" for="linija">Linija</label>
-        <select id="linija"><option value="">Vse linije</option></select>
+        <label class="skrito" for="situacija">Situacija las</label>
+        <select id="situacija"><option value="">Vse situacije las</option></select>
         <label class="skrito" for="razvrsti">Razvrsti</label>
         <select id="razvrsti">
           <option value="priporoceno">Priporočeno</option>
@@ -553,6 +553,7 @@ var POTREBE=['Barvani lasje','Blond in sivi lasje','Suhi in poškodovani lasje',
 var ARTIKLI=[], KARTICE=[], PO_ID={};
 var NAST={cena_dostave:3.90, prag:50, flik:null, povzetje:null};
 var F={potreba:'',vrsta:'',linija:'',isci:'',razvrsti:'priporoceno'};
+var SITUACIJE_VRSTE=['Krtače','Dodatki'];
 var KOS=beriKosarico();
 var KORAK=1;
 
@@ -636,7 +637,7 @@ function zgradiLinije(){
   m.innerHTML=Object.keys(LINIJE_INFO).map(function(k){ return '<article class="lin-kartica'+(LINIJE_INFO[k].stevilke?' siroka':'')+'">'+linijaHtml(k,false)+'</article>'; }).join('');
   m.addEventListener('click',function(e){
     var b=e.target.closest('[data-linija]'); if(!b) return;
-    F.linija=b.dataset.linija; $('#linija').value=F.linija; izrisi(); naRezultate();
+    F.linija=b.dataset.linija; izrisi(); naRezultate();
   });
 }
 function naRezultate(){
@@ -656,7 +657,7 @@ function zgradiFiltre(){
   cipi.innerHTML=h;
   cipi.addEventListener('click',function(e){
     var b=e.target.closest('[data-potreba]'); if(!b) return;
-    F.potreba=(F.potreba===b.dataset.potreba)?'':b.dataset.potreba; izrisi(); naRezultate();
+    F.potreba=(F.potreba===b.dataset.potreba)?'':b.dataset.potreba; if(F.potreba&&SITUACIJE_VRSTE.indexOf(F.vrsta)>=0) F.vrsta=''; izrisi(); naRezultate();
   });
   var vr=$('#vrste'), hv='<button type="button" class="vrsta" role="tab" data-vrsta="" aria-selected="true">Vse</button>';
   VRSTE.forEach(function(v){
@@ -665,10 +666,19 @@ function zgradiFiltre(){
   });
   vr.innerHTML=hv;
   vr.addEventListener('click',function(e){ var b=e.target.closest('[data-vrsta]'); if(!b) return; F.vrsta=b.dataset.vrsta; izrisi(); naRezultate(); });
-  var sel=$('#linija'), linije={};
-  ARTIKLI.forEach(function(a){ linije[LINIJA[a.kategorija]||a.kategorija]=1; });
-  Object.keys(linije).sort().forEach(function(l){ sel.insertAdjacentHTML('beforeend','<option>'+esc(l)+'</option>'); });
-  sel.addEventListener('change',function(){ F.linija=sel.value; izrisi(); naRezultate(); });
+  /* v14: spustni meni s situacijami las (namesto linij, ki jih stranke ne poznajo) + krtače in dodatki */
+  var sel=$('#situacija'), so='';
+  POTREBE.forEach(function(p){ if(stej(function(c){ return c.potrebe[p]; })) so+='<option value="p:'+esc(p)+'">'+esc(p)+'</option>'; });
+  var pri=SITUACIJE_VRSTE.filter(function(v){ return stej(function(c){ return c.vrste[v]; }); });
+  if(pri.length) so+='<optgroup label="Pripomočki">'+pri.map(function(v){ return '<option value="v:'+esc(v)+'">'+esc(v)+'</option>'; }).join('')+'</optgroup>';
+  sel.insertAdjacentHTML('beforeend',so);
+  sel.addEventListener('change',function(){
+    var v=sel.value;
+    if(!v){ F.potreba=''; if(SITUACIJE_VRSTE.indexOf(F.vrsta)>=0) F.vrsta=''; }
+    else if(v.slice(0,2)==='p:'){ F.potreba=v.slice(2); if(SITUACIJE_VRSTE.indexOf(F.vrsta)>=0) F.vrsta=''; }
+    else { F.vrsta=v.slice(2); F.potreba=''; }
+    izrisi(); naRezultate();
+  });
   $('#razvrsti').addEventListener('change',function(){ F.razvrsti=this.value; izrisi(); });
   nastaviIskanje();
 }
@@ -689,7 +699,7 @@ function nastaviIskanje(){
   var vh=$('#isci'), pl=$('#predlogi'), x=$('#isciPocisti'), t=null;
   vh.addEventListener('input',function(){
     var v=vh.value; x.hidden=!v;
-    if(v.trim() && !F.isci){ F.potreba='';F.vrsta='';F.linija=''; $('#linija').value=''; }   /* iskanje vedno po vseh izdelkih */
+    if(v.trim() && !F.isci){ F.potreba='';F.vrsta='';F.linija=''; }   /* iskanje vedno po vseh izdelkih */
     clearTimeout(t); t=setTimeout(function(){ F.isci=v; izrisi(); risiPredloge(); },110);
   });
   vh.addEventListener('focus',function(){ if(vh.value.trim()) risiPredloge(); });
@@ -790,6 +800,7 @@ function izrisi(){
   var r=filtriraj(), m=$('#mreza');
   document.querySelectorAll('.cip').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.potreba===F.potreba)); });
   document.querySelectorAll('.vrsta').forEach(function(b){ b.setAttribute('aria-selected', String(b.dataset.vrsta===F.vrsta)); });
+  var ss=$('#situacija'); if(ss){ var sv=F.potreba?'p:'+F.potreba:(SITUACIJE_VRSTE.indexOf(F.vrsta)>=0?'v:'+F.vrsta:''); ss.value=sv; if(ss.value!==sv) ss.value=''; }
   var n=r.length;
   $('#stevec').innerHTML='<b>'+n+'</b> '+(n===1?'izdelek':(n===2?'izdelka':(n<5?'izdelki':'izdelkov')))
     +(F.isci.trim()?' za <span class="isk-izraz">»'+esc(F.isci.trim())+'«</span> <button type="button" class="isk-x" data-odstrani="isci" aria-label="Počisti iskanje">×</button>':'');
@@ -820,10 +831,10 @@ $('#mreza').addEventListener('click',function(e){
 });
 $('.aktivni').addEventListener('click',function(e){
   var o=e.target.closest('[data-odstrani]');
-  if(o){ var k=o.dataset.odstrani; if(k==='isci'){ F.isci=''; $('#isci').value=''; $('#isciPocisti').hidden=true; } else F[k]=''; if(k==='linija') $('#linija').value=''; izrisi(); return; }
+  if(o){ var k=o.dataset.odstrani; if(k==='isci'){ F.isci=''; $('#isci').value=''; $('#isciPocisti').hidden=true; } else F[k]=''; izrisi(); return; }
   if(e.target.closest('[data-pocisti]')) pocisti();
 });
-function pocisti(){ F.potreba='';F.vrsta='';F.linija='';F.isci=''; $('#isci').value=''; $('#isciPocisti').hidden=true; $('#linija').value=''; izrisi(); }
+function pocisti(){ F.potreba='';F.vrsta='';F.linija='';F.isci=''; $('#isci').value=''; $('#isciPocisti').hidden=true; izrisi(); }
 
 /* ── okno izdelka ── */
 var ZADNJI_FOKUS=null, O_KARTICA=null, O_KOL=1;
