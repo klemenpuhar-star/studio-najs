@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v14-2026-11-14 (spustni meni situacij las namesto linij; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v15-2026-11-15 (telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -276,7 +276,9 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
   .mreza{grid-template-columns:repeat(2,1fr);gap:20px 12px;padding:0 14px 50px}
   .k-dno{flex-direction:column;align-items:stretch;gap:8px}
   .v-kosarico{width:100%}
-  .izbire select{max-width:150px}
+  .izbire{width:100%}
+  .izbire select{flex:1 1 0;min-width:0;max-width:none;text-overflow:ellipsis}
+  .k-slika .znacka-vegan{top:auto;bottom:10px}   /* v15: na ozki kartici se ne prekriva z znacko Priporocam */
 }
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
 /* ── linije in certifikati ── */
@@ -422,7 +424,7 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
       <div class="aktivni"><span class="stevec" id="stevec" aria-live="polite"></span><span id="aktivniF"></span></div>
       <div class="izbire">
         <label class="skrito" for="situacija">Situacija las</label>
-        <select id="situacija"><option value="">Vse situacije las</option></select>
+        <select id="situacija"><option value="">Situacija las</option></select>
         <label class="skrito" for="razvrsti">Razvrsti</label>
         <select id="razvrsti">
           <option value="priporoceno">Priporočeno</option>
