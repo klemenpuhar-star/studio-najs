@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v17-2026-11-16 (preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v18-2026-11-16 (posta: locena polja postna stevilka + kraj, kraj se izpise sam iz tabele postne_stevilke; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -210,6 +210,10 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 .polje .napaka-p{color:#b03a2e;font-size:.8rem;display:none}
 .polje.napaka input{border-color:#c0473c}
 .polje.napaka .napaka-p{display:block}
+.polje-vrsta{display:flex;gap:10px}
+.polje-vrsta .polje-postna{flex:0 0 108px}
+.polje-vrsta .polje-kraj{flex:1 1 auto;min-width:0}
+.polje-kraj input.samodejno{background:#f6f1ea}
 .polje .opoz-p{color:#8a5a00;font-size:.8rem}
 .polje .opoz-p .predlog{border:none;background:none;padding:0;color:var(--navy);font-weight:600;text-decoration:underline;font-size:inherit;cursor:pointer}
 .dva{display:grid;grid-template-columns:110px 1fr;gap:10px}
@@ -1034,7 +1038,7 @@ var OBV_T=null;
 function obvesti(t){ $('#obvBesedilo').textContent=t; var o=$('#obvestilo'); o.classList.add('on'); clearTimeout(OBV_T); OBV_T=setTimeout(function(){ o.classList.remove('on'); },3200); }
 $('#obvOdpri').addEventListener('click',function(){ $('#obvestilo').classList.remove('on'); odpriKosarico(); });
 
-var PODATKI={dostava:'prevzem',placilo:'nakazilo',ime:'',telefon:'',email:'',naslov:'',posta:'',opomba:''};
+var PODATKI={dostava:'prevzem',placilo:'nakazilo',ime:'',telefon:'',email:'',naslov:'',postna:'',kraj:'',posta:'',opomba:''};
 function odpriKosarico(){
   KORAK=1; risiKosarico(); var p=$('#predal'); p.hidden=false;
   requestAnimationFrame(function(){ p.classList.add('on'); $('#zatemni').classList.add('on'); });
@@ -1096,7 +1100,10 @@ function korak2(){
    +polje('email','E-pošta <small>(za navodila in potrditev naročila)</small>','email',P.email,'email','E-naslov ni pravilen.')
    +'<div id="naslovBlok"'+(P.dostava==='posta'?'':' hidden')+'>'
    +polje('naslov','Ulica in hišna številka','text',P.naslov,'street-address','Vpišite naslov za dostavo.')
-   +polje('posta','Poštna številka in kraj','text',P.posta,'postal-code','Vpišite poštno številko in kraj, npr. 4220 Škofja Loka.')
+   +'<div class="polje-vrsta">'
+   +'<div class="polje polje-postna"><label for="f_postna">Poštna št.</label><input id="f_postna" name="postna" type="text" inputmode="numeric" maxlength="4" value="'+esc(P.postna)+'" autocomplete="postal-code"><span class="napaka-p"></span></div>'
+   +'<div class="polje polje-kraj"><label for="f_kraj">Kraj</label><input id="f_kraj" name="kraj" type="text" value="'+esc(P.kraj)+'" autocomplete="address-level2"><span class="napaka-p"></span></div>'
+   +'</div>'
    +'</div></fieldset>'
    +'<fieldset><legend>Plačilo</legend><div class="izbira-kartic" id="placilaIzbira">'+placilaHtml()+'</div></fieldset>'
    +'<div class="polje"><label for="f_opomba">Sporočilo <small>(neobvezno)</small></label><textarea id="f_opomba" name="opomba">'+esc(P.opomba)+'</textarea></div>'
@@ -1106,10 +1113,20 @@ function korak2(){
   t.innerHTML=h; povzetek2();
   var f=$('#obrazec');
   f.addEventListener('change',function(e){
-    if(e.target.name==='dostava'){ PODATKI.dostava=e.target.value; $('#naslovBlok').hidden=(e.target.value!=='posta'); $('#placilaIzbira').innerHTML=placilaHtml(); povzetek2(); }
+    if(e.target.name==='dostava'){ PODATKI.dostava=e.target.value; $('#naslovBlok').hidden=(e.target.value!=='posta'); if(e.target.value==='posta') naloziPoste(); $('#placilaIzbira').innerHTML=placilaHtml(); povzetek2(); }
     if(e.target.name==='placilo'){ PODATKI.placilo=e.target.value; povzetek2(); }
   });
   f.addEventListener('input',function(e){ if(e.target.name&&PODATKI.hasOwnProperty(e.target.name)){ PODATKI[e.target.name]=e.target.value; var p=e.target.closest('.polje'); if(p) p.classList.remove('napaka'); } });
+  /* v18: ko stranka vpiše 4 števke poštne številke, se kraj izpiše sam */
+  f.addEventListener('input',function(e){
+    if(e.target.name!=='postna') return;
+    var v=e.target.value.replace(/\D/g,'').slice(0,4); if(v!==e.target.value) e.target.value=v; PODATKI.postna=v;
+    var k=$('#f_kraj');
+    if(v.length===4 && POSTE && POSTE[v]){ k.value=POSTE[v]; PODATKI.kraj=POSTE[v]; k.classList.add('samodejno'); pokaziPolje('postna',null); pokaziPolje('kraj',null); }
+    else if(v.length===4 && POSTE){ pokaziPolje('postna',{stanje:'napaka',sporocilo:'Te poštne številke ni.'}); if(k.classList.contains('samodejno')){ k.value=''; PODATKI.kraj=''; } }
+    else if(k.classList.contains('samodejno')){ k.value=''; PODATKI.kraj=''; k.classList.remove('samodejno'); }
+  });
+  if(P.dostava==='posta') naloziPoste();
   /* v17: preverjanje ob izhodu iz polja; pravilen vnos se zapiše v enotni obliki */
   f.addEventListener('focusout',function(e){
     var n=e.target.name; if(!PREVERI[n]) return;
@@ -1201,7 +1218,29 @@ function preveriTelefon(v){
   if(window.NajsTel) return NajsTel.preveri(v);
   return String(v||'').replace(/\D/g,'').length>=8?{stanje:'ok',zapis:String(v).trim()}:{stanje:'napaka',sporocilo:'Vpišite telefonsko številko, npr. 040 123 456.'};
 }
-var PREVERI={ime:preveriIme,telefon:preveriTelefon,email:preveriEmail,naslov:preveriNaslov,posta:preveriPosto};
+var POSTE=null, POSTE_NALAGAM=false;
+function naloziPoste(){
+  if(POSTE||POSTE_NALAGAM||!sb) return; POSTE_NALAGAM=true;
+  sb.from('postne_stevilke').select('stevilka,kraj').then(function(r){
+    POSTE_NALAGAM=false;
+    if(r.error||!r.data||!r.data.length) return;              /* seznama ni: kraj stranka vpiše sama */
+    var m={}; r.data.forEach(function(x){ m[x.stevilka]=x.kraj; }); POSTE=m;
+    var el=$('#f_postna'); if(el&&el.value.length===4) el.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+}
+function preveriPostno(v){
+  v=String(v||'').replace(/\D/g,'');
+  if(v.length!==4) return {stanje:'napaka',sporocilo:'Poštna številka ima 4 števke.'};
+  if(+v<1000) return {stanje:'napaka',sporocilo:'Poštna številka ni pravilna.'};
+  if(POSTE&&!POSTE[v]) return {stanje:'napaka',sporocilo:'Te poštne številke ni.'};
+  return {stanje:'ok',zapis:v};
+}
+function preveriKraj(v){
+  v=String(v||'').trim().replace(/\s+/g,' ');
+  if(!/^[A-Za-zČŠŽčšžĆćĐđ][A-Za-zČŠŽčšžĆćĐđ .\-]+$/.test(v)) return {stanje:'napaka',sporocilo:'Vpišite kraj.'};
+  return {stanje:'ok',zapis:v.replace(/(^|[\s\-])([a-zčšžćđ])/g,function(x,a,b){return a+b.toUpperCase();})};
+}
+var PREVERI={ime:preveriIme,telefon:preveriTelefon,email:preveriEmail,naslov:preveriNaslov,postna:preveriPostno,kraj:preveriKraj};
 function pokaziPolje(ime,r){
   var el=$('#f_'+ime); if(!el) return; var p=el.closest('.polje'), s=p.querySelector('.napaka-p'), o=p.querySelector('.opoz-p');
   p.classList.remove('napaka'); if(o) o.remove();
@@ -1218,7 +1257,7 @@ function pokaziPolje(ime,r){
 var OPOZ_POTRJENA={};
 function preveri(){
   var ok=true, P=PODATKI, prvi=null, polja=['ime','telefon','email'];
-  if(P.dostava==='posta') polja.push('naslov','posta');
+  if(P.dostava==='posta') polja.push('naslov','postna','kraj');
   polja.forEach(function(n){
     var r=PREVERI[n](P[n]); pokaziPolje(n,r);
     if(r.stanje!=='napaka'&&r.zapis){ P[n]=r.zapis; var el=$('#f_'+n); if(el) el.value=r.zapis; }
@@ -1230,6 +1269,7 @@ function preveri(){
     }
   });
   if(prvi){ prvi.focus(); prvi.scrollIntoView({block:'center'}); }
+  P.posta=(P.postna&&P.kraj)?(P.postna+' '+P.kraj):'';
   return ok;
 }
 var NAPAKE={'manjkajo-podatki':'Manjka ime ali telefon.','manjka-naslov':'Za dostavo po pošti vpišite naslov in poštno številko.',
