@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v9-2026-10-23 (zaprti slovenski prazniki v koledarju) -->
+<!-- NAJS-NAROCILO: v10-2026-11-16 (posebni delovni dnevi iz tabele posebni_dnevi; v9: zaprti prazniki) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -97,6 +97,7 @@ function tedenVrsta(ds){
   return (((teden%2)+2)%2===0) ? 1 : 2;
 }
 function dcZa(ds){
+  if(typeof POSEBNI!=='undefined' && POSEBNI && POSEBNI[ds]) return POSEBNI[ds];   /* v10: izjema za posamezen datum (tabela posebni_dnevi) */
   var p=String(ds).split('-');
   var dow=new Date(+p[0],+p[1]-1,+p[2]).getDay();
   var par=tedenVrsta(ds);
@@ -132,6 +133,16 @@ function sumDur(){ return selArr().reduce(function(a,s){ return a+(parseInt(s.du
 /* Slovenski dela prosti prazniki (datum -> naziv). Streznik (narocilo_popravi preko
    najs_delovni_cas) to vedno preveri tudi sam, tole je le za pravilen prikaz tukaj. */
 var PRAZNIKI={};
+var POSEBNI={};
+function nalozPosebne(){
+  sb.from('posebni_dnevi').select('datum,od,do_').then(function(res){
+    if(res.error||!res.data) return;
+    var novi={};
+    res.data.forEach(function(r){ novi[r.datum]={start:String(r.od).substring(0,5), end:String(r.do_).substring(0,5)}; });
+    POSEBNI=novi;
+    loadSlots();
+  });
+}
 function nalozPraznike(){
   sb.from('prazniki').select('datum,naziv').then(function(res){
     if(res.error||!res.data) return;
@@ -188,6 +199,7 @@ function init(){
     }
   });
   nalozPraznike();
+  nalozPosebne();
   sb.from('services').select('id,name,description,price,category,sort_order,duration_min,gap_after_min,gap_duration_min')
     .eq('active',true).order('category').order('sort_order')
     .then(function(res){ SERVICES=res.data||[]; loadBooking(); });

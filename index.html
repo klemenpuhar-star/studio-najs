@@ -1246,7 +1246,7 @@
 </script>
 </head>
 <body>
-<!-- NAJS-BUILD: v49-2026-11-12 (pregled: meni O meni, novica v pretekliku) -->
+<!-- NAJS-BUILD: v50-2026-11-16 (posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -2079,6 +2079,7 @@ function tedenVrsta(ds){
   return (((teden%2)+2)%2===0) ? 1 : 2;
 }
 function dcZa(ds){
+  if(typeof POSEBNI!=='undefined' && POSEBNI && POSEBNI[ds]) return POSEBNI[ds];   /* v50: izjema za posamezen datum (tabela posebni_dnevi) */
   var p=String(ds).split('-');
   var dow=new Date(+p[0],+p[1]-1,+p[2]).getDay();
   var par=tedenVrsta(ds);
@@ -2118,6 +2119,21 @@ function nalozPraznike(){
   }catch(e){}
 }
 nalozPraznike();
+/* v50: posebni delovni dnevi (npr. 24. in 31. 12. dopoldan) – prednost pred rednim urnikom */
+var POSEBNI = {};
+function nalozPosebne(){
+  try{
+    return sb.from('posebni_dnevi').select('datum,od,do_').then(function(res){
+      if(res.error || !res.data) return;
+      var novi={};
+      res.data.forEach(function(r){ novi[r.datum]={ start:String(r.od).substring(0,5), end:String(r.do_).substring(0,5) }; });
+      POSEBNI=novi;
+      if(typeof dayStatusCache!=='undefined') dayStatusCache={};
+      if(document.getElementById('dayStrip')) buildStrip();
+    });
+  }catch(e){}
+}
+nalozPosebne();
 function daysPerView(){ return window.innerWidth <= 600 ? 3 : 8; }
 var stripOffset = 0; // offset v dnevih (0 = danes)
 
