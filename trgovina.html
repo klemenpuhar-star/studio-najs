@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v15-2026-11-15 (telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v16-2026-11-16 (potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -1077,8 +1077,8 @@ function korak3(d,P,vsebina){
     ? 'Ko bo naročilo pripravljeno, vas obvestim – prevzamete ga v salonu na Cesti talcev 3B v Škofji Loki.'
     : (P.placilo==='povzetje'?'Paket pošljem v nekaj dneh':'Paket pošljem po prejemu plačila')+' na naslov '+esc(P.naslov)+', '+esc(P.posta)+'.';
   $('#pTelo').innerHTML='<div class="uspeh"><div class="kljukica"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2c4251" stroke-width="2.2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>'
-    +'<h3>Hvala, naročilo je oddano</h3><p>Številka naročila: <b>'+sklic+'</b>'+(P.email?'<br>Potrdilo z navodili za plačilo prejmete na '+esc(P.email)+'.':'')+'</p>'
-    +nav+'<p>'+dost+'</p><p>Če imate vprašanje, me pokličite na <a href="tel:+38631217361">031 217 361</a>.</p></div>';
+    +'<h3>'+(P.placilo==='povzetje'?'Hvala, naročilo je potrjeno':'Hvala, naročilo je oddano')+'</h3><p>Številka naročila: <b>'+sklic+'</b>'+(P.email?'<br>'+(P.placilo==='povzetje'?'Potrditev naročila prejmete na ':'Navodila za plačilo prejmete na ')+esc(P.email)+'.':'')+'</p>'
+    +nav+(P.placilo==='povzetje'?'':'<p>Naročilo potrdim, ko prejmem vaše plačilo – takrat prejmete potrditev.</p>')+'<p>'+dost+'</p><p>Če imate vprašanje, me pokličite na <a href="tel:+38631217361">031 217 361</a>.</p></div>';
   $('#pDno').innerHTML='<button type="button" class="gumb-glavni" data-nadaljuj-nakup>Nazaj v trgovino</button>';
 }
 $('#predal').addEventListener('click',function(e){
