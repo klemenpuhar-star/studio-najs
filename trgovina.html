@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v18-2026-11-16 (posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v19-2026-11-16 (pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -110,6 +110,8 @@ img{max-width:100%;display:block}
 .k-ime:hover{color:var(--koral-txt)}
 .k-ime small{display:block;font-weight:400;color:var(--siva);font-size:.82rem;margin-top:2px}
 .velikosti{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.cena-blok{display:flex;flex-direction:column;line-height:1.15}
+.na-enoto{font-size:.72rem;color:var(--siva);font-weight:400}
 .vel{border:1.5px solid var(--crta);background:var(--belo);border-radius:8px;padding:4px 9px;font-size:.78rem;min-height:32px}
 .vel[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:#fff}
 .barve{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
@@ -413,7 +415,7 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
     <p>Profesionalna nega las Kemon. Vse izdelke sama uporabljam v salonu – če niste prepričani, kaj bi izbrali, me <a href="tel:+38631217361">pokličite</a> ali pa me vprašajte ob naslednjem obisku.</p>
     <ul class="zagotovila">
       <li>Brezplačen prevzem v salonu</li>
-      <li><span id="zagDostava">Dostava po Sloveniji</span><span id="zagPrag"></span></li>
+      <li><span id="zagDostava">Dostava po Sloveniji</span></li>
       <li id="zagPlacilo">Plačilo z nakazilom – QR koda za mobilno banko</li>
       <li class="vegan-povezava"><a href="#linije" data-na-linije><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 19C5 10 11 5 19 5c0 8-5 14-14 14z"/><path d="M5 19l8-8"/></svg> Actyva je 100 % veganska</a></li>
     </ul>
@@ -453,7 +455,7 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 
 <footer class="noga">
   <div class="noga-in">
-    <div>FRIZERSKI STUDIO NAJS, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka · Davčna št. 54499453<br>Cene so končne. DDV ni obračunan na podlagi prvega odstavka 94. člena ZDDV-1.</div>
+    <div>FRIZERSKI STUDIO NAJS, Nataša Markuta s.p. · Cesta talcev 3B, 4220 Škofja Loka · Matična št. 7614381000 · Davčna št. 54499453<br>Cene so končne. DDV ni obračunan na podlagi prvega odstavka 94. člena ZDDV-1.</div>
     <div><a href="https://najs.si/">Spletna stran</a> &nbsp; <a href="pogoji.html">Pogoji poslovanja</a> &nbsp; <a href="zasebnost.html">Zasebnost</a> &nbsp; <a href="piskotki.html">Piškotki</a> &nbsp; <a href="tel:+38631217361">031 217 361</a></div>
   </div>
 </footer>
@@ -699,8 +701,7 @@ function nalozi(){
     if(n.prag_brezplacna_dostava!=null) NAST.prag=Number(n.prag_brezplacna_dostava);
     NAST.flik=n.flik_stevilka||null; NAST.povzetje=(n.doplacilo_povzetje!=null)?Number(n.doplacilo_povzetje):null;
     if(NAST.povzetje!=null) $('#zagPlacilo').textContent='Plačilo z nakazilom (QR koda) ali po povzetju';
-    $('#zagDostava').textContent='Dostava '+eur(NAST.cena_dostave);
-    $('#zagPrag').textContent=NAST.prag?(', brezplačna nad '+eur(NAST.prag)):'';
+    $('#zagDostava').textContent='Dostava po pošti '+eur(NAST.cena_dostave)+(NAST.prag?(', brezplačna nad '+eur(NAST.prag)):'');
     ARTIKLI.forEach(function(a){ PO_ID[a.id]=a; });
     KOS=KOS.filter(function(p){ return PO_ID[p.id]; }); shraniKosarico();
     zgradiKartice(); zgradiFiltre(); zgradiLinije(); izrisi(); preberiHash();
@@ -899,6 +900,12 @@ function prikaznoIme(c,a){
   return {ime:a.naziv, pod:c.variante.length>1?'':(a.velikost||'')};
 }
 
+/* v19: cena za liter (Pravilnik o načinu označevanja cen) – samo pri izdelkih, prodanih na prostornino */
+function naEnoto(a){
+  var m=String(a&&a.velikost||'').match(/(\d+(?:[.,]\d+)?)\s*ml/i); if(!m) return '';
+  var ml=parseFloat(m[1].replace(',','.')); if(!ml) return '';
+  return eur(Number(a.cena)/ml*1000)+'/l';
+}
 function karticaHtml(c){
   var a=PO_ID[c.izbrana], im=prikaznoIme(c,a), h='';
   h+='<article class="kartica" data-k="'+esc(c.kljuc)+'">';
@@ -915,7 +922,7 @@ function karticaHtml(c){
     c.variante.forEach(function(v){ h+='<button type="button" class="vel" data-var="'+v.id+'" aria-pressed="'+(v.id===c.izbrana)+'">'+esc(v.velikost)+'</button>'; });
     h+='</div>';
   }
-  h+='<div class="k-dno"><span class="cena">'+eur(a.cena)+'</span><button type="button" class="v-kosarico" data-dodaj>V košarico</button></div>';
+  h+='<div class="k-dno"><span class="cena-blok"><span class="cena">'+eur(a.cena)+'</span>'+(naEnoto(a)?'<small class="na-enoto">'+naEnoto(a)+'</small>':'')+'</span><button type="button" class="v-kosarico" data-dodaj>V košarico</button></div>';
   return h+'</article>';
 }
 
@@ -982,7 +989,7 @@ function risiOkno(){
     c.variante.forEach(function(v){ h+='<button type="button" class="vel" data-ovar="'+v.id+'" aria-pressed="'+(v.id===c.izbrana)+'">'+esc(v.velikost)+' · '+eur(v.cena)+'</button>'; });
     h+='</div>';
   } else if(a.velikost){ h+='<div style="font-size:.86rem;color:var(--siva)">'+esc(a.velikost)+'</div>'; }
-  h+='<div class="cena" style="font-size:1.9rem">'+eur(a.cena)+'</div>';
+  h+='<div class="cena" style="font-size:1.9rem">'+eur(a.cena)+'</div>'+(naEnoto(a)?'<div class="na-enoto">'+naEnoto(a)+'</div>':'');
   if(a.zakaj) h+='<div class="zakaj"><span>Zakaj deluje</span><p>'+krepko(a.zakaj)+'</p></div>';
   if(a.opis) h+='<p class="o-opis">'+esc(a.opis)+'</p>';
   var LI=LINIJE_INFO[c.kategorija];
@@ -1163,7 +1170,7 @@ function povzetek2(){
     +'<div class="vsota"><span>Dostava</span><span>'+(PODATKI.dostava==='prevzem'?'prevzem v salonu':(d?eur(d):'brezplačno'))+'</span></div>'
     +(dp?'<div class="vsota"><span>Doplačilo za povzetje</span><span>'+eur(dp)+'</span></div>':'')
     +'<div class="vsota skupaj"><span>Skupaj za plačilo</span><span>'+eur(v+d+dp)+'</span></div>'
-    +'<button type="button" class="gumb-glavni" id="oddaj" data-oddaj>'+(PODATKI.placilo==='povzetje'?'Oddaj naročilo – plačilo po povzetju':(PODATKI.placilo==='ob_prevzemu'?'Oddaj naročilo – plačilo ob prevzemu':'Oddaj naročilo in plačaj '+eur(v+d+dp)))+'</button>'
+    +'<button type="button" class="gumb-glavni" id="oddaj" data-oddaj>'+'Oddaj naročilo z obveznostjo plačila ('+eur(v+d+dp)+')'+'</button>'
     +'<button type="button" class="gumb-drugi" data-nazaj>Nazaj na košarico</button>';
 }
 /* ── v17: preverjanje podatkov stranke ──
