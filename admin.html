@@ -692,7 +692,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v62-2026-11-16 - narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v63-2026-11-16 - posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v62 · 16.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v63 · 16.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -913,6 +913,7 @@ function tedenVrsta(ds){
 }
 /* Slovenski dela prosti prazniki (datum -> naziv). */
 var PRAZNIKI={};
+var POSEBNI={};   /* v63: posebni delovni dnevi (tabela posebni_dnevi) – datum -> {h:[od,do], posebno:opomba} */
 function nalozPraznike(cb){
   sb.from('prazniki').select('datum,naziv').then(function(res){
     if(!res.error && res.data){
@@ -920,7 +921,14 @@ function nalozPraznike(cb){
       res.data.forEach(function(r){ novi[r.datum]=r.naziv||'praznik'; });
       PRAZNIKI=novi;
     }
-    if(cb) cb();
+    sb.from('posebni_dnevi').select('datum,od,do_,opomba').then(function(r2){
+      if(!r2.error && r2.data){
+        var p={};
+        r2.data.forEach(function(r){ p[r.datum]={h:[parseInt(String(r.od).substring(0,2)), parseInt(String(r.do_).substring(0,2))], posebno:r.opomba||'posebni delovni čas'}; });
+        POSEBNI=p;
+      }
+      if(cb) cb();
+    });
   });
 }
 /* x je lahko Date, datum "YYYY-MM-DD" ali (zastarelo) stevilka dneva v tednu */
@@ -930,6 +938,7 @@ function dayInfo(x){
   else if(typeof x==='string'){ var p=x.split('-'); dow=new Date(+p[0],+p[1]-1,+p[2]).getDay(); iso=x; }
   else { dow=x; }
   if(iso && PRAZNIKI[iso]) return {closed:true, praznik:PRAZNIKI[iso]};
+  if(iso && POSEBNI[iso]) return POSEBNI[iso];
   if(DCAS){
     if(iso){ var par=tedenVrsta(iso); if(DCAS[par]&&DCAS[par][dow]) return DCAS[par][dow]; }
     if(DCAS[0]&&DCAS[0][dow]) return DCAS[0][dow];
