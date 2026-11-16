@@ -1244,9 +1244,37 @@
   ]
 }
 </script>
+
+<style>
+/* v52: oblikovne izboljsave – crtne ikone v Kontaktu, vecje in temnejse drobno besedilo, sirsa galerija na racunalniku */
+.k-icon{ display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; border-radius:50%; background:rgba(208,102,102,.1); color:var(--coral); margin-top:0; font-size:0; }
+.k-item{ align-items:center; }
+.k-lbl{ font-size:.74rem; }
+.k-val{ font-size:1rem; }
+.pr-name, .cenik-row-name{ font-size:.95rem; }
+.pr-note, .cenik-row-desc, .bk-chk-desc{ font-size:.85rem; }
+.cenik-row-dur, .bk-chk-dur{ font-size:.8rem; color:rgba(23,57,75,.72); }
+.bk-chk-name{ font-size:.95rem; }
+.bk-sum-svc{ font-size:.86rem; color:rgba(23,57,75,.8); }
+.bk-sel-list, .bk-sel-tot{ font-size:.9rem; }
+.tel-msg{ font-size:.86rem; }
+.nov-slika figcaption{ font-size:.86rem; color:#5f6d75; }
+.act-st span{ font-size:.94rem; color:var(--navy); }
+.act-vir{ font-size:.86rem; color:rgba(23,57,75,.75); }
+.eko-znaki li{ font-size:.9rem; color:rgba(255,255,255,.85); }
+.eko-znaki strong{ font-size:.95rem; }
+.onas-st-opomba{ font-size:.92rem; color:rgba(255,255,255,.8); }
+.ok-mnenj{ font-size:.92rem; color:#5f6368; }
+#bkOverlay .bk-pogoj{ font-size:.86rem; opacity:.85; }
+.footer-copy{ font-size:.82rem; opacity:.7; line-height:1.6; }
+.footer-links a{ font-size:.8rem; color:rgba(255,255,255,.75); }
+@media (min-width:1000px){
+  .gallery-grid{ grid-template-columns:repeat(4,1fr); max-width:1160px; gap:1.1rem; }
+}
+</style>
 </head>
 <body>
-<!-- NAJS-BUILD: v51-2026-11-16 (maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v52-2026-11-16 (crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1515,19 +1543,19 @@
   <div class="kontakt-grid">
     <div>
       <div class="k-item reveal">
-        <span class="k-icon">📍</span>
+        <span class="k-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
         <div><p class="k-lbl">Naslov</p><p class="k-val">Cesta talcev 3B<br/>4220 Škofja Loka</p></div>
       </div>
       <div class="k-item reveal" style="transition-delay:.07s">
-        <span class="k-icon">📞</span>
+        <span class="k-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.8 2z"/></svg></span>
         <div><p class="k-lbl">Telefon</p><p class="k-val"><a href="tel:+38631217361">+386 31 217 361</a></p></div>
       </div>
       <div class="k-item reveal" style="transition-delay:.14s">
-        <span class="k-icon">✉️</span>
+        <span class="k-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="M3 6.5l9 6.5 9-6.5"/></svg></span>
         <div><p class="k-lbl">E-pošta</p><p class="k-val"><a href="mailto:frizerskistudionajs@gmail.com">frizerskistudionajs@gmail.com</a></p></div>
       </div>
       <div class="k-item reveal" style="transition-delay:.21s">
-        <span class="k-icon">🕐</span>
+        <span class="k-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3.2 2"/></svg></span>
         <div><p class="k-lbl">Delovni čas</p><p class="k-val">Po dogovoru</p></div>
       </div>
       <div class="socialne reveal" style="transition-delay:.28s">
@@ -1564,9 +1592,9 @@
     </div>
     <div class="map-wrap reveal" style="transition-delay:.1s">
       <div id="mapPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:280px;height:100%;background:#efe6da;border-radius:14px;padding:26px;text-align:center">
-        <div style="font-size:1.6rem">📍</div>
+        <div style="color:#d06666"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
         <p style="margin:0;font-weight:600;color:#2c4251">Cesta talcev 3B, 4220 Škofja Loka</p>
-        <p style="margin:0;font-size:.86rem;color:#6f7f89;max-width:330px;line-height:1.5">
+        <p style="margin:0;font-size:.92rem;color:#4f5f69;max-width:340px;line-height:1.55">
           Zemljevid prikazuje Google. Za prikaz je potrebna vaša privolitev, saj Google ob tem prejme vaš IP naslov.
         </p>
         <button type="button" onclick="najsDovoliZemljevid()" style="background:#d06666;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-family:inherit;font-weight:600;font-size:.9rem;cursor:pointer">Prikaži zemljevid</button>
