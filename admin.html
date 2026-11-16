@@ -692,7 +692,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v60-2026-11-16 - preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v61-2026-11-16 - narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v60 · 16.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v61 · 16.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -2100,7 +2100,8 @@ function izrisiNarocila(box,vrstice){
     var postavke=Array.isArray(o.postavke)?o.postavke:[];
     var izdelkiTxt=postavke.map(function(p){return esc(p.naziv)+' ×'+p.kolicina;}).join(', ');
     var dostavaTxt = o.nacin_dostave==='posta' ? ('Pošta: '+esc(o.naslov||'')+', '+esc(o.posta||'')) : 'Prevzem v salonu';
-    var placiloTxt = o.nacin_placila==='flik' ? 'Flik' : o.nacin_placila==='povzetje' ? ('<b>Po povzetju</b>'+(Number(o.doplacilo)?' (+'+eur(o.doplacilo)+')':'')) : 'Nakazilo';
+    var placiloTxt = o.nacin_placila==='flik' ? 'Flik' : o.nacin_placila==='povzetje' ? ('<b>Po povzetju</b>'+(Number(o.doplacilo)?' (+'+eur(o.doplacilo)+')':''))
+      : o.nacin_placila==='ob_prevzemu' ? '<b>Plačilo ob prevzemu</b> – ko je pripravljeno, nastavite »Pripravljeno za prevzem« (stranka dobi SMS)' : 'Nakazilo';
     var statusSel='<select class="nar-status" data-id="'+o.id+'">'+STATUSI_TRG.map(function(s){
       return '<option value="'+s[0]+'"'+(s[0]===o.status?' selected':'')+'>'+esc(s[1])+'</option>';
     }).join('')+'</select>';

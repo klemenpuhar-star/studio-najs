@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v16-2026-11-16 (potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v17-2026-11-16 (preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -210,6 +210,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 .polje .napaka-p{color:#b03a2e;font-size:.8rem;display:none}
 .polje.napaka input{border-color:#c0473c}
 .polje.napaka .napaka-p{display:block}
+.polje .opoz-p{color:#8a5a00;font-size:.8rem}
+.polje .opoz-p .predlog{border:none;background:none;padding:0;color:var(--navy);font-weight:600;text-decoration:underline;font-size:inherit;cursor:pointer}
 .dva{display:grid;grid-template-columns:110px 1fr;gap:10px}
 .opozorilo{background:#fdf0ee;border:1px solid #efc9c3;color:#8e3328;border-radius:var(--r-mal);padding:10px 12px;font-size:.86rem;margin-top:10px;display:none}
 .opozorilo.on{display:block}
@@ -503,6 +505,121 @@ function upnSlika(niz){ /* vrne data:URL slike QR ali '' */
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.13.12/bundle/libphonenumber-max.js" defer></script>
+<script>/* ══════════════════════════════════════════════════════════════════════
+     NAJS — preverjanje telefonskih stevilk (v1, 2026-11-04)
+     Uporablja: index.html (spletno narocanje), admin.html (nova rezervacija, urejanje stranke)
+     - Slovenske stevilke: lastna pravila (8 stevk za 0/+386), enoten zapis "+386 40 123 456".
+     - Tuje stevilke (+ ali 00 + koda drzave): Googlova knjiznica libphonenumber (zgoraj v datoteki).
+     - stanje: "ok" | "opozorilo" (stevilka obstaja, a npr. ne prejme SMS) | "napaka" (ne more obstajati)
+     Isto pretvorbo za slovenske stevilke dela tudi baza (funkcija najs_norm_tel), zato so
+     zapisi vedno enaki, ne glede na to, od kod pride stevilka.
+     ══════════════════════════════════════════════════════════════════════ */
+  (function(){
+    var MOBILNE=['30','31','40','41','49','51','64','65','68','69','70','71'];
+    var PRIMER='040 123 456';
+    var SMS_OPOZ='SMS potrditve in opomnika na to številko ne boste prejeli. Če imate mobilno številko, vpišite raje njo.';
+  
+    function lib(){ return window.libphonenumber || null; }
+    function stevk(n){ return n===1?'števko':(n===2?'števki':(n===3||n===4?'števke':'števk')); }
+    function zapisSI(nat){
+      if(MOBILNE.indexOf(nat.slice(0,2))>=0) return '+386 '+nat.slice(0,2)+' '+nat.slice(2,5)+' '+nat.slice(5);
+      return '+386 '+nat.slice(0,1)+' '+nat.slice(1,4)+' '+nat.slice(4,6)+' '+nat.slice(6);
+    }
+    function drzava(cc){
+      try{ return new Intl.DisplayNames(['sl'],{type:'region'}).of(cc) || cc; }catch(e){ return cc; }
+    }
+    function R(stanje,sporocilo,zapis,tip){ return {stanje:stanje,sporocilo:sporocilo||'',zapis:zapis||'',tip:tip||''}; }
+  
+    function tuja(intl){
+      if(intl.length<7) return R('napaka','Številka je prekratka. Preverite jo.');
+      if(intl.length>15) return R('napaka','Številka je predolga. Preverite jo.');
+      var L=lib();
+      if(!L) return R('ok','','+'+intl,'tuja');           /* knjiznica se ni nalozila: ne oviramo stranke */
+      var e164='+'+intl, dolz;
+      try{ dolz=L.validatePhoneNumberLength(e164); }catch(e){ dolz=null; }
+      if(dolz==='INVALID_COUNTRY') return R('napaka','Koda države na začetku številke (+'+intl.slice(0,3)+'…) ne obstaja. Preverite začetek številke.');
+      var p=null; try{ p=L.parsePhoneNumber(e164); }catch(e){ p=null; }
+      var ime=p&&p.country?('državo '+drzava(p.country)):'izbrano državo';
+      if(dolz==='TOO_SHORT') return R('napaka','Številka je prekratka za '+ime+'. Preverite jo.');
+      if(dolz==='TOO_LONG') return R('napaka','Številka je predolga za '+ime+'. Preverite jo.');
+      if(dolz==='INVALID_LENGTH'||!p) return R('napaka','Številka nima pravilne dolžine za '+ime+'. Preverite jo.');
+      var zapis=p.formatInternational();
+      if(!p.isValid()) return R('opozorilo','Številka verjetno ni pravilna – ne ustreza številkam za '+ime+' (prekratka ali napačen začetek). Preverite jo.',zapis,'tuja');
+      var t=p.getType();
+      if(t==='FIXED_LINE') return R('opozorilo','To je stacionarna številka. '+SMS_OPOZ,zapis,'stacionarna');
+      if(t&&t!=='MOBILE'&&t!=='FIXED_LINE_OR_MOBILE') return R('opozorilo','To ni običajna osebna številka. '+SMS_OPOZ,zapis,'posebna');
+      return R('ok','',zapis,(t==='MOBILE'?'mobilna · ':'')+drzava(p.country));
+    }
+  
+    function preveri(vnos){
+      var s=String(vnos==null?'':vnos).trim();
+      if(!s) return R('napaka','Vpišite telefonsko številko.');
+      if(/[^\d\s+()\-\/.]/.test(s)){
+        return R('napaka', /[oO]/.test(s)
+          ? 'V številki je črka »o« namesto ničle 0. Popravite jo.'
+          : 'Telefonska številka lahko vsebuje samo števke (in znake + ( ) - /).');
+      }
+      if((s.match(/\+/g)||[]).length>1 || (s.indexOf('+')>0)) return R('napaka','Znak + je lahko samo na začetku, npr. +386 40 123 456.');
+      var d=s.replace(/\D/g,''), intl=null, nat;
+      if(s.charAt(0)==='+') intl=d; else if(d.slice(0,2)==='00') intl=d.slice(2);
+      if(intl!==null){
+        if(intl.slice(0,3)!=='386') return tuja(intl);
+        nat=intl.slice(3);
+      } else if(d.slice(0,3)==='386' && (d.length===11||d.length===12)) nat=d.slice(3);
+      else if(d.charAt(0)==='0') nat=d.slice(1);
+      else nat=d;
+      if(nat.charAt(0)==='0') nat=nat.slice(1);
+      var brezKode=(intl===null);
+      if((nat.charAt(0)==='8'||nat.charAt(0)==='9') && nat.length<=8) return R('napaka','To je posebna številka (080/090), na katero vas ne moremo poklicati. Vpišite svojo mobilno ali domačo številko.');
+      if(nat.length<8){
+        var m=8-nat.length;
+        return R('napaka','Številki manjka '+m+' '+(m===1?'števka':(m===2?'števki':(m<5?'števke':'števk')))+'. Slovenske številke imajo 9 števk, npr. '+PRIMER+'.');
+      }
+      if(nat.length>8){
+        var v=nat.length-8;
+        return R('napaka','Številka ima '+v+' '+stevk(v)+' preveč. Slovenske številke imajo 9 števk, npr. '+PRIMER+'.'
+          +(brezKode?' Če je številka tuja, jo vpišite s kodo države, npr. +385 91 234 5678.':''));
+      }
+      var c1=nat.charAt(0), c2=nat.slice(0,2);
+      if(c1==='8'||c1==='9') return R('napaka','To je posebna številka (080/090), na katero vas ne moremo poklicati. Vpišite svojo mobilno ali domačo številko.');
+      if(!/^[1-7]/.test(nat)) return R('napaka','Ta številka ne obstaja. Preverite jo, npr. '+PRIMER+'.');
+      var zapis=zapisSI(nat);
+      if(MOBILNE.indexOf(c2)>=0) return R('ok','',zapis,'mobilna');
+      if(c1==='6') return R('opozorilo','Številka se začne z 0'+c2+', kar ni običajna slovenska številka. Preverite, ali je pravilna.',zapis,'neobicajna');
+      if(c2==='59') return R('opozorilo','To je internetna (VoIP) številka. '+SMS_OPOZ,zapis,'stacionarna');
+      return R('opozorilo','To je stacionarna številka. '+SMS_OPOZ,zapis,'stacionarna');
+    }
+  
+    /* Prikaz pod poljem. el = <input>, msg = element za sporocilo.
+       Preveri, ko stranka zapusti polje; med tipkanjem samo pocisti napako, ko je popravljena.
+       Ob uspehu polje prepise v enoten zapis (+386 40 123 456), da stranka vidi, kako smo jo razumeli. */
+    function prikazi(el,msg,r){
+      if(!msg) return;
+      el.classList.remove('err');
+      msg.className='tel-msg';
+      if(!r){ msg.textContent=''; return; }
+      if(r.stanje==='napaka'){ el.classList.add('err'); msg.classList.add('tel-napaka'); msg.textContent=r.sporocilo; }
+      else if(r.stanje==='opozorilo'){ msg.classList.add('tel-opozorilo'); msg.textContent='⚠ '+r.sporocilo; }
+      else { msg.classList.add('tel-ok'); msg.textContent='✓ '+r.zapis+(r.tip?' · '+r.tip:''); }
+    }
+    function povezi(el,msg){
+      if(!el||el._najsTel) return; el._najsTel=true;
+      el.addEventListener('blur',function(){
+        if(!el.value.trim()){ prikazi(el,msg,null); return; }
+        var r=preveri(el.value); prikazi(el,msg,r);
+        if(r.stanje!=='napaka' && r.zapis) el.value=r.zapis;
+      });
+      el.addEventListener('input',function(){
+        if(!msg||!msg.textContent) return;
+        var r=preveri(el.value);
+        if(r.stanje!=='napaka') prikazi(el,msg,r); else if(msg.classList.contains('tel-ok')||msg.classList.contains('tel-opozorilo')) prikazi(el,msg,null);
+      });
+    }
+  
+    window.NajsTel={ preveri:preveri, prikazi:prikazi, povezi:povezi, verzija:'v2-2026-11-04-vgrajeno' };
+  })();
+  </script>
 <script>
 (function(){
 'use strict';
@@ -970,13 +1087,13 @@ function korak2(){
   var t=$('#pTelo'), P=PODATKI;
   var h='<form id="obrazec" novalidate>'
    +'<fieldset><legend>Kako želite prejeti izdelke?</legend><div class="izbira-kartic">'
-   +'<label class="izbira"><input type="radio" name="dostava" value="prevzem"'+(P.dostava==='prevzem'?' checked':'')+'><div><b>Prevzem v salonu – brezplačno</b><small>Cesta talcev 3B, Škofja Loka. Obvestim vas, ko je naročilo pripravljeno.</small></div></label>'
+   +'<label class="izbira"><input type="radio" name="dostava" value="prevzem"'+(P.dostava==='prevzem'?' checked':'')+'><div><b>Prevzem v salonu – brezplačno</b><small>Cesta talcev 3B, Škofja Loka. Ko bo naročilo pripravljeno, vam pošljem SMS – prosim, pridite šele po obvestilu.</small></div></label>'
    +'<label class="izbira"><input type="radio" name="dostava" value="posta"'+(P.dostava==='posta'?' checked':'')+'><div><b>Dostava po pošti – '+(NAST.prag&&vsotaIzdelkov()>=NAST.prag?'brezplačno':eur(NAST.cena_dostave))+'</b><small>'+(NAST.povzetje!=null?'Plačate vnaprej ali po povzetju.':'Paket pošljem po prejemu plačila.')+'</small></div></label>'
    +'</div></fieldset>'
    +'<fieldset><legend>Vaši podatki</legend>'
    +polje('ime','Ime in priimek','text',P.ime,'name','Vpišite ime in priimek.')
    +polje('telefon','Telefon','tel',P.telefon,'tel','Vpišite telefonsko številko, da vas lahko obvestim.')
-   +polje('email','E-pošta <small>(za potrdilo naročila)</small>','email',P.email,'email','E-naslov ni pravilen.')
+   +polje('email','E-pošta <small>(za navodila in potrditev naročila)</small>','email',P.email,'email','E-naslov ni pravilen.')
    +'<div id="naslovBlok"'+(P.dostava==='posta'?'':' hidden')+'>'
    +polje('naslov','Ulica in hišna številka','text',P.naslov,'street-address','Vpišite naslov za dostavo.')
    +polje('posta','Poštna številka in kraj','text',P.posta,'postal-code','Vpišite poštno številko in kraj, npr. 4220 Škofja Loka.')
@@ -993,17 +1110,30 @@ function korak2(){
     if(e.target.name==='placilo'){ PODATKI.placilo=e.target.value; povzetek2(); }
   });
   f.addEventListener('input',function(e){ if(e.target.name&&PODATKI.hasOwnProperty(e.target.name)){ PODATKI[e.target.name]=e.target.value; var p=e.target.closest('.polje'); if(p) p.classList.remove('napaka'); } });
+  /* v17: preverjanje ob izhodu iz polja; pravilen vnos se zapiše v enotni obliki */
+  f.addEventListener('focusout',function(e){
+    var n=e.target.name; if(!PREVERI[n]) return;
+    if(!e.target.value.trim()){ pokaziPolje(n,null); return; }
+    var r=PREVERI[n](e.target.value); pokaziPolje(n,r);
+    if(r.stanje!=='napaka'&&r.zapis){ e.target.value=r.zapis; PODATKI[n]=r.zapis; }
+  });
+  f.addEventListener('click',function(e){
+    var b=e.target.closest('[data-predlog]'); if(!b) return;
+    var el=$('#f_email'); el.value=b.dataset.predlog; PODATKI.email=b.dataset.predlog; pokaziPolje('email',{stanje:'ok'});
+  });
 }
 /* v13: nacini placila – nakazilo z UPN QR vedno, Flik samo ce je v adminu vpisana stevilka,
    povzetje samo pri dostavi po posti in ce je v adminu vpisano doplacilo */
 function placilaHtml(){
   var P=PODATKI, moz=['nakazilo'];
+  if(P.dostava==='prevzem') moz.push('ob_prevzemu');
   if(NAST.flik) moz.push('flik');
   if(P.dostava==='posta' && NAST.povzetje!=null) moz.push('povzetje');
   if(moz.indexOf(P.placilo)<0) P.placilo='nakazilo';
   var opis={nakazilo:['Nakazilo – QR koda za mobilno banko','Po oddaji prejmete QR kodo: skenirate jo v aplikaciji svoje banke in plačilo je izpolnjeno.'],
     flik:['Flik','Hitro plačilo z mobilno banko na mojo številko.'],
-    povzetje:['Po povzetju – doplačilo '+eur(NAST.povzetje||0),'Plačate poštarju ob prevzemu paketa.']};
+    povzetje:['Po povzetju – doplačilo '+eur(NAST.povzetje||0),'Plačate poštarju ob prevzemu paketa.'],
+    ob_prevzemu:['Plačilo ob prevzemu v salonu','Plačate z gotovino ali kartico, ko pridete po naročilo – po mojem obvestilu, da je pripravljeno.']};
   return moz.map(function(k){ return '<label class="izbira"><input type="radio" name="placilo" value="'+k+'"'+(P.placilo===k?' checked':'')+'><div><b>'+esc(opis[k][0])+'</b><small>'+esc(opis[k][1])+'</small></div></label>'; }).join('');
 }
 function doplacilo(){ return (PODATKI.placilo==='povzetje'&&PODATKI.dostava==='posta'&&NAST.povzetje!=null)?NAST.povzetje:0; }
@@ -1016,17 +1146,90 @@ function povzetek2(){
     +'<div class="vsota"><span>Dostava</span><span>'+(PODATKI.dostava==='prevzem'?'prevzem v salonu':(d?eur(d):'brezplačno'))+'</span></div>'
     +(dp?'<div class="vsota"><span>Doplačilo za povzetje</span><span>'+eur(dp)+'</span></div>':'')
     +'<div class="vsota skupaj"><span>Skupaj za plačilo</span><span>'+eur(v+d+dp)+'</span></div>'
-    +'<button type="button" class="gumb-glavni" id="oddaj" data-oddaj>'+(PODATKI.placilo==='povzetje'?'Oddaj naročilo – plačilo po povzetju':'Oddaj naročilo in plačaj '+eur(v+d+dp))+'</button>'
+    +'<button type="button" class="gumb-glavni" id="oddaj" data-oddaj>'+(PODATKI.placilo==='povzetje'?'Oddaj naročilo – plačilo po povzetju':(PODATKI.placilo==='ob_prevzemu'?'Oddaj naročilo – plačilo ob prevzemu':'Oddaj naročilo in plačaj '+eur(v+d+dp)))+'</button>'
     +'<button type="button" class="gumb-drugi" data-nazaj>Nazaj na košarico</button>';
 }
+/* ── v17: preverjanje podatkov stranke ──
+   telefon: NajsTel (enako kot pri naročanju terminov), e-pošta: oblika + namig za tipkarske napake v domeni,
+   naslov: ulica s hišno številko, pošta: 4-mestna poštna številka in kraj. Vrne {stanje, sporocilo, zapis}. */
+var DOMENE=['gmail.com','hotmail.com','outlook.com','yahoo.com','icloud.com','live.com','gmx.net','siol.net','t-2.net','amis.net','telemach.net','guest.arnes.si','najs.si'];
+function razdalja(a,b){ var m=a.length,n=b.length,d=[],i,j; for(i=0;i<=m;i++){d[i]=[i];} for(j=0;j<=n;j++) d[0][j]=j;
+  for(i=1;i<=m;i++) for(j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
+function preveriEmail(v){
+  v=String(v||'').trim().toLowerCase();
+  if(!v) return {stanje:'napaka',sporocilo:'Vpišite e-naslov – nanj prejmete navodila in potrditev naročila.'};
+  if(/\s/.test(v)) return {stanje:'napaka',sporocilo:'E-naslov ne sme vsebovati presledkov.'};
+  if((v.match(/@/g)||[]).length!==1) return {stanje:'napaka',sporocilo:'E-naslov mora vsebovati en znak @, npr. ime@gmail.com.'};
+  var d=v.split('@'), lok=d[0], dom=d[1];
+  if(!lok||!/^[a-z0-9._%+\-]+$/.test(lok)||/^\.|\.$|\.\./.test(lok)) return {stanje:'napaka',sporocilo:'Del pred znakom @ ni pravilen. Preverite e-naslov.'};
+  if(!/^[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,}$/.test(dom)) return {stanje:'napaka',sporocilo:'Domena za znakom @ ni pravilna (npr. gmail.com). Preverite e-naslov.'};
+  if(DOMENE.indexOf(dom)<0){
+    var naj=null, nd=9; DOMENE.forEach(function(x){ var r=razdalja(dom,x); if(r<nd){nd=r;naj=x;} });
+    if(naj && nd<=2) return {stanje:'opozorilo',sporocilo:'Ste mislili '+lok+'@'+naj+'?',predlog:lok+'@'+naj,zapis:v};
+  }
+  return {stanje:'ok',zapis:v};
+}
+function preveriIme(v){
+  v=String(v||'').trim().replace(/\s+/g,' ');
+  if(v.length<3) return {stanje:'napaka',sporocilo:'Vpišite ime in priimek.'};
+  if(/\d/.test(v)) return {stanje:'napaka',sporocilo:'Ime in priimek ne smeta vsebovati številk.'};
+  if(v.split(' ').length<2) return {stanje:'napaka',sporocilo:'Vpišite ime in priimek (obe besedi).'};
+  return {stanje:'ok',zapis:v};
+}
+function preveriNaslov(v){
+  v=String(v||'').trim().replace(/\s+/g,' ');
+  if(!/[A-Za-zČŠŽčšžĆćĐđ]{2,}/.test(v)) return {stanje:'napaka',sporocilo:'Vpišite ulico (ali kraj) in hišno številko, npr. Cesta talcev 3B.'};
+  if(!/\d/.test(v)) return {stanje:'napaka',sporocilo:'Manjka hišna številka, npr. Cesta talcev 3B.'};
+  if(/^\d{4}\s/.test(v)) return {stanje:'napaka',sporocilo:'Tu vpišite ulico in hišno številko; poštno številko vpišite v spodnje polje.'};
+  return {stanje:'ok',zapis:v};
+}
+function preveriPosto(v){
+  v=String(v||'').trim().replace(/\s+/g,' ').replace(/^SI[- ]?/i,'');
+  var m=v.match(/^(\d{4}),?\s*(.+)$/);
+  if(!m){
+    if(/^\d{4}$/.test(v)) return {stanje:'napaka',sporocilo:'Za poštno številko vpišite še kraj, npr. 4220 Škofja Loka.'};
+    if(/^\d{3}\b|^\d{5,}/.test(v)) return {stanje:'napaka',sporocilo:'Poštna številka ima 4 števke, npr. 4220 Škofja Loka.'};
+    return {stanje:'napaka',sporocilo:'Vpišite poštno številko in kraj, npr. 4220 Škofja Loka.'};
+  }
+  var st=+m[1], kraj=m[2];
+  if(st<1000||st>9999) return {stanje:'napaka',sporocilo:'Slovenske poštne številke so med 1000 in 9999.'};
+  if(!/^[A-Za-zČŠŽčšžĆćĐđ][A-Za-zČŠŽčšžĆćĐđ .\-]+$/.test(kraj)) return {stanje:'napaka',sporocilo:'Za poštno številko vpišite ime kraja, npr. 4220 Škofja Loka.'};
+  kraj=kraj.replace(/(^|[\s\-])([a-zčšžćđ])/g,function(x,a,b){return a+b.toUpperCase();});
+  return {stanje:'ok',zapis:m[1]+' '+kraj};
+}
+function preveriTelefon(v){
+  if(window.NajsTel) return NajsTel.preveri(v);
+  return String(v||'').replace(/\D/g,'').length>=8?{stanje:'ok',zapis:String(v).trim()}:{stanje:'napaka',sporocilo:'Vpišite telefonsko številko, npr. 040 123 456.'};
+}
+var PREVERI={ime:preveriIme,telefon:preveriTelefon,email:preveriEmail,naslov:preveriNaslov,posta:preveriPosto};
+function pokaziPolje(ime,r){
+  var el=$('#f_'+ime); if(!el) return; var p=el.closest('.polje'), s=p.querySelector('.napaka-p'), o=p.querySelector('.opoz-p');
+  p.classList.remove('napaka'); if(o) o.remove();
+  if(!r) return;
+  if(r.stanje==='napaka'){ s.textContent=r.sporocilo; p.classList.add('napaka'); return; }
+  if(r.stanje==='opozorilo'){
+    var x=document.createElement('span'); x.className='opoz-p';
+    if(r.predlog){ x.innerHTML='⚠ Ste mislili <button type="button" class="predlog" data-predlog="'+esc(r.predlog)+'">'+esc(r.predlog)+'</button>?'; }
+    else x.textContent='⚠ '+r.sporocilo;
+    p.appendChild(x);
+  }
+}
+
+var OPOZ_POTRJENA={};
 function preveri(){
-  var ok=true, P=PODATKI, prvi=null;
-  function nap(ime,pogoj){ var el=$('#f_'+ime); if(!el) return; var p=el.closest('.polje'); if(pogoj){ p.classList.add('napaka'); ok=false; if(!prvi) prvi=el; } else p.classList.remove('napaka'); }
-  nap('ime', P.ime.trim().length<3);
-  nap('telefon', P.telefon.replace(/\D/g,'').length<8);
-  nap('email', P.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(P.email.trim()));
-  if(P.dostava==='posta'){ nap('naslov', P.naslov.trim().length<4); nap('posta', !/\d{4}/.test(P.posta)); }
-  if(prvi) prvi.focus();
+  var ok=true, P=PODATKI, prvi=null, polja=['ime','telefon','email'];
+  if(P.dostava==='posta') polja.push('naslov','posta');
+  polja.forEach(function(n){
+    var r=PREVERI[n](P[n]); pokaziPolje(n,r);
+    if(r.stanje!=='napaka'&&r.zapis){ P[n]=r.zapis; var el=$('#f_'+n); if(el) el.value=r.zapis; }
+    /* napaka ustavi oddajo; opozorilo (npr. stacionarna številka, morda tipkarska napaka v e-naslovu) ustavi samo prvič */
+    var kljuc=n+'|'+P[n];
+    if(r.stanje==='napaka'||(r.stanje==='opozorilo'&&!OPOZ_POTRJENA[kljuc])){
+      ok=false; if(!prvi) prvi=$('#f_'+n);
+      if(r.stanje==='opozorilo') OPOZ_POTRJENA[kljuc]=1;
+    }
+  });
+  if(prvi){ prvi.focus(); prvi.scrollIntoView({block:'center'}); }
   return ok;
 }
 var NAPAKE={'manjkajo-podatki':'Manjka ime ali telefon.','manjka-naslov':'Za dostavo po pošti vpišite naslov in poštno številko.',
@@ -1063,6 +1266,8 @@ function korak3(d,P,vsebina){
     nav=d.flik_stevilka
       ? '<dl class="navodila"><dt>Plačilo s Flikom na številko</dt><dd>'+esc(d.flik_stevilka)+'</dd><dt>Znesek</dt><dd>'+znesek+'</dd><dt>Namen</dt><dd>Naročilo '+sklic+'</dd></dl>'
       : '<div class="navodila">Podatke za plačilo s Flikom vam pošljem po SMS-u v najkrajšem možnem času. Znesek: <b>'+znesek+'</b>.</div>';
+  } else if(P.placilo==='ob_prevzemu'){
+    nav='<div class="navodila">Plačilo ob prevzemu v salonu: <b>'+znesek+'</b> (gotovina ali kartica).</div>';
   } else if(P.placilo==='povzetje'){
     nav='<div class="navodila">Plačilo po povzetju: znesek <b>'+znesek+'</b> (vključno z doplačilom '+eur(d.doplacilo)+') plačate poštarju ob prevzemu paketa.</div>';
   } else if(d.tr_racun){
@@ -1074,11 +1279,11 @@ function korak3(d,P,vsebina){
     nav='<div class="navodila">Podatke za nakazilo vam pošljem po e-pošti ali SMS-u v najkrajšem možnem času. Znesek: <b>'+znesek+'</b>.</div>';
   }
   var dost=P.dostava==='prevzem'
-    ? 'Ko bo naročilo pripravljeno, vas obvestim – prevzamete ga v salonu na Cesti talcev 3B v Škofji Loki.'
+    ? 'Ko bo naročilo pripravljeno, vam pošljem SMS'+(P.email?' in e-pošto':'')+'. <b>Prosim, pridite v salon šele po obvestilu</b> – Cesta talcev 3B, Škofja Loka.'
     : (P.placilo==='povzetje'?'Paket pošljem v nekaj dneh':'Paket pošljem po prejemu plačila')+' na naslov '+esc(P.naslov)+', '+esc(P.posta)+'.';
   $('#pTelo').innerHTML='<div class="uspeh"><div class="kljukica"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2c4251" stroke-width="2.2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>'
-    +'<h3>'+(P.placilo==='povzetje'?'Hvala, naročilo je potrjeno':'Hvala, naročilo je oddano')+'</h3><p>Številka naročila: <b>'+sklic+'</b>'+(P.email?'<br>'+(P.placilo==='povzetje'?'Potrditev naročila prejmete na ':'Navodila za plačilo prejmete na ')+esc(P.email)+'.':'')+'</p>'
-    +nav+(P.placilo==='povzetje'?'':'<p>Naročilo potrdim, ko prejmem vaše plačilo – takrat prejmete potrditev.</p>')+'<p>'+dost+'</p><p>Če imate vprašanje, me pokličite na <a href="tel:+38631217361">031 217 361</a>.</p></div>';
+    +'<h3>'+(P.placilo==='povzetje'?'Hvala, naročilo je potrjeno':'Hvala, naročilo je oddano')+'</h3><p>Številka naročila: <b>'+sklic+'</b>'+(P.email?'<br>'+(P.placilo==='povzetje'?'Potrditev naročila prejmete na ':(P.placilo==='ob_prevzemu'?'Povzetek naročila prejmete na ':'Navodila za plačilo prejmete na '))+esc(P.email)+'.':'')+'</p>'
+    +nav+((P.placilo==='povzetje'||P.placilo==='ob_prevzemu')?'':'<p>Naročilo potrdim, ko prejmem vaše plačilo – takrat prejmete potrditev.</p>')+'<p>'+dost+'</p><p>Če imate vprašanje, me pokličite na <a href="tel:+38631217361">031 217 361</a>.</p></div>';
   $('#pDno').innerHTML='<button type="button" class="gumb-glavni" data-nadaljuj-nakup>Nazaj v trgovino</button>';
 }
 $('#predal').addEventListener('click',function(e){
