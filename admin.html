@@ -692,7 +692,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v59-2026-11-14 - narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v60-2026-11-16 - preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v59 · 14.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v60 · 16.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1714,7 +1714,7 @@ function obrObrazec(b){
 function loadBlagajna(){
   calScroll.classList.add('hidden'); nujniList.classList.add('hidden');
   document.getElementById('strankeView').classList.add('hidden');
-  var box=document.getElementById('blagajnaView'); box.classList.remove('hidden');
+  skrijBlagajno(); var box=document.getElementById('blagajnaView'); box.classList.remove('hidden');
   resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Blagajna · '+prettyDate(isoOf(cur));
   box.innerHTML='<div class="empty">Nalagam …</div>';
@@ -1837,6 +1837,7 @@ function izdKrepko(t){ return esc(t||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</s
 function loadIzdelki(){
   calScroll.classList.add('hidden'); nujniList.classList.add('hidden');
   document.getElementById('strankeView').classList.add('hidden');
+  skrijBlagajno();   /* v60: ob preklopu ostane viden samo en pogled (prej je seznam izdelkov ostal nad naročili) */
   var box=document.getElementById('izdelkiView'); box.classList.remove('hidden');
   resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Izdelki (spletna trgovina)';
@@ -2036,6 +2037,7 @@ function statusImeTrg(s){for(var i=0;i<STATUSI_TRG.length;i++){if(STATUSI_TRG[i]
 function loadNarocila(){
   calScroll.classList.add('hidden'); nujniList.classList.add('hidden');
   document.getElementById('strankeView').classList.add('hidden');
+  skrijBlagajno();
   var box=document.getElementById('narocilaView'); box.classList.remove('hidden');
   resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Naročila (spletna trgovina)';
@@ -2132,7 +2134,7 @@ function izrisiNarocila(box,vrstice){
 }
 
 function loadStranke(){
-  calScroll.classList.add('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.remove('hidden');
+  calScroll.classList.add('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.remove('hidden');skrijBlagajno();
   resetMiniHeight();
   document.getElementById('rangeLabel').textContent='Stranke';
   var box=document.getElementById('strankeView');
