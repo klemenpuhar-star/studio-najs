@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v21-2026-11-17 (zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v22-2026-11-17 (navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -314,6 +314,10 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
 .zakaj span{display:block;font-size:.74rem;font-weight:600;color:var(--koral-txt);margin-bottom:3px}
 .zakaj p{margin:0;line-height:1.55;font-size:.92rem}
 .zakaj strong{font-weight:600;color:var(--navy)}
+/* v22: navodila za uporabo v oknu izdelka */
+.navodila{border-top:1px solid var(--crta);padding-top:12px}
+.navodila span{display:block;font-size:.74rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--koral-txt);margin-bottom:4px}
+.navodila p{margin:0;line-height:1.6;font-size:.95rem;color:#3d5260}
 @media (max-width:760px){ .lin-mreza{grid-template-columns:1fr} .linije{padding:0 14px} }
 /* ── Actyva: vegansko in odgovorno ── */
 .lin-kartica.siroka{grid-column:1/-1}
@@ -699,7 +703,7 @@ function nalozi(){
   var m=$('#mreza'); var h=''; for(var i=0;i<8;i++) h+='<div><div class="skelet"></div></div>'; m.innerHTML=h;
   if(!sb){ napakaNalaganja(); return; }
   Promise.all([
-    sb.from('artikli').select('id,naziv,cena,opis,slika_url,kategorija,velikost,zaloga,skupina,barva,barva_hex,vrsta,potrebe,priporoceno,sort_order,kljucna_sestavina,zakaj')
+    sb.from('artikli').select('id,naziv,cena,opis,slika_url,kategorija,velikost,zaloga,skupina,barva,barva_hex,vrsta,potrebe,priporoceno,sort_order,kljucna_sestavina,zakaj,navodila')
       .eq('aktiven',true).eq('prikazi_na_spletu',true).order('sort_order',{ascending:true}),
     sb.from('nastavitve_trgovina').select('cena_dostave,prag_brezplacna_dostava,flik_stevilka,doplacilo_povzetje').limit(1)
   ]).then(function(r){
@@ -1003,6 +1007,7 @@ function risiOkno(){
   h+='<div class="cena" style="font-size:1.9rem">'+eur(a.cena)+'</div>'+(naEnoto(a)?'<div class="na-enoto">'+naEnoto(a)+'</div>':'');
   if(a.zakaj) h+='<div class="zakaj"><span>Zakaj deluje</span><p>'+krepko(a.zakaj)+'</p></div>';
   if(a.opis) h+='<p class="o-opis">'+esc(a.opis)+'</p>';
+  if(a.navodila) h+='<div class="navodila"><span>Navodila za uporabo</span><p>'+esc(a.navodila)+'</p></div>';
   var LI=LINIJE_INFO[c.kategorija];
   if(LI&&LI.eko&&!c.vrste['Dodatki']){   /* v12: dodatki (npr. prazna steklenica) niso kozmetika – brez oznak vegansko/embalaža */
      h+='<ul class="eko kratko">'+LI.eko.map(function(x){ return '<li>'+ikona(x[0],18)+'<div><b>'+esc(x[1])+'</b></div></li>'; }).join('')+'</ul>';

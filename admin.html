@@ -692,7 +692,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v63-2026-11-16 - posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v64-2026-11-17 - izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +708,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v63 · 16.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v64 · 17.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -1971,11 +1971,12 @@ function izdelekForma(a,nacin){
     +'<div class="iz-potrebe" id="izPotrebe">'+vsePotrebe.map(function(p){
         return '<label class="iz-chip'+(potr.indexOf(p)>=0?' on':'')+'"><input type="checkbox" value="'+esc(p)+'"'+(potr.indexOf(p)>=0?' checked':'')+'>'+esc(p)+'</label>';
       }).join('')+'</div>'
-    +'<div class="iz-sek">Opis in »Zakaj deluje«</div>'
+    +'<div class="iz-sek">Opis, »Zakaj deluje« in navodila</div>'
     +'<div class="obr-row"><label style="flex:1 0 100%">Opis (s svojimi besedami, po katalogu)<textarea id="izOpis" rows="3">'+esc(a.opis||'')+'</textarea></label></div>'
     +'<div class="obr-row"><label style="flex:1 0 100%">Ključna sestavina<input type="text" id="izKljuc" value="'+esc(a.kljucna_sestavina||'')+'" placeholder="npr. Velian Complex"></label></div>'
     +'<div class="obr-row"><label style="flex:1 0 100%">Zakaj deluje – besedo med **zvezdicami** trgovina izpiše krepko<textarea id="izZakaj" rows="3">'+esc(a.zakaj||'')+'</textarea></label></div>'
     +'<div class="iz-predogled" id="izZakajPre"></div>'
+    +'<div class="obr-row"><label style="flex:1 0 100%">Navodila za uporabo (trgovina jih izpiše pod opisom)<textarea id="izNavodila" rows="3" placeholder="npr. Nanesite na mokre lase, zmasirajte in sperite.">'+esc(a.navodila||'')+'</textarea></label></div>'
     +'<div class="iz-sek">Slika</div>'
     +'<div class="iz-slika-vrsta"><img id="izSlikaPre" alt="">'
     +'<label>Ime datoteke (Klemen jo naloži v koren repozitorija, npr. kemon-actyva-volume-250.webp)<input type="text" id="izSlika" value="'+esc(a.slika_url||'')+'"></label></div>'
@@ -2022,6 +2023,7 @@ function izdelekForma(a,nacin){
       opis:document.getElementById('izOpis').value.trim()||null,
       kljucna_sestavina:document.getElementById('izKljuc').value.trim()||null,
       zakaj:document.getElementById('izZakaj').value.trim()||null,
+      navodila:document.getElementById('izNavodila').value.trim()||null,
       potrebe:potrebe,
       priporoceno:document.getElementById('izPrip').checked,
       slika_url:document.getElementById('izSlika').value.trim()||null,
