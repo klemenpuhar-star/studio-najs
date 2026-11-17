@@ -2818,8 +2818,8 @@ function odpriOpravek(bl){
     if(!d||!od||!doo){ m.textContent='Vpišite datum ter uro od in do.'; return; }
     if(toMin(doo)<=toMin(od)){ m.textContent='Ura »do« mora biti za uro »od«.'; return; }
     this.disabled=true;
-    sb.from('blocks').update({note:v||null, block_date:d, start_time:od, end_time:doo}).eq('id',bl.id).then(function(r){
-      if(r.error){m.textContent='Napaka: '+r.error.message;document.getElementById('opShrani').disabled=false;return;}
+    sb.from('blocks').update({note:v||null, block_date:d, start_time:od, end_time:doo}).eq('id',bl.id).select('id').then(function(r){
+      if(r.error||!r.data||!r.data.length){m.textContent='Sprememba ni bila shranjena'+(r.error?': '+r.error.message:' (ni dovoljenja za urejanje).');document.getElementById('opShrani').disabled=false;return;}
       ov.remove(); load();
     });
   };
