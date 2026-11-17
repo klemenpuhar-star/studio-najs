@@ -689,10 +689,27 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
   .iz-gumbi{grid-column:1/-1;justify-content:flex-end}
   .iz-thumb{width:44px;height:44px}
 }
+
+/* ══ v65: nizki zasloni (prenosnik 14", povecava 150 %) – manj zgornjega dela, vec koledarja ══ */
+@media (min-width:821px) and (max-height:820px){
+  header{height:46px}
+  header .brand .logo-img{height:28px}
+  .toolbar{padding:.35rem 1.5rem .15rem;gap:.4rem}
+  .toolbar .btn-ghost{padding:.32rem .75rem}
+  .nav-btn{width:30px;height:30px}
+  .range{font-size:1.05rem;min-width:0;white-space:nowrap;margin:0 .2rem}
+  .seg button{padding:.32rem .62rem;white-space:nowrap}
+  .cat-legend{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:.1rem 1.5rem .1rem;gap:.9rem}
+  .cat-legend::-webkit-scrollbar{display:none}
+  .cat-legend .lg{white-space:nowrap;font-size:.66rem}
+  .wrap{padding:.25rem 1.5rem 1rem}
+  .side{top:52px}
+  .tb-dolgo{display:none}
+}
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v64-2026-11-17 - izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v65-2026-11-17 - nizki zasloni: kompaktnejsa glava, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -708,7 +725,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v64 · 17.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v65 · 17.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -717,7 +734,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
     <button class="nav-btn" id="prevBtn">&#8249;</button>
     <button class="nav-btn" id="nextBtn">&#8250;</button>
     <span class="range" id="rangeLabel"></span>
-    <button class="btn-ghost" id="newBtn">+ Nova rezervacija</button>
+    <button class="btn-ghost" id="newBtn" title="Nova rezervacija">+ Nova<span class="tb-dolgo"> rezervacija</span></button>
     <button class="btn-ghost" id="blockToggle">&#128197; Opravek</button>
     <div class="seg">
       <button data-mode="day" class="active">Dan</button>
@@ -2861,6 +2878,26 @@ document.getElementById('nbName').addEventListener('change',fillFromCustomer);
 document.getElementById('nbSave').addEventListener('click',saveNew);
 
 sb.auth.getSession().then(function(res){if(res.data&&res.data.session)showApp(res.data.session);else showLogin();});
+</script>
+
+<script>
+/* v65: koledar zapolni preostanek zaslona (izracun iz dejanskega polozaja, ne fiksnih 215 px) */
+(function(){
+  function prilagodi(){
+    var cs=document.getElementById('calScroll'); if(!cs) return; if(cs.classList.contains('brez-drsnika')){ cs.style.height=''; return; } if(!cs.offsetParent) return;
+    if(window.innerWidth<=820){ cs.style.height=''; return; }
+    var vrh=cs.getBoundingClientRect().top+window.scrollY;
+    var h=Math.max(320, window.innerHeight-vrh-14);
+    cs.style.height=h+'px';
+  }
+  window.najsPrilagodiKoledar=prilagodi;
+  window.addEventListener('resize',prilagodi);
+  if(window.ResizeObserver){ var ro=new ResizeObserver(prilagodi);
+    ['appView','catLegend','blockForm'].forEach(function(id){ var e=document.getElementById(id); if(e) ro.observe(e); });
+    var t=document.querySelector('.toolbar'); if(t) ro.observe(t); }
+  new MutationObserver(prilagodi).observe(document.getElementById('calScroll')||document.body,{attributes:true,attributeFilter:['class']});
+  setTimeout(prilagodi,300);
+})();
 </script>
 </body>
 </html>
