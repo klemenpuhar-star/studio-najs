@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v20-2026-11-17 (situacija las »Styling« = izdelki Kemon Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v20-2026-11-17 (situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -675,6 +675,10 @@ var POTREBE=['Barvani lasje','Blond in sivi lasje','Suhi in poškodovani lasje',
   'Poletje in sonce','Za otroke','Vsakodnevna nega','Styling'];
 /* v20: »Styling« = vsi izdelki linije Kemon Hair Style (poleg svojih potreb) */
 var STYLING_LINIJE=['Kemon Hair Style'];
+/* v20: kratek opis namena (rdeča vrstica na kartici) za izdelke brez ključne sestavine */
+var NAMEN={'Dreamfix':'Lak za lase z močnim oprijemom','Easy Smooth':'Gladilni serum','Glamoon':'Sprej za sijaj',
+  'Hi Density Control':'Krema za ukrotitev las','Hi Density Curl':'Krema za definicijo kodrov','Macro':'Sprej za volumen',
+  'Marvol':'Pena za volumen','On Time':'Suhi šampon','Wrap The Heat':'Zaščita pred vročino','Zero Gravity':'Pasta za močno utrditev'};
 
 /* ── stanje ── */
 var ARTIKLI=[], KARTICE=[], PO_ID={};
@@ -916,6 +920,7 @@ function karticaHtml(c){
   h+='<div class="k-linija">'+esc(LINIJA[c.kategorija]||c.kategorija)+'</div>';
   h+='<button type="button" class="k-ime" data-odpri>'+esc(im.ime)+(im.pod?'<small>'+esc(im.pod)+'</small>':'')+'</button>';
   if(a.kljucna_sestavina && a.kljucna_sestavina!=='Velian Complex') h+='<div class="k-sest">'+esc(a.kljucna_sestavina)+'</div>';
+  else if(NAMEN[a.naziv]) h+='<div class="k-sest">'+esc(NAMEN[a.naziv])+'</div>';
   if(c.barvna){
     h+='<div class="barve" role="group" aria-label="Odtenki">';
     c.variante.forEach(function(v){ h+='<button type="button" class="barva" data-var="'+v.id+'" title="'+esc(v.barva)+'" aria-label="'+esc(v.barva)+'" aria-pressed="'+(v.id===c.izbrana)+'" style="background:'+esc(v.barva_hex||'#ddd')+'"></button>'; });
