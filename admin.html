@@ -540,6 +540,9 @@ header .who{font-size:.74rem;opacity:.65}
   .d-actions .act{flex:1 1 45%}
 }
 .op-pop{max-width:430px;width:100%}
+.op-cas{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:.5rem;margin-bottom:.2rem}
+.op-cas input{width:100%;min-width:0;box-sizing:border-box;padding:.6rem .45rem}
+@media(max-width:420px){.op-cas{grid-template-columns:1fr 1fr}.op-cas label:first-child{grid-column:1/-1}}
 .op-lab{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:#7c8a93;margin:.6rem 0}
 .op-lab input{padding:.6rem;border:1.5px solid #e7e0d8;border-radius:10px;font-family:inherit;font-size:1rem;color:var(--navy)}
 .op-btns{display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem}
@@ -709,7 +712,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v65-2026-11-17 - nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v65-2026-11-17 - okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -2797,18 +2800,25 @@ function odpriOpravek(bl){
   ov.innerHTML='<div class="pop op-pop">'
     +'<div class="ui-top"><h3 style="margin:0">Opravek</h3><button type="button" class="ui-x" id="opZapri">✕</button></div>'
     +'<p class="uvoz-sub">'+esc(prettyDate(bl.block_date))+' · '+esc(hm(bl.start_time))+'–'+esc(hm(bl.end_time))+'</p>'
+    +'<div class="op-cas"><label class="op-lab">Datum<input type="date" id="opDatum" value="'+esc(bl.block_date)+'"></label>'
+    +'<label class="op-lab">Od<input type="time" id="opOd" step="900" value="'+esc(hm(bl.start_time))+'"></label>'
+    +'<label class="op-lab">Do<input type="time" id="opDo" step="900" value="'+esc(hm(bl.end_time))+'"></label></div>'
     +'<label class="op-lab">Za kakšen opravek gre?'
     +'<input type="text" id="opOpis" value="'+esc(bl.note||'')+'" placeholder="npr. malica, dostava, zdravnik, dopust"></label>'
     +'<div class="op-btns">'
-    +'<button type="button" class="btn op-shrani" id="opShrani">Shrani opis</button>'
+    +'<button type="button" class="btn op-shrani" id="opShrani">Shrani spremembe</button>'
     +'<button type="button" class="btn op-vrini" id="opVrini">➕ Vrini termin ob '+esc(hm(bl.start_time))+'</button>'
     +'<button type="button" class="btn op-brisi" id="opBrisi">🗑 Odstrani opravek</button>'
     +'</div><div id="opMsg" class="uvoz-sub"></div></div>';
   document.body.appendChild(ov);
   document.getElementById('opZapri').onclick=function(){ov.remove();};
   document.getElementById('opShrani').onclick=function(){
-    var v=document.getElementById('opOpis').value.trim(), m=document.getElementById('opMsg'); this.disabled=true;
-    sb.from('blocks').update({note:v||null}).eq('id',bl.id).then(function(r){
+    var v=document.getElementById('opOpis').value.trim(), m=document.getElementById('opMsg');
+    var d=document.getElementById('opDatum').value, od=document.getElementById('opOd').value, doo=document.getElementById('opDo').value;
+    if(!d||!od||!doo){ m.textContent='Vpišite datum ter uro od in do.'; return; }
+    if(toMin(doo)<=toMin(od)){ m.textContent='Ura »do« mora biti za uro »od«.'; return; }
+    this.disabled=true;
+    sb.from('blocks').update({note:v||null, block_date:d, start_time:od, end_time:doo}).eq('id',bl.id).then(function(r){
       if(r.error){m.textContent='Napaka: '+r.error.message;document.getElementById('opShrani').disabled=false;return;}
       ov.remove(); load();
     });
