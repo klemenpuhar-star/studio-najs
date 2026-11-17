@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v22-2026-11-17 (navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v23-2026-11-17 (spustni meni »Kaj iščete?« s skupinami Nega las / Styling / Pripomočki; v22: navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -438,8 +438,8 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
     <div class="vrstica2">
       <div class="aktivni"><span class="stevec" id="stevec" aria-live="polite"></span><span id="aktivniF"></span></div>
       <div class="izbire">
-        <label class="skrito" for="situacija">Situacija las</label>
-        <select id="situacija"><option value="">Situacija las</option></select>
+        <label class="skrito" for="situacija">Kaj iščete?</label>
+        <select id="situacija"><option value="">Kaj iščete?</option></select>
         <label class="skrito" for="razvrsti">Razvrsti</label>
         <select id="razvrsti">
           <option value="priporoceno">Priporočeno</option>
@@ -806,7 +806,11 @@ function zgradiFiltre(){
   vr.addEventListener('click',function(e){ var b=e.target.closest('[data-vrsta]'); if(!b) return; F.vrsta=b.dataset.vrsta; izrisi(); naRezultate(); });
   /* v14: spustni meni s situacijami las (namesto linij, ki jih stranke ne poznajo) + krtače in dodatki */
   var sel=$('#situacija'), so='';
-  POTREBE.forEach(function(p){ if(stej(function(c){ return c.potrebe[p]; })) so+='<option value="p:'+esc(p)+'">'+esc(p)+'</option>'; });
+  /* v23: skupine Nega las / Styling / Pripomočki */
+  var opt=function(p){ return '<option value="p:'+esc(p)+'">'+esc(p)+'</option>'; };
+  var nega=POTREBE.filter(function(p){ return p!=='Styling' && stej(function(c){ return c.potrebe[p]; }); });
+  if(nega.length) so+='<optgroup label="Nega las">'+nega.map(opt).join('')+'</optgroup>';
+  if(stej(function(c){ return c.potrebe['Styling']; })) so+='<optgroup label="Styling">'+opt('Styling')+'</optgroup>';
   var pri=SITUACIJE_VRSTE.filter(function(v){ return stej(function(c){ return c.vrste[v]; }); });
   if(pri.length) so+='<optgroup label="Pripomočki">'+pri.map(function(v){ return '<option value="v:'+esc(v)+'">'+esc(v)+'</option>'; }).join('')+'</optgroup>';
   sel.insertAdjacentHTML('beforeend',so);
