@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v20-2026-11-17 (situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v21-2026-11-17 (zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -76,6 +76,9 @@ img{max-width:100%;display:block}
 .orodja{max-width:1200px;margin:26px auto 0;padding:0 20px;position:sticky;top:65px;z-index:30;background:var(--ozadje)}
 .vrste{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--crta);padding-bottom:0}
 .vrste::-webkit-scrollbar{display:none}
+/* v21: na računalniku se vidijo vsi zavihki (brez odrezanega »Dodatki«); na telefonu ostane drsenje z namigom na desni */
+@media (min-width:1100px){ .vrste{justify-content:space-between;gap:0} .vrsta{padding:12px 6px 11px;font-size:.86rem} }
+@media (max-width:1099px){ .vrste{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:32px} }
 .vrsta{border:none;background:none;padding:12px 12px 11px;white-space:nowrap;font-size:.9rem;color:var(--siva);
   border-bottom:2.5px solid transparent;margin-bottom:-1px;min-height:44px}
 .vrsta:hover{color:var(--navy)}
