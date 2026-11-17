@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v23-2026-11-17 (spustni meni »Kaj iščete?« s skupinami Nega las / Styling / Pripomočki; v22: navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v24-2026-11-17 (odstranjeni gumbi »Kaj potrebujejo vaši lasje?«; v23: spustni meni »Kaj iščete?« s skupinami Nega las / Styling / Pripomočki; v22: navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -428,10 +428,6 @@ legend{font-weight:600;font-size:.92rem;margin-bottom:10px;padding:0}
     </ul>
   </section>
 
-  <section class="potrebe" aria-labelledby="potNaslov">
-    <h2 id="potNaslov">Kaj potrebujejo vaši lasje?</h2>
-    <div class="cipi" id="cipi" role="group" aria-labelledby="potNaslov"></div>
-  </section>
 
   <div class="orodja">
     <div class="vrste" id="vrste" role="tablist" aria-label="Vrsta izdelka"></div>
@@ -792,11 +788,11 @@ function zgradiFiltre(){
     var n=stej(function(c){ return c.potrebe[p]; }); if(!n) return;
     h+='<button type="button" class="cip" data-potreba="'+esc(p)+'" aria-pressed="false">'+esc(p)+' <small>'+n+'</small></button>';
   });
-  cipi.innerHTML=h;
+  if(cipi){ cipi.innerHTML=h;   /* v24: gumbi potreb odstranjeni (izbira je v meniju »Kaj iščete?«) */
   cipi.addEventListener('click',function(e){
     var b=e.target.closest('[data-potreba]'); if(!b) return;
     F.potreba=(F.potreba===b.dataset.potreba)?'':b.dataset.potreba; if(F.potreba&&SITUACIJE_VRSTE.indexOf(F.vrsta)>=0) F.vrsta=''; izrisi(); naRezultate();
-  });
+  }); }
   var vr=$('#vrste'), hv='<button type="button" class="vrsta" role="tab" data-vrsta="" aria-selected="true">Vse</button>';
   VRSTE.forEach(function(v){
     var n=stej(function(c){ return c.vrste[v]; }); if(!n) return;
