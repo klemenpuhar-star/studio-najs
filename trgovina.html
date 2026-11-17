@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NAJS-TRGOVINA: v24-2026-11-17 (odstranjeni gumbi »Kaj potrebujejo vaši lasje?«; v23: spustni meni »Kaj iščete?« s skupinami Nega las / Styling / Pripomočki; v22: navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
+<!-- NAJS-TRGOVINA: v24-2026-11-17 (skupina Nega lasisca v meniju; odstranjeni gumbi »Kaj potrebujejo vaši lasje?«; v23: spustni meni »Kaj iščete?« s skupinami Nega las / Styling / Pripomočki; v22: navodila za uporabo v oknu izdelka; v21: zavihki vrst na racunalniku vsi vidni, na telefonu namig za drsenje; v20: situacija las »Styling« = izdelki Kemon Hair Style, rdeča vrstica z namenom pri Hair Style, ostanejo tudi pod svojimi potrebami; v19: pravno: gumb z obveznostjo placila, cena za liter, maticna stevilka v nogi; v18: posta: locena polja postna stevilka + kraj, kraj se izpise sam iz vgrajenega seznama postnih stevilk; v17: preverjanje telefona, e-poste in naslova; placilo ob prevzemu v salonu; prevzem sele po obvestilu; v16: potrditev narocila sele ob placilu; v15: telefon: izbirnika cez celo sirino, napis Situacija las, znacka Vegansko spodaj; v14: situacije las; v13: UPN QR, povzetje) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
@@ -804,8 +804,12 @@ function zgradiFiltre(){
   var sel=$('#situacija'), so='';
   /* v23: skupine Nega las / Styling / Pripomočki */
   var opt=function(p){ return '<option value="p:'+esc(p)+'">'+esc(p)+'</option>'; };
-  var nega=POTREBE.filter(function(p){ return p!=='Styling' && stej(function(c){ return c.potrebe[p]; }); });
+  var LASISCE=['Mastno lasišče','Prhljaj','Izpadanje las','Občutljivo lasišče'];
+  var ima=function(p){ return stej(function(c){ return c.potrebe[p]; }); };
+  var nega=POTREBE.filter(function(p){ return p!=='Styling' && LASISCE.indexOf(p)<0 && ima(p); });
+  var las=LASISCE.filter(ima);
   if(nega.length) so+='<optgroup label="Nega las">'+nega.map(opt).join('')+'</optgroup>';
+  if(las.length) so+='<optgroup label="Nega lasišča">'+las.map(opt).join('')+'</optgroup>';
   if(stej(function(c){ return c.potrebe['Styling']; })) so+='<optgroup label="Styling">'+opt('Styling')+'</optgroup>';
   var pri=SITUACIJE_VRSTE.filter(function(v){ return stej(function(c){ return c.vrste[v]; }); });
   if(pri.length) so+='<optgroup label="Pripomočki">'+pri.map(function(v){ return '<option value="v:'+esc(v)+'">'+esc(v)+'</option>'; }).join('')+'</optgroup>';
