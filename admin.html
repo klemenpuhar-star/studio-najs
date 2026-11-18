@@ -712,7 +712,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v66-2026-11-18 - narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v67-2026-11-18 - zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -728,7 +728,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v66 · 18.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v67 · 18.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
@@ -749,6 +749,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
       <button data-mode="blagajna">Blagajna</button>
       <button data-mode="izdelki">Izdelki</button>
       <button data-mode="narocila">Naročila</button>
+      <button data-mode="novicke">Novičke</button>
     </div>
   </div>
 
@@ -780,6 +781,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
         <div class="blagajna hidden" id="blagajnaView"></div>
         <div class="blagajna hidden" id="izdelkiView"></div>
         <div class="blagajna hidden" id="narocilaView"></div>
+        <div class="blagajna hidden" id="novickeView"></div>
       </div>
     </div>
   </div>
@@ -1255,13 +1257,14 @@ function rangeText(days){
 }
 function load(){
   nastaviMerilo();
-  var lg=document.getElementById('catLegend'); if(lg)lg.style.display=(mode==='stranke'||mode==='blagajna')?'none':'flex';
+  var lg=document.getElementById('catLegend'); if(lg)lg.style.display=(mode==='stranke'||mode==='blagajna'||mode==='novicke')?'none':'flex';
   if(isMobile()&&MINI_BUILT){buildMini();}else{updateMiniSel();}
   if(mode==='nujni'){loadNujni();return;}
   if(mode==='stranke'){loadStranke();return;}
   if(mode==='blagajna'){loadBlagajna();return;}
   if(mode==='izdelki'){loadIzdelki();return;}
   if(mode==='narocila'){loadNarocila();return;}
+  if(mode==='novicke'){loadNovicke();return;}
   if(mode==='month'){loadMonth();return;}
   calScroll.classList.remove('hidden');nujniList.classList.add('hidden');document.getElementById('strankeView').classList.add('hidden');skrijBlagajno();
   var days=daysForMode();
@@ -1547,7 +1550,7 @@ function uvozShrani(R,btn){
   })();
 }
 
-function skrijBlagajno(){["blagajnaView","izdelkiView","narocilaView"].forEach(function(id){var b=document.getElementById(id);if(b)b.classList.add("hidden");});}
+function skrijBlagajno(){["blagajnaView","izdelkiView","narocilaView","novickeView"].forEach(function(id){var b=document.getElementById(id);if(b)b.classList.add("hidden");});}
 /* ── BLAGAJNA: obracun opravljenih storitev ───────────────────── */
 var NACINI=[['gotovina','💶 Gotovina'],['kartica','💳 Kartica'],['nakazilo','🏦 Nakazilo']];
 function nacinIme(n){for(var i=0;i<NACINI.length;i++){if(NACINI[i][0]===n)return NACINI[i][1];}return n;}
@@ -2059,6 +2062,99 @@ function izdelekForma(a,nacin){
       if(res.error){msg.textContent='Napaka: '+res.error.message;msg.className='d-edit-msg err';btn.disabled=false;btn.textContent='Shrani';return;}
       box.innerHTML=''; loadIzdelki();
     });
+  });
+}
+
+/* ═══ NOVIČKE (prijave in kode za popust, v67) ═══════════════ */
+var NOV_FILTER='aktivni';
+function novStanje(n){ return n.odjavljen_at?'odjavljen':(n.potrjeno_at?'aktivni':'nepotrjeni'); }
+function novDatum(t){ if(!t) return ''; var d=new Date(t); return d.getDate()+'. '+(d.getMonth()+1)+'. '+d.getFullYear(); }
+function loadNovicke(){
+  calScroll.classList.add('hidden'); nujniList.classList.add('hidden');
+  document.getElementById('strankeView').classList.add('hidden');
+  skrijBlagajno();
+  var box=document.getElementById('novickeView'); box.classList.remove('hidden');
+  resetMiniHeight();
+  document.getElementById('rangeLabel').textContent='Novičke (naročniki in kode)';
+  box.innerHTML='<div class="empty">Nalagam …</div>';
+  Promise.all([
+    sb.from('novicke').select('*').order('created_at',{ascending:false}).limit(2000),
+    sb.from('nastavitve_trgovina').select('id,novicke_popust,novicke_prag').limit(1)
+  ]).then(function(r){
+    if(r[0].error){ box.innerHTML='<div class="empty">Napaka: '+esc(r[0].error.message)+'</div>'; return; }
+    izrisiNovicke(box, r[0].data||[], (r[1].data||[])[0]||{});
+  });
+}
+function izrisiNovicke(box, vse, nast){
+  var st={aktivni:0,nepotrjeni:0,odjavljen:0}, porab=0;
+  vse.forEach(function(n){ st[novStanje(n)]++; if(n.koda_porabljena_at) porab++; });
+  var vidni=vse.filter(function(n){ return NOV_FILTER==='vsi' || novStanje(n)===NOV_FILTER; });
+  var oznake={aktivni:['Prijavljen','#e8f3ec','#2f6b45'],nepotrjeni:['Ni potrdil','#fdf0e1','#8a4f1e'],odjavljen:['Odjavljen','#f1f1f1','#6f7f89']};
+  var h='<div class="obr-form" style="margin-bottom:1rem">'
+    +'<div class="d-edit-hd">Novičke</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:.6rem 1.4rem;margin:.3rem 0 .8rem;font-size:.92rem">'
+    +'<span><b style="font-size:1.3rem">'+st.aktivni+'</b> prijavljenih</span>'
+    +'<span><b style="font-size:1.3rem">'+st.nepotrjeni+'</b> nepotrjenih</span>'
+    +'<span><b style="font-size:1.3rem">'+st.odjavljen+'</b> odjavljenih</span>'
+    +'<span><b style="font-size:1.3rem">'+porab+'</b> porabljenih kod</span></div>'
+    +'<div class="obr-row">'
+    +'<label>Popust za prijavo (%)<input type="text" id="nvOdst" value="'+esc(nast.novicke_popust!=null?nast.novicke_popust:10)+'"></label>'
+    +'<label>Velja pri nakupu nad (€)<input type="text" id="nvPrag" value="'+esc(nast.novicke_prag!=null?nast.novicke_prag:50)+'"></label>'
+    +'</div><button class="act save" id="nvShrani">Shrani popust</button> <span class="msg" id="nvMsg"></span>'
+    +'<p style="font-size:.8rem;color:#5f6f79;margin:.6rem 0 0">Sprememba velja takoj – za nove kode in za vse še neporabljene kode, okno v trgovini se posodobi samo. Pogoji poslovanja navajajo 10 % nad 50 €, zato ob spremembi popravite tudi pogoje.</p>'
+    +'</div>'
+    +'<div class="iz-bar"><select id="nvFilter">'
+    +[['aktivni','Prijavljeni ('+st.aktivni+')'],['nepotrjeni','Niso potrdili ('+st.nepotrjeni+')'],['odjavljen','Odjavljeni ('+st.odjavljen+')'],['vsi','Vsi ('+vse.length+')']].map(function(o){ return '<option value="'+o[0]+'"'+(NOV_FILTER===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')
+    +'</select><button class="btn-ghost" id="nvKopiraj" title="E-naslove prijavljenih kopira v odložišče, ločene z vejico">Kopiraj e-naslove prijavljenih</button>'
+    +'<button class="btn-ghost" id="nvCsv">Izvozi CSV</button></div>'
+    +'<p class="iz-stevec">Novičke pošiljajte samo <b>prijavljenim</b> – tistim, ki so prijavo potrdili in se niso odjavili.</p>';
+  if(!vidni.length) h+='<div class="empty">Ni vpisov.</div>';
+  else h+='<div class="bl-list">'+vidni.map(function(n){
+    var s=novStanje(n), o=oznake[s];
+    return '<div class="bl-row" style="flex-wrap:wrap;gap:.4rem .8rem">'
+      +'<div class="bl-l" style="flex:1 1 240px;min-width:0"><b>'+esc(n.email)+'</b>'+(n.ime?' · '+esc(n.ime):'')
+      +'<div class="bl-svc">Prijava '+novDatum(n.created_at)+(n.potrjeno_at?' · potrjeno '+novDatum(n.potrjeno_at):'')+(n.odjavljen_at?' · odjava '+novDatum(n.odjavljen_at):'')+'</div>'
+      +(n.koda?'<div class="bl-svc">Koda <b>'+esc(n.koda)+'</b> – '+(n.koda_porabljena_at?'porabljena '+novDatum(n.koda_porabljena_at)+(n.narocilo_id?' (naročilo '+esc(String(n.narocilo_id).slice(0,8).toUpperCase())+')':''):'še ni porabljena')+'</div>':'')
+      +'</div><div class="bl-r" style="gap:.5rem;align-items:center">'
+      +'<span class="bl-rn" style="background:'+o[1]+';color:'+o[2]+'">'+o[0]+'</span>'
+      +'<button class="act" data-nv-brisi="'+n.id+'" title="Trajno izbriše vpis (npr. na zahtevo osebe)">Izbriši</button></div></div>';
+  }).join('')+'</div>';
+  box.innerHTML=h;
+  document.getElementById('nvFilter').onchange=function(){ NOV_FILTER=this.value; izrisiNovicke(box,vse,nast); };
+  var aktivni=vse.filter(function(n){ return novStanje(n)==='aktivni'; });
+  document.getElementById('nvKopiraj').onclick=function(){
+    var t=aktivni.map(function(n){ return n.email; }).join(', '), b=this;
+    if(!t){ alert('Ni prijavljenih naročnikov.'); return; }
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ b.textContent='Kopirano ('+aktivni.length+') ✓'; },function(){ prompt('Kopirajte e-naslove:',t); });
+  };
+  document.getElementById('nvCsv').onclick=function(){
+    var q=function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
+    var rows=[['e-naslov','ime','stanje','prijava','potrjeno','odjava','koda','koda porabljena']].concat(vse.map(function(n){
+      return [n.email,n.ime,oznake[novStanje(n)][0],n.created_at,n.potrjeno_at,n.odjavljen_at,n.koda,n.koda_porabljena_at];
+    }));
+    var csv='﻿'+rows.map(function(r){ return r.map(q).join(';'); }).join('\r\n');
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download='novicke-'+new Date().toISOString().slice(0,10)+'.csv'; document.body.appendChild(a); a.click(); a.remove();
+  };
+  document.getElementById('nvShrani').onclick=function(){
+    var od=parseFloat(String(document.getElementById('nvOdst').value).replace(',','.')), pr=parseFloat(String(document.getElementById('nvPrag').value).replace(',','.')), m=document.getElementById('nvMsg');
+    if(!(od>0&&od<=50)||!(pr>=0)){ m.textContent='Vpišite popust med 1 in 50 % ter znesek.'; m.className='msg err'; return; }
+    var q=sb.from('nastavitve_trgovina').update({novicke_popust:od,novicke_prag:pr});
+    q=(nast.id!=null)?q.eq('id',nast.id):q.neq('novicke_popust',-1);
+    q.select('novicke_popust').then(function(r){
+      if(r.error||!r.data||!r.data.length){ m.textContent='Ni shranjeno'+(r.error?': '+r.error.message:'.'); m.className='msg err'; return; }
+      nast.novicke_popust=od; nast.novicke_prag=pr; m.textContent='Shranjeno ✓'; m.className='msg ok';
+    });
+  };
+  box.querySelectorAll('[data-nv-brisi]').forEach(function(b){
+    b.onclick=function(){
+      var id=b.getAttribute('data-nv-brisi'), n=vse.filter(function(x){ return String(x.id)===id; })[0];
+      if(!confirm('Trajno izbrišem vpis '+(n?n.email:'')+'?\nTega ni mogoče razveljaviti. Če ima neporabljeno kodo, ta preneha veljati.')) return;
+      sb.from('novicke').delete().eq('id',id).select('id').then(function(r){
+        if(r.error||!r.data||!r.data.length){ alert('Ni izbrisano'+(r.error?': '+r.error.message:'.')); return; }
+        vse=vse.filter(function(x){ return String(x.id)!==id; }); izrisiNovicke(box,vse,nast);
+      });
+    };
   });
 }
 
