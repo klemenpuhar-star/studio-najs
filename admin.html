@@ -712,7 +712,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v67-2026-11-18 - zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v68-2026-11-18 - narocila: placilo s kartico (SumUp), stikalo za vklop kartice v nastavitvah trgovine; v67: zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -2193,6 +2193,7 @@ function izrisiNastavitveTrg(box,n){
     +'<label>Doplačilo za povzetje (€) – prazno = povzetje ni na voljo<input type="text" id="ntPovzetje" value="'+(n.doplacilo_povzetje!=null?esc(n.doplacilo_povzetje):'')+'"></label>'
     +'<label>Flik – številka (prazno = Flik se v trgovini ne prikaže)<input type="text" id="ntFlik" value="'+esc(n.flik_stevilka||'')+'"></label>'
     +'</div>'
+    +'<label style="display:flex;gap:.5rem;align-items:center;margin:.2rem 0 .4rem"><input type="checkbox" id="ntKartica"'+(n.kartica_vklopljena?' checked':'')+'> Plačilo s kartico (SumUp) – prikaži v trgovini</label>'
     +'<div class="bl-svc" style="margin:-.2rem 0 .3rem">Ti podatki se izpišejo v QR kodi (UPN QR) na potrditvi naročila in v e-pošti stranki.</div>'
     +'<div class="obr-btns"><button class="act save" id="ntSave">Shrani nastavitve</button></div>'
     +'<div class="d-edit-msg" id="ntMsg"></div></div>'
@@ -2204,6 +2205,7 @@ function izrisiNastavitveTrg(box,n){
       cena_dostave:stevilo(document.getElementById('ntCena').value),
       prag_brezplacna_dostava: document.getElementById('ntPrag').value.trim()===''?null:stevilo(document.getElementById('ntPrag').value),
       flik_stevilka:document.getElementById('ntFlik').value.trim()||null,
+      kartica_vklopljena:document.getElementById('ntKartica').checked,
       tr_racun:document.getElementById('ntTrr').value.trim()||null,
       prejemnik:document.getElementById('ntPrejemnik').value.trim()||null,
       prejemnik_ulica:document.getElementById('ntUlica').value.trim()||null,
@@ -2228,7 +2230,8 @@ function izrisiNarocila(box,vrstice){
     var izdelkiTxt=postavke.map(function(p){return esc(p.naziv)+' ×'+p.kolicina;}).join(', ');
     var dostavaTxt = o.nacin_dostave==='posta' ? ('Pošta: '+esc(o.naslov||'')+', '+esc(o.posta||'')) : 'Prevzem v salonu';
     var placiloTxt = o.nacin_placila==='flik' ? 'Flik' : o.nacin_placila==='povzetje' ? ('<b>Po povzetju</b>'+(Number(o.doplacilo)?' (+'+eur(o.doplacilo)+')':''))
-      : o.nacin_placila==='ob_prevzemu' ? '<b>Plačilo ob prevzemu</b> – ko je pripravljeno, nastavite »Pripravljeno za prevzem« (stranka dobi SMS)' : 'Nakazilo';
+      : o.nacin_placila==='ob_prevzemu' ? '<b>Plačilo ob prevzemu</b> – ko je pripravljeno, nastavite »Pripravljeno za prevzem« (stranka dobi SMS)'
+      : o.nacin_placila==='kartica' ? (o.status==='novo' ? '<b>Kartica (SumUp)</b> – plačilo še ni potrjeno' : '<b>Kartica (SumUp)</b> – plačano'+(o.placano_at?' '+new Date(o.placano_at).toLocaleString('sl-SI',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}):'')) : 'Nakazilo';
     /* v62: statusi glede na nacin dostave – »Pripravljeno za prevzem« samo pri prevzemu v salonu, »Poslano« samo pri posti */
     var dovoljeni = o.nacin_dostave==='posta' ? ['novo','placano','poslano','prevzeto','preklicano'] : ['novo','placano','pripravljeno','prevzeto','preklicano'];
     var statusSel='<select class="nar-status" data-id="'+o.id+'">'+STATUSI_TRG.filter(function(s){ return dovoljeni.indexOf(s[0])>=0 || s[0]===o.status; }).map(function(s){
