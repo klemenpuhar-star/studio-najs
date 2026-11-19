@@ -1,0 +1,15 @@
+{
+  "name": "Frizerski studio Najs",
+  "short_name": "Najs",
+  "description": "Frizerski salon v Škofji Loki – spletno naročanje na termin.",
+  "lang": "sl",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#F4E9DC",
+  "theme_color": "#F4E9DC",
+  "icons": [
+    { "src": "ikona-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "ikona-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "ikona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

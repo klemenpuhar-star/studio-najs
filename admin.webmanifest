@@ -1,0 +1,17 @@
+{
+  "id": "/admin.html",
+  "name": "Najs – admin",
+  "short_name": "Najs admin",
+  "description": "Koledar, stranke, naročila in blagajna Frizerskega studia Najs.",
+  "lang": "sl",
+  "start_url": "/admin.html",
+  "scope": "/admin.html",
+  "display": "standalone",
+  "background_color": "#F4E9DC",
+  "theme_color": "#2c4251",
+  "icons": [
+    { "src": "ikona-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "ikona-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "ikona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

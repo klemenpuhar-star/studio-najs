@@ -5,12 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
 <title>Najs · Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<!-- preverjanje telefonskih stevilk: Googlova knjiznica (za tuje stevilke) s CDN + NAJS koda vgrajena tukaj,
-     da ne potrebujemo posebne datoteke. Ce se knjiznica ne nalozi, slovenske stevilke se vedno preverjamo. -->
-<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.13.12/bundle/libphonenumber-max.js" defer></script>
+<!-- v69: admin kot aplikacija na telefonu/računalniku (ikona na zaslonu, odpre se brez brskalnika) -->
+<link rel="manifest" href="admin.webmanifest" />
+<link rel="icon" href="favicon.ico" sizes="any" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="theme-color" content="#2c4251" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Najs admin" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<!-- v69: pisave in knjižnici gostujejo na najs.si (fiksne različice, brez Googla in jsDelivr) -->
+<link rel="stylesheet" href="pisave/pisave.css" />
+<script src="js/supabase-2.118.0.js"></script>
+<!-- preverjanje telefonskih stevilk: Googlova knjiznica (za tuje stevilke) + NAJS koda vgrajena tukaj.
+     Ce se knjiznica ne nalozi, slovenske stevilke se vedno preverjamo. -->
+<script src="js/libphonenumber-max-1.13.12.js" defer></script>
 <script>/* ══════════════════════════════════════════════════════════════════════
    NAJS — preverjanje telefonskih stevilk (v1, 2026-11-04)
    Uporablja: index.html (spletno narocanje), admin.html (nova rezervacija, urejanje stranke)
@@ -712,7 +721,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v68-2026-11-18 - narocila: placilo s kartico (SumUp), stikalo za vklop kartice v nastavitvah trgovine; v67: zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v69-2026-11-19 - aplikacija na zaslonu (manifest, ikone), pisave in knjiznici na najs.si (fiksne razlicice); v68: narocila: placilo s kartico (SumUp), stikalo za vklop kartice v nastavitvah trgovine; v67: zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -728,7 +737,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v67 · 18.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v69 · 19.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 

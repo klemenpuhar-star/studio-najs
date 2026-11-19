@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<!-- NAJS-NAROCILO: v10-2026-11-16 (posebni delovni dnevi iz tabele posebni_dnevi; v9: zaprti prazniki) -->
+<!-- NAJS-NAROCILO: v11-2026-11-19 (pisave in knjiznica za bazo na najs.si (fiksna razlicica), ikone, kontrast; v10: posebni delovni dnevi iz tabele posebni_dnevi; v9: zaprti prazniki) -->
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <title>Moje naročilo — Frizerski studio Najs</title>
-<!-- Googlove pisave le po privolitvi -->
-<link id="najsFonts" data-href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#faf7f3">
+<!-- v11: pisave gostujejo na najs.si (brez Googla) -->
+<link rel="stylesheet" href="pisave/pisave.css">
+<script src="js/supabase-2.118.0.js"></script>
 <style>
 :root{ --navy:#2c4251; --coral:#d06666; --bez:#e5ccb2; --line:#e7e0d8; --bg:#faf7f3; }
 @font-face{ font-family:'Stigma'; src:url('Stigma_Display_Typeface.woff2') format('woff2'); font-display:swap; }
@@ -20,10 +24,10 @@ body{ margin:0; background:var(--bg); color:var(--navy); font-family:'Poppins',s
 .brand .nm{ font-family:'Stigma',Georgia,serif; font-size:1.5rem; letter-spacing:.5px; margin-top:6px; }
 .card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 6px 22px rgba(44,66,81,.06); }
 h1{ font-family:'Stigma',Georgia,serif; font-weight:400; font-size:1.5rem; margin:0 0 4px; }
-.sub{ color:#7c8a93; font-size:.9rem; margin:0 0 16px; }
+.sub{ color:#5f6f79; font-size:.9rem; margin:0 0 16px; }
 .row{ display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); }
 .row:last-child{ border-bottom:none; }
-.row .k{ color:#7c8a93; font-size:.9rem; }
+.row .k{ color:#5f6f79; font-size:.9rem; }
 .row .v{ font-weight:600; text-align:right; }
 .badge{ display:inline-block; padding:3px 11px; border-radius:999px; font-size:.78rem; font-weight:600; }
 .b-nova{ background:#fdf0d5; color:#9a6b00; }
@@ -45,7 +49,7 @@ h1{ font-family:'Stigma',Georgia,serif; font-weight:400; font-size:1.5rem; margi
 .btn-danger{ background:#fff; color:#b23b3b; border:1.5px solid #f1c9c9; }
 .btn-danger:hover{ background:#fbe0e0; }
 .btn:disabled{ opacity:.5; cursor:not-allowed; }
-.loading{ text-align:center; color:#7c8a93; padding:40px 0; }
+.loading{ text-align:center; color:#5f6f79; padding:40px 0; }
 .acc{ margin-top:6px; }
 .acc details{ border:1px solid var(--line); border-radius:12px; margin-bottom:8px; overflow:hidden; }
 .acc summary{ list-style:none; cursor:pointer; padding:12px 14px; font-weight:600; background:#fff; display:flex; justify-content:space-between; }
@@ -54,22 +58,23 @@ h1{ font-family:'Stigma',Georgia,serif; font-weight:400; font-size:1.5rem; margi
 .item{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-top:1px solid var(--line); }
 .item label{ flex:1; cursor:pointer; }
 .item .nm{ font-weight:500; }
-.item .meta{ color:#7c8a93; font-size:.82rem; }
+.item .meta{ color:#5f6f79; font-size:.82rem; }
 .item input[type=checkbox]{ width:20px; height:20px; accent-color:var(--coral); }
 .qty{ display:flex; align-items:center; gap:8px; }
 .qty button{ width:28px; height:28px; border-radius:8px; border:1px solid var(--line); background:#fff; font-size:1rem; cursor:pointer; }
 .qty span{ min-width:18px; text-align:center; font-weight:600; }
 .field{ margin-top:16px; }
-.field label{ display:block; font-size:.85rem; color:#7c8a93; margin-bottom:6px; }
+.field label{ display:block; font-size:.85rem; color:#5f6f79; margin-bottom:6px; }
 .field input[type=date]{ width:100%; padding:12px; border:1.5px solid var(--line); border-radius:12px; font-family:inherit; font-size:1rem; color:var(--navy); }
 .slots{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
 .slot{ border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:9px 14px; font-weight:600; cursor:pointer; }
 .slot:hover{ border-color:var(--coral); }
 .slot.sel{ background:var(--coral); color:#fff; border-color:var(--coral); }
-.slotmsg{ color:#7c8a93; font-size:.9rem; padding:8px 0; }
+.slotmsg{ color:#5f6f79; font-size:.9rem; padding:8px 0; }
 .summary{ background:var(--bg); border-radius:12px; padding:12px 14px; margin-top:14px; font-size:.92rem; }
 .summary .tot{ display:flex; justify-content:space-between; font-weight:700; margin-top:6px; padding-top:6px; border-top:1px solid var(--line); }
-.tel{ color:var(--coral); text-decoration:none; }
+.tel{ color:#8e3b3b; text-decoration:underline; text-underline-offset:2px; }
+.note .tel{ color:inherit; font-weight:600; }
 </style>
 </head>
 <body>
@@ -428,19 +433,9 @@ function saveEdit(){
 window.toggleSvc=toggleSvc; window.bumpQty=bumpQty; window.pickSlot=pickSlot;
 init();
 </script>
-<div style="text-align:center;margin:26px auto 40px;font-size:.82rem;color:#8a969d">
-  <a href="zasebnost.html" style="color:#8a969d">Pravilnik o zasebnosti</a> ·
-  <a href="piskotki.html" style="color:#8a969d">Politika piškotkov</a>
+<div style="text-align:center;margin:26px auto 40px;font-size:.82rem;color:#5f6d75">
+  <a href="zasebnost.html" style="color:#5f6d75">Pravilnik o zasebnosti</a> ·
+  <a href="piskotki.html" style="color:#5f6d75">Politika piškotkov</a>
 </div>
-<script>
-(function(){
-  try{
-    if(localStorage.getItem('najs-privola')==='sprejeto'){
-      var l=document.getElementById('najsFonts');
-      if(l && l.dataset.href) l.setAttribute('href', l.dataset.href);
-    }
-  }catch(e){}
-})();
-</script>
 </body>
 </html>
