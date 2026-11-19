@@ -264,15 +264,25 @@
     }
     .hero-photo.p2 {
       background-image: url("hero-2.webp");
-      animation: heroFadeB 26s ease-in-out infinite, heroKenB 30s ease-in-out infinite alternate;
+      animation: heroFadeB 30s ease-in-out infinite, heroKenB 30s ease-in-out infinite alternate;
     }
-    /* v55: na širokih zaslonih (računalnik, tablica ležeče) široki fotografiji salona */
+    .hero-photo.p3 {
+      background-image: url("hero-3.webp");
+      animation: heroFadeC 30s ease-in-out infinite, heroKenA 30s ease-in-out infinite alternate-reverse;
+    }
+    /* v55: tri fotografije – vsaka je vidna 10 s, mehak preliv */
+    .hero-photo.p1 { animation: heroFadeA 30s ease-in-out infinite, heroKenA 30s ease-in-out infinite alternate; }
+    @keyframes heroFadeC { 0%{opacity:0} 61%{opacity:0} 67%{opacity:1} 94%{opacity:1} 100%{opacity:0} }
+    /* v55: na širokih zaslonih (računalnik) široke fotografije in samo mehak preliv brez premikanja –
+       počasno premikanje velike slike na računalniških zaslonih ni teklo gladko */
     @media (min-aspect-ratio: 1001/1000) {
-      .hero-photo.p1 { background-image: url("hero-1-siroka.webp"); }
-      .hero-photo.p2 { background-image: url("hero-2-siroka.webp"); }
+      .hero-photo { inset: 0; transform: none; will-change: opacity; }
+      .hero-photo.p1 { background-image: url("hero-1-siroka.webp"); animation: heroFadeA 30s ease-in-out infinite; }
+      .hero-photo.p2 { background-image: url("hero-2-siroka.webp"); animation: heroFadeB 30s ease-in-out infinite; }
+      .hero-photo.p3 { background-image: url("hero-3-siroka.webp"); animation: heroFadeC 30s ease-in-out infinite; }
     }
-    @keyframes heroFadeA { 0%{opacity:1} 42%{opacity:1} 50%{opacity:0} 92%{opacity:0} 100%{opacity:1} }
-    @keyframes heroFadeB { 0%{opacity:0} 42%{opacity:0} 50%{opacity:1} 92%{opacity:1} 100%{opacity:0} }
+    @keyframes heroFadeA { 0%{opacity:1} 28%{opacity:1} 34%{opacity:0} 94%{opacity:0} 100%{opacity:1} }
+    @keyframes heroFadeB { 0%{opacity:0} 28%{opacity:0} 34%{opacity:1} 61%{opacity:1} 67%{opacity:0} 100%{opacity:0} }
     /* v41: rotate(.01deg) je ocem neviden, prepreci pa, da Firefox pri pocasnem premiku sliko "zaskoci" na cele piksle (zatikanje) */
     @keyframes heroKenA { from{transform:translate3d(0,0,0) scale(1.05) rotate(.01deg)} to{transform:translate3d(-1%,-0.7%,0) scale(1.15) rotate(.01deg)} }
     @keyframes heroKenB { from{transform:translate3d(0.7%,0.7%,0) scale(1.15) rotate(.01deg)} to{transform:translate3d(0,0,0) scale(1.05) rotate(.01deg)} }
@@ -1332,7 +1342,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v55-2026-11-19 (nove fotografije salona na prvi strani: siroke za racunalnik, pokoncne za telefon; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v55-2026-11-19 (tri originalne fotografije salona na prvi strani, menjavajo se vsakih 10 s; na racunalniku brez premikanja (gladko), na telefonu rahlo priblizevanje; siroke za racunalnik, pokoncne za telefon; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1371,6 +1381,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
   <div class="hero-photos">
     <div class="hero-photo p1"></div>
     <div class="hero-photo p2"></div>
+    <div class="hero-photo p3"></div>
   </div>
   <div class="hero-bg"></div>
   <div class="watermark" id="wm">SN</div>
