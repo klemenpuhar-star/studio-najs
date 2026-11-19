@@ -1326,7 +1326,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v53-2026-11-19 (hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v54-2026-11-19 (glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1360,6 +1360,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </nav>
 
 <!-- ══ HERO ════════════════════════════════════════════════ -->
+<main id="vsebina">
 <section id="hero">
   <div class="hero-photos">
     <div class="hero-photo p1"></div>
@@ -1437,7 +1438,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
     <div class="gal-item reveal" style="transition-delay:.30s"><picture><source type="image/webp" srcset="gal-6-480.webp 480w, gal-6-960.webp 960w" sizes="(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 290px"><img src="gal-6.jpg" alt="Bob pričeska z naravnimi rjavimi prameni" loading="lazy" decoding="async" width="1000" height="1333"></picture></div>
     <div class="gal-item reveal" style="transition-delay:.36s"><picture><source type="image/webp" srcset="gal-7-480.webp 480w, gal-7-960.webp 960w" sizes="(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 290px"><img src="gal-7.jpg" alt="Kratka bob pričeska v svetlo bakreni barvi" loading="lazy" decoding="async" width="1000" height="1239"></picture></div>
     <div class="gal-item gal-video reveal" style="transition-delay:.42s">
-      <video id="galVideo" src="gal-video.mp4" poster="gal-video-poster-480.webp" muted loop playsinline preload="none"></video>
+      <video id="galVideo" src="gal-video.mp4" poster="gal-video-poster-480.webp" muted loop playsinline preload="none" aria-label="Kratek video iz salona (brez zvoka)"><track kind="captions" src="gal-video.vtt" srclang="sl" label="Slovenščina"></video>
     </div>
   </div>
 </section>
@@ -1661,6 +1662,8 @@ footer :focus-visible{ outline-color:#f0a8a8; }
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ══ FOOTER ════════════════════════════════════════════════ -->
 <footer>
