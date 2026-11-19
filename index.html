@@ -45,8 +45,7 @@
 @font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:600;font-display:swap;src:url('pisave/cormorant-garamond-latin-600-italic.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
   </style>
   <!-- v53: prva slika se naloži takoj (najpomembnejši element za hitrost) -->
-  <link rel="preload" as="image" href="hero-1.webp" media="(max-aspect-ratio: 1/1)" fetchpriority="high" />
-  <link rel="preload" as="image" href="hero-1-siroka.webp" media="(min-aspect-ratio: 1001/1000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="hero-1.webp" fetchpriority="high" />
   <!-- v53: knjižnica za bazo je zdaj na najs.si (fiksna različica) in se naloži na koncu strani, da ne zadrži prikaza.
        Knjižnica za tuje telefonske številke se naloži, ko je stran že prikazana (glej konec datoteke). -->
   <script>/* ══════════════════════════════════════════════════════════════════════
@@ -264,25 +263,10 @@
     }
     .hero-photo.p2 {
       background-image: url("hero-2.webp");
-      animation: heroFadeB 30s ease-in-out infinite, heroKenB 30s ease-in-out infinite alternate;
+      animation: heroFadeB 26s ease-in-out infinite, heroKenB 30s ease-in-out infinite alternate;
     }
-    .hero-photo.p3 {
-      background-image: url("hero-3.webp");
-      animation: heroFadeC 30s ease-in-out infinite, heroKenA 30s ease-in-out infinite alternate-reverse;
-    }
-    /* v55: tri fotografije – vsaka je vidna 10 s, mehak preliv */
-    .hero-photo.p1 { animation: heroFadeA 30s ease-in-out infinite, heroKenA 30s ease-in-out infinite alternate; }
-    @keyframes heroFadeC { 0%{opacity:0} 61%{opacity:0} 67%{opacity:1} 94%{opacity:1} 100%{opacity:0} }
-    /* v55: na širokih zaslonih (računalnik) široke fotografije in samo mehak preliv brez premikanja –
-       počasno premikanje velike slike na računalniških zaslonih ni teklo gladko */
-    @media (min-aspect-ratio: 1001/1000) {
-      .hero-photo { inset: 0; transform: none; will-change: opacity; }
-      .hero-photo.p1 { background-image: url("hero-1-siroka.webp"); animation: heroFadeA 30s ease-in-out infinite; }
-      .hero-photo.p2 { background-image: url("hero-2-siroka.webp"); animation: heroFadeB 30s ease-in-out infinite; }
-      .hero-photo.p3 { background-image: url("hero-3-siroka.webp"); animation: heroFadeC 30s ease-in-out infinite; }
-    }
-    @keyframes heroFadeA { 0%{opacity:1} 28%{opacity:1} 34%{opacity:0} 94%{opacity:0} 100%{opacity:1} }
-    @keyframes heroFadeB { 0%{opacity:0} 28%{opacity:0} 34%{opacity:1} 61%{opacity:1} 67%{opacity:0} 100%{opacity:0} }
+    @keyframes heroFadeA { 0%{opacity:1} 42%{opacity:1} 50%{opacity:0} 92%{opacity:0} 100%{opacity:1} }
+    @keyframes heroFadeB { 0%{opacity:0} 42%{opacity:0} 50%{opacity:1} 92%{opacity:1} 100%{opacity:0} }
     /* v41: rotate(.01deg) je ocem neviden, prepreci pa, da Firefox pri pocasnem premiku sliko "zaskoci" na cele piksle (zatikanje) */
     @keyframes heroKenA { from{transform:translate3d(0,0,0) scale(1.05) rotate(.01deg)} to{transform:translate3d(-1%,-0.7%,0) scale(1.15) rotate(.01deg)} }
     @keyframes heroKenB { from{transform:translate3d(0.7%,0.7%,0) scale(1.15) rotate(.01deg)} to{transform:translate3d(0,0,0) scale(1.05) rotate(.01deg)} }
@@ -1342,7 +1326,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v55-2026-11-19 (tri originalne fotografije salona na prvi strani, menjavajo se vsakih 10 s; na racunalniku brez premikanja (gladko), na telefonu rahlo priblizevanje; siroke za racunalnik, pokoncne za telefon; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v54-2026-11-19 (glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1381,7 +1365,6 @@ footer :focus-visible{ outline-color:#f0a8a8; }
   <div class="hero-photos">
     <div class="hero-photo p1"></div>
     <div class="hero-photo p2"></div>
-    <div class="hero-photo p3"></div>
   </div>
   <div class="hero-bg"></div>
   <div class="watermark" id="wm">SN</div>
