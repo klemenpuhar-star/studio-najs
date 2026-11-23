@@ -1300,6 +1300,7 @@
   .gallery-grid{ grid-template-columns:repeat(4,1fr); max-width:1160px; gap:1.1rem; }
 }
 </style>
+<style id="v58-storitve">.onas-st-pov{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}.onas-st-pov:hover{text-decoration-color:currentColor}</style>
 <style id="v53-dostopnost">
 /* v53: berljivost (WCAG 2.2 AA – kontrast vsaj 4,5 : 1) in viden fokus pri uporabi tipkovnice */
 .sec-label, .k-lbl, .nov-podpis, .cenik-row-desc, .bk-chk-desc, .vpr-dodatno a{ color:#8e3b3b; }
@@ -1326,7 +1327,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v57-2026-11-23 (povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v58-2026-11-23 (povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1455,14 +1456,14 @@ footer :focus-visible{ outline-color:#f0a8a8; }
       <div class="onas-storitve">
         <p class="onas-st-naslov">Kaj delam</p>
         <ul class="onas-st-sez">
-          <li>Žensko striženje in oblikovanje pričesk</li>
-          <li>Moško striženje z umivanjem ali brez</li>
-          <li>Otroško striženje</li>
-          <li>Barvanje las in barvanje narastka</li>
-          <li>Pramena in posvetlitve</li>
-          <li>Preliv, toniranje in odsevi</li>
-          <li>Nega lasišča in las ter rituali</li>
-          <li>Fen in oblikovanje za posebne priložnosti</li>
+          <li><a class="onas-st-pov" href="/zensko-strizenje/">Žensko striženje in oblikovanje pričesk</a></li>
+          <li><a class="onas-st-pov" href="/mosko-strizenje/">Moško striženje z umivanjem ali brez</a></li>
+          <li><a class="onas-st-pov" href="/otrosko-strizenje/">Otroško striženje</a></li>
+          <li><a class="onas-st-pov" href="/barvanje-las/">Barvanje las in barvanje narastka</a></li>
+          <li><a class="onas-st-pov" href="/pramena-in-posvetlitve/">Pramena in posvetlitve</a></li>
+          <li><a class="onas-st-pov" href="/barvanje-las/">Preliv, toniranje in odsevi</a></li>
+          <li><a class="onas-st-pov" href="/nega-las/">Nega lasišča in las ter rituali</a></li>
+          <li><a class="onas-st-pov" href="/zensko-strizenje/">Fen in oblikovanje za posebne priložnosti</a></li>
         </ul>
         <p class="onas-st-opomba">Vse storitve s cenami najdete v <a href="#cenik">ceniku</a>.</p>
       </div>
@@ -1678,6 +1679,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
       <a href="#narocanje">Naroči se</a>
     </nav>
     <p class="footer-stamp">✦ &nbsp;Have a nice hair day&nbsp; ✦</p>
+    <nav class="footer-links" aria-label="Storitve"><a href="/zensko-strizenje/">Žensko striženje</a><a href="/mosko-strizenje/">Moško striženje</a><a href="/otrosko-strizenje/">Otroško striženje</a><a href="/barvanje-las/">Barvanje las</a><a href="/pramena-in-posvetlitve/">Pramena</a><a href="/nega-las/">Nega las</a></nav>
     <nav class="footer-links" style="margin-top:6px">
       <a href="zasebnost.html">Pravilnik o zasebnosti</a>
       <a href="piskotki.html">Politika piškotkov</a>
