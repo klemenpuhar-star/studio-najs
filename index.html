@@ -1326,7 +1326,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v56-2026-11-23 (brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v57-2026-11-23 (povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1918,6 +1918,14 @@ document.querySelectorAll('.open-modal').forEach(function(b){
 document.getElementById('bkClose').addEventListener('click', closeModal);
 overlay.addEventListener('click', function(e){ if(e.target===overlay) closeModal(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+/* v57: povezava najs.si/#narocanje takoj odpre spletno naročanje (gumb Rezervacija v Google profilu, QR koda …) */
+function odpriNarocanjeIzPovezave(){
+  if(location.hash!=='#narocanje') return;
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  openModal();
+}
+if(document.readyState==='complete') odpriNarocanjeIzPovezave(); else window.addEventListener('load', odpriNarocanjeIzPovezave);
+window.addEventListener('hashchange', odpriNarocanjeIzPovezave);
 
 /* ── STEP BAR ─────────────────────────────────────────────── */
 function renderStepBar(){
