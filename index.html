@@ -507,6 +507,12 @@
     @media (min-width: 861px) {
       nav.mobile { display: none !important; }
     }
+    /* v65: v meniju je 7 povezav (Trgovina) – na ozjih zaslonih manjsi razmiki */
+    @media (min-width: 861px) and (max-width: 1100px) {
+      nav.desktop { gap: 1.05rem; }
+      nav.desktop a { letter-spacing: .08em; font-size: .7rem; }
+    }
+    .act-trg{ text-align:center; margin:1.6rem 0 0; }
 
 
     /* ── BOOKING MULTI-SELECT ACCORDION ── */
@@ -969,6 +975,8 @@
     }
   /* ── NOVOSTI ── */
 #novosti{ padding:4rem 1.2rem; background:var(--bez2,#f7efe6); }
+.nov-locilo{ max-width:900px; margin:3.2rem auto; border:0; border-top:1px solid rgba(44,66,81,.15); }
+.nov-ponovno{ font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:#8e3b3b; margin:0 0 .6rem; }
 .nov-grid{ max-width:1050px; margin:0 auto; display:grid; grid-template-columns:1.05fr .95fr;
   gap:2.4rem; align-items:center; }
 .nov-text p{ margin:0 0 .85rem; line-height:1.7; }
@@ -1277,6 +1285,14 @@
         "@type": "Answer",
         "text": "Delam z izdelki znamke Kemon, predvsem z linijo Kemon Actyva, ki je naravna, nežna in učinkovita. Formule Kemon Actyva imajo certifikat ICEA Vegan in so dermatološko testirane, stekleničke so do 50 % iz reciklirane plastike, na voljo pa so tudi polnila v vrečkah z manj plastike."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "Ali lahko izdelke kupim tudi za domov?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Da. Izdelke, s katerimi delam v salonu, lahko kupite v spletni trgovini najsshop.si. Prevzem v salonu je brezplačen, dostava po pošti stane 3,99 € (pri naročilu nad 50 € je brezplačna). Plačate lahko s kartico, s QR kodo ali po povzetju."
+      }
     }
   ]
 }
@@ -1336,7 +1352,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v63-2026-11-25 (praznični okraski 1. 12.–6. 1. – praznicno.js, predlog 5; v62: pregled skladnosti: Nuova Fibra v ceniku; v61: naročanje: pri Pramenih razlaga balayage/klasični prameni s sliko in opomba ob izbiri balayagea; v59: balayage spet v ponudbi – besedila, cenik, oznake; v58: povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v65-2026-11-25 (odprtje spletne trgovine: novica, Trgovina v meniju in nogi, gumb pri Actyva, vprasanje o nakupu; v64: novica o odprtju spletne trgovine nad novico Ponovno odprto; povecava za vec slik; v63: praznični okraski 1. 12.–6. 1. – praznicno.js, predlog 5; v62: pregled skladnosti: Nuova Fibra v ceniku; v61: naročanje: pri Pramenih razlaga balayage/klasični prameni s sliko in opomba ob izbiri balayagea; v59: balayage spet v ponudbi – besedila, cenik, oznake; v58: povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -1351,6 +1367,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
     <a href="#onas">O meni</a>
     <a href="#vprasanja">Vprašanja</a>
     <a href="#kontakt">Kontakt</a>
+    <a href="https://najsshop.si/?utm_source=najs.si&amp;utm_medium=meni&amp;utm_campaign=trgovina">Trgovina</a>
     <button class="btn-nav open-modal" type="button">Naroči se</button>
   </nav>
 
@@ -1366,6 +1383,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
   <a href="#onas">O meni</a>
   <a href="#vprasanja">Pogosta vprašanja</a>
   <a href="#kontakt">Kontakt</a>
+  <a href="https://najsshop.si/?utm_source=najs.si&amp;utm_medium=meni&amp;utm_campaign=trgovina">Spletna trgovina</a>
   <button class="btn-nav open-modal" type="button">Naroči se</button>
 </nav>
 
@@ -1407,11 +1425,37 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 <section id="novosti">
   <div class="sec-center reveal">
     <p class="sec-label">Novosti</p>
-    <h2 class="sec-title">Ponovno odprto</h2>
+    <h2 class="sec-title">Odprta je spletna trgovina</h2>
   </div>
 
   <div class="nov-grid">
     <article class="nov-text reveal">
+      <p class="nov-datum">25. novembra 2026</p>
+      <h3 class="nov-naslov">Najs Shop – izdelki, ki jih uporabljam v salonu, zdaj tudi za domov</h3>
+      <p>Z velikim veseljem vam sporočam, da je končno luč sveta ugledala moja lastna spletna trgovina!</p>
+      <p>V njej boste našli profesionalne izdelke za nego in oblikovanje las priznane italijanske znamke
+         <strong>Kemon</strong>, ki jih z zaupanjem uporabljam tudi pri svojem delu v Frizerskem studiu Najs.
+         V ponudbi najdete tudi <strong>veganske izdelke</strong>.</p>
+      <p>Plačate lahko s kartico ali s QR kodo, izdelke pa prevzamete v salonu ali vam jih pošljem po pošti.
+         Če niste prepričani, kaj bi izbrali, me pokličite ali pa me vprašajte ob naslednjem obisku.</p>
+      <p>Ker si vaši lasje zaslužijo najboljše – tudi doma. 🤎</p>
+      <p class="nov-podpis">Nataša</p>
+      <a class="btn-main" href="https://najsshop.si/?utm_source=najs.si&amp;utm_medium=novica&amp;utm_campaign=odprtje">V spletno trgovino ✦</a>
+    </article>
+
+    <figure class="nov-slika reveal">
+      <img src="novost-trgovina.jpg" srcset="novost-trgovina-480.webp 480w, novost-trgovina-900.webp 900w" sizes="(max-width: 860px) 90vw, 380px"
+           alt="Obvestilo: odprta je spletna trgovina Najs Shop na najsshop.si"
+           loading="lazy" decoding="async" width="900" height="1200" data-velika="novost-trgovina-900.webp" data-opis="Obvestilo: odprta je spletna trgovina Najs Shop">
+      <figcaption>Kliknite za povečavo</figcaption>
+    </figure>
+  </div>
+
+  <hr class="nov-locilo">
+
+  <div class="nov-grid">
+    <article class="nov-text reveal">
+      <p class="nov-ponovno">Ponovno odprto</p>
       <p class="nov-datum">19. oktobra 2026</p>
       <h3 class="nov-naslov">Frizerski studio NAJS je ponovno odprl svoja vrata</h3>
       <p>Dragi moji, ko sem zaprla vrata salona, sem vam napisala, da se bom vrnila, ko bom
@@ -1428,7 +1472,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
     <figure class="nov-slika reveal">
       <img src="novost-odprtje.jpg" srcset="novost-odprtje-480.webp 480w, novost-odprtje-900.webp 900w" sizes="(max-width: 860px) 90vw, 380px"
            alt="Obvestilo Frizerskega studia Najs: 19. oktobra ponovno odpiramo"
-           loading="lazy" decoding="async" width="900" height="1350" id="novImg">
+           loading="lazy" decoding="async" width="900" height="1350" data-velika="novost-odprtje-900.webp" data-opis="Obvestilo Frizerskega studia Najs o ponovnem odprtju">
       <figcaption>Kliknite za povečavo</figcaption>
     </figure>
   </div>
@@ -1515,6 +1559,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14.5l1.8 1.8 3.4-3.6"/></svg><span><strong>Dermatološko testirano</strong>nežno do kože in lasišča</span></li>
     </ul>
     <p class="act-vir reveal">Podatki proizvajalca Kemon in uradnega distributerja Trimužijat.</p>
+    <p class="act-trg reveal"><a class="btn-main" href="https://najsshop.si/?utm_source=najs.si&amp;utm_medium=actyva&amp;utm_campaign=trgovina">Izdelke Kemon kupite v spletni trgovini ✦</a></p>
   </div>
 </section>
 
@@ -1591,6 +1636,10 @@ footer :focus-visible{ outline-color:#f0a8a8; }
     <details class="vpr-item">
       <summary><h3 class="vpr-q">Katere izdelke uporabljate?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
       <p class="vpr-a">Delam z izdelki znamke Kemon, predvsem z linijo Kemon Actyva, ki je naravna, nežna in učinkovita. Formule Kemon Actyva imajo certifikat ICEA Vegan in so dermatološko testirane, stekleničke so do 50 % iz reciklirane plastike, na voljo pa so tudi polnila v vrečkah z manj plastike.</p>
+    </details>
+    <details class="vpr-item">
+      <summary><h3 class="vpr-q">Ali lahko izdelke kupim tudi za domov?</h3><span class="vpr-ikona" aria-hidden="true"></span></summary>
+      <p class="vpr-a">Da. Izdelke, s katerimi delam v salonu, lahko kupite v spletni trgovini <a href="https://najsshop.si/?utm_source=najs.si&amp;utm_medium=vprasanja&amp;utm_campaign=trgovina">najsshop.si</a>. Prevzem v salonu je brezplačen, dostava po pošti stane 3,99 € (pri naročilu nad 50 € je brezplačna). Plačate lahko s kartico, s QR kodo ali po povzetju. Če niste prepričani, kaj bi izbrali, me pokličite ali vprašajte ob naslednjem obisku.</p>
     </details>
     </div>
     <p class="vpr-dodatno reveal">Ne najdete odgovora? Pokličite me na <a href="tel:+38631217361">031 217 361</a> ali pišite na <a href="mailto:frizerskistudionajs@gmail.com">frizerskistudionajs@gmail.com</a>.</p>
@@ -1686,10 +1735,12 @@ footer :focus-visible{ outline-color:#f0a8a8; }
       <a href="#vprasanja">Vprašanja</a>
       <a href="#kontakt">Kontakt</a>
       <a href="#narocanje">Naroči se</a>
+      <a href="https://najsshop.si/?utm_source=najs.si&amp;utm_medium=noga&amp;utm_campaign=trgovina">Spletna trgovina</a>
     </nav>
     <p class="footer-stamp">✦ &nbsp;Have a nice hair day&nbsp; ✦</p>
     <nav class="footer-links" aria-label="Storitve"><a href="/zensko-strizenje/">Žensko striženje</a><a href="/mosko-strizenje/">Moško striženje</a><a href="/otrosko-strizenje/">Otroško striženje</a><a href="/barvanje-las/">Barvanje las</a><a href="/pramena-in-posvetlitve/">Pramena</a><a href="/nega-las/">Nega las</a></nav>
     <nav class="footer-links" style="margin-top:6px">
+      <a href="pogoji.html">Pogoji poslovanja trgovine</a>
       <a href="zasebnost.html">Pravilnik o zasebnosti</a>
       <a href="piskotki.html">Politika piškotkov</a>
       <a href="#" onclick="najsOdpriNastavitve();return false;">Nastavitve zasebnosti</a>
@@ -3109,17 +3160,19 @@ function showBodyError(msg){
   if(v==='sprejeto') uveljavi();
 })();
 </script>
-<div id="novLightbox" class="nov-lb" role="dialog" aria-label="Obvestilo o odprtju">
+<div id="novLightbox" class="nov-lb" role="dialog" aria-label="Povečano obvestilo">
   <button type="button" class="nov-lb-x" aria-label="Zapri">✕</button>
   <img src="novost-odprtje-900.webp" alt="Obvestilo Frizerskega studia Najs o ponovnem odprtju" loading="lazy" width="900" height="1350">
 </div>
 <script>
 (function(){
-  var sl=document.getElementById('novImg'), lb=document.getElementById('novLightbox');
-  if(!sl||!lb) return;
-  function odpri(){ lb.classList.add('on'); document.body.style.overflow='hidden'; }
+  /* v64: vec novic – vsaka slika odpre svojo povecavo (data-velika) */
+  var slike=document.querySelectorAll('.nov-slika img[data-velika]'), lb=document.getElementById('novLightbox');
+  if(!slike.length||!lb) return;
+  var lbImg=lb.querySelector('img');
+  function odpri(e){ var t=e.currentTarget; lbImg.src=t.getAttribute('data-velika'); lbImg.alt=t.getAttribute('data-opis')||''; lb.classList.add('on'); document.body.style.overflow='hidden'; }
   function zapri(){ lb.classList.remove('on'); document.body.style.overflow=''; }
-  sl.addEventListener('click', odpri);
+  [].forEach.call(slike,function(sl){ sl.addEventListener('click', odpri); });
   lb.addEventListener('click', zapri);
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') zapri(); });
 })();
