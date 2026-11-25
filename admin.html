@@ -241,6 +241,8 @@ header .who{font-size:.74rem;opacity:.65}
 .cat-legend{display:flex;flex-wrap:wrap;gap:.35rem .8rem;align-items:center;padding:.55rem 4% .2rem}
 .cat-legend .lg{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--navy);opacity:.85}
 .cat-legend .sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+/* v71: legenda barv skrita na vseh napravah */
+#catLegend{display:none!important}
 .mcell .mdots{display:flex;flex-wrap:wrap;gap:2px;margin-top:3px;padding-right:1.3rem}
 .mcell .mdot{width:6px;height:6px;border-radius:50%}
 
@@ -721,7 +723,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v70-2026-11-19 - potreba »Neukrotljivi lasje«; v69: aplikacija na zaslonu (manifest, ikone), pisave in knjiznici na najs.si (fiksne razlicice); v68: narocila: placilo s kartico (SumUp), stikalo za vklop kartice v nastavitvah trgovine; v67: zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
+<!-- NAJS-BUILD: v71-2026-11-25 - barvna legenda kategorij skrita (racunalnik in telefon); v70: potreba »Neukrotljivi lasje«; v69: aplikacija na zaslonu (manifest, ikone), pisave in knjiznici na najs.si (fiksne razlicice); v68: narocila: placilo s kartico (SumUp), stikalo za vklop kartice v nastavitvah trgovine; v67: zavihek Novicke (narocniki, kode, izvoz, popust); v66: narocila: prikaz popusta s kodo novick; v65: okno opravka: sprememba datuma in ure; nizki zasloni: kompaktnejsa glava, potreba Styling v obrazcu izdelka, legenda v eni vrsti, koledar do dna zaslona; v64: izdelki: polje Navodila za uporabo; v63: posebni delovni dnevi (posebni_dnevi); v62: narocila: statusi glede na nacin dostave; v61: narocila: placilo ob prevzemu v salonu; v60: preklop med Izdelki, Narocila in Blagajna skrije prejsnji pogled; v59: narocila: naslov prejemnika za UPN QR, doplacilo za povzetje; v58: vrsta Dodatki; v57: celoten obrazec (vrsta, potrebe, priporocam, kljucna sestavina, zakaj deluje, barvne razlicice), iskalnik, filtri, slicice, opozorila, gumb Podvoji -->
 
 <div class="login-wrap" id="loginView">
   <div class="login-card">
@@ -737,7 +739,7 @@ header .brand .brand-tag[style]{ opacity:.55 !important }   /* oznaka razlicice 
 
 <div id="appView" class="hidden">
   <header>
-    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v70 · 19.11.</span></div>
+    <div class="brand"><img src="logo.png" alt="Frizerski studio Najs" class="logo-img" /><span class="brand-tag">admin</span><span class="brand-tag" style="opacity:.32;letter-spacing:.05em">v71 · 25.11.</span></div>
     <div class="right"><span class="who" id="whoLabel"></span><button class="btn-ghost" id="pwdBtn">Geslo</button><button class="btn-ghost" id="logoutBtn">Odjava</button></div>
   </header>
 
