@@ -1336,7 +1336,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v60-2026-11-25 (naročanje: pri Pramenih razlaga balayage/klasični prameni s sliko in opomba ob izbiri balayagea; v59: balayage spet v ponudbi – besedila, cenik, oznake; v58: povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v61-2026-11-25 (naročanje: pri Pramenih razlaga balayage/klasični prameni s sliko in opomba ob izbiri balayagea; v59: balayage spet v ponudbi – besedila, cenik, oznake; v58: povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -2018,8 +2018,8 @@ function renderStep1(){
              + '<a class="bk-bal-img" href="/pramena-in-posvetlitve/#razlika-naslov" target="_blank" rel="noopener" aria-label="Večja slika in razlaga razlike (odpre se v novem zavihku)">'
              + '<img src="/primerjava-balayage-prameni-480.webp" alt="Primerjava: levo balayage s temnejšo korenino in mehkim prehodom, desno klasična blond pramena po vsej dolžini" width="480" height="720" loading="lazy" decoding="async"></a>'
              + '<div class="bk-bal-txt"><strong>Balayage ali klasični prameni?</strong>'
-             + '<span><b>Balayage</b> – barvo nanesem ročno, pri korenini ostane temnejši odtenek, proti konicam mehak prehod v svetlo. Traja 150–160 min.</span>'
-             + '<span><b>Klasični prameni</b> – tanki prameni s folijo od korenin do konic, enakomeren videz.</span>'
+             + '<span><b>Balayage</b> – posvetlitev s folijo od sredine las naprej. Barva pri korenini ostane temnejša, proti konicam pa s prehodom preide v svetlo. Traja 150–160 min.</span>'
+             + '<span><b>Klasični prameni</b> – posvetljeni od narastka do konic, lasje so enakomerno blond.</span>'
              + '<span class="bk-bal-klic">Niste prepričani? Pokličite <a href="tel:+38631217361">031 217 361</a>.</span></div></div>';
         }
         catMap[cat].items.forEach(function(sv){
@@ -2041,7 +2041,7 @@ function renderStep1(){
              + (priceStr ? '<span class="bk-chk-price">'+priceStr+'</span>' : '')
              + '</label>'
              + (/balayage/i.test(sv.name)
-               ? '<div class="bk-bal-opomba">Izbrali ste <b>balayage</b> – temnejša korenina in mehak prehod v svetle konice (kot na sliki zgoraj, levo). Če želite enakomerno posvetlitev od korenin, izberite klasične pramene s folijo.</div>'
+               ? '<div class="bk-bal-opomba">Izbrali ste <b>balayage</b> – barva pri korenini ostane temnejša, proti konicam preide v svetlo (kot na sliki zgoraj, levo). Če želite pramene od narastka do konic, izberite klasične pramene s folijo.</div>'
                : '')
              + (sv.requires_base
                ? '<div class="bk-dep-inline" id="'+depId+'">⚠ Te storitve ni mogoče izbrati brez striženja ali fen frizure!</div>'
