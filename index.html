@@ -535,6 +535,15 @@
     }
     .bk-macc-item.open .bk-macc-body { max-height: 1600px; }
     .bk-macc-inner { padding: .1rem 1.1rem .85rem; }
+    /* v60: razlaga balayage / klasični prameni */
+    .bk-bal{display:grid;grid-template-columns:104px 1fr;gap:.8rem;align-items:start;background:#faf6f1;border-radius:10px;padding:.65rem;margin:.35rem 0 .6rem}
+    .bk-bal-img img{width:104px;height:156px;object-fit:cover;border-radius:8px;display:block}
+    .bk-bal-txt{display:flex;flex-direction:column;gap:.35rem;font-size:.76rem;line-height:1.45;color:#3d5260}
+    .bk-bal-txt strong{font-family:var(--serif);font-size:.98rem;color:var(--navy);font-weight:600}
+    .bk-bal-txt b{color:var(--navy)}
+    .bk-bal-klic a{color:#8e3b3b;text-decoration:underline}
+    .bk-bal-opomba{display:none;font-size:.74rem;line-height:1.45;color:#3d5260;background:#fff7ea;border-left:3px solid #c9a56a;border-radius:6px;padding:.5rem .65rem;margin:.1rem 0 .5rem}
+    .bk-chk-row:has(input:checked) + .bk-bal-opomba{display:block}
 
     /* Checkbox vrstica */
     .bk-chk-row {
@@ -1327,7 +1336,7 @@ footer :focus-visible{ outline-color:#f0a8a8; }
 </style>
 </head>
 <body>
-<!-- NAJS-BUILD: v59-2026-11-25 (balayage spet v ponudbi – besedila, cenik, oznake; v58: povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
+<!-- NAJS-BUILD: v60-2026-11-25 (naročanje: pri Pramenih razlaga balayage/klasični prameni s sliko in opomba ob izbiri balayagea; v59: balayage spet v ponudbi – besedila, cenik, oznake; v58: povezave na podstrani storitev v »Kaj delam« in nogi; v57: povezava #narocanje odpre naročanje; v56: brez balayage – storitev ukinjena; v54: glavno obmocje strani <main>, podnapisi za video brez zvoka; v53: hitrost in dostopnost: pisave, knjiznici in slike na najs.si, prva slika kot datoteka, galerija WebP po velikosti zaslona, cenik zapisan v strani + storitve s cenami za Google, ikone in manifest, kontrast in viden fokus, okno privolitve samo se za zemljevid, Dodaj v koledar po rezervaciji; v52: crtne ikone v Kontaktu, vecje drobno besedilo, galerija 4 stolpci na racunalniku; v51: maticna stevilka v nogi, odstranjeno podvojeno nalaganje supabase-js; v50: posebni delovni dnevi iz tabele posebni_dnevi, npr. 24. in 31. 12. dopoldan) -->
 
 <!-- ══ HEADER ══════════════════════════════════════════════ -->
 <header id="hdr">
@@ -2003,6 +2012,16 @@ function renderStep1(){
            + '<span class="bk-macc-arr" aria-hidden="true">+</span>'
            + '</button>'
            + '<div class="bk-macc-body"><div class="bk-macc-inner">';
+        /* v60: pri Pramenih razlaga razlike med balayageem in klasičnimi prameni s sliko */
+        if(/pramen/i.test(cat) && catMap[cat].items.some(function(sv){ return /balayage/i.test(sv.name); })){
+          h += '<div class="bk-bal">'
+             + '<a class="bk-bal-img" href="/pramena-in-posvetlitve/#razlika-naslov" target="_blank" rel="noopener" aria-label="Večja slika in razlaga razlike (odpre se v novem zavihku)">'
+             + '<img src="/primerjava-balayage-prameni-480.webp" alt="Primerjava: levo balayage s temnejšo korenino in mehkim prehodom, desno klasična blond pramena po vsej dolžini" width="480" height="720" loading="lazy" decoding="async"></a>'
+             + '<div class="bk-bal-txt"><strong>Balayage ali klasični prameni?</strong>'
+             + '<span><b>Balayage</b> – barvo nanesem ročno, pri korenini ostane temnejši odtenek, proti konicam mehak prehod v svetlo. Traja 150–160 min.</span>'
+             + '<span><b>Klasični prameni</b> – tanki prameni s folijo od korenin do konic, enakomeren videz.</span>'
+             + '<span class="bk-bal-klic">Niste prepričani? Pokličite <a href="tel:+38631217361">031 217 361</a>.</span></div></div>';
+        }
         catMap[cat].items.forEach(function(sv){
           var checked = (state.selectedIds[sv.id]) ? ' checked' : '';
           var priceStr = (sv.price !== null && sv.price !== undefined)
@@ -2021,6 +2040,9 @@ function renderStep1(){
              + (durStr ? '<span class="bk-chk-dur">'+durStr+'</span>' : '')
              + (priceStr ? '<span class="bk-chk-price">'+priceStr+'</span>' : '')
              + '</label>'
+             + (/balayage/i.test(sv.name)
+               ? '<div class="bk-bal-opomba">Izbrali ste <b>balayage</b> – temnejša korenina in mehak prehod v svetle konice (kot na sliki zgoraj, levo). Če želite enakomerno posvetlitev od korenin, izberite klasične pramene s folijo.</div>'
+               : '')
              + (sv.requires_base
                ? '<div class="bk-dep-inline" id="'+depId+'">⚠ Te storitve ni mogoče izbrati brez striženja ali fen frizure!</div>'
                : '')
